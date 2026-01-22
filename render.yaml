@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: rule-based-horror-generator
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ANTHROPIC_API_KEY
+        sync: false
+        # User must set this in Render dashboard
+    autoDeploy: true
