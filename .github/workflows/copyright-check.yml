@@ -1,0 +1,197 @@
+name: Copyright Protection Check
+
+on:
+  push:
+    branches: [ main, master, develop, claude/* ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  copyright-protection:
+    name: Verify No Copyrighted Materials
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comprehensive check
+
+      - name: Check for forbidden paths
+        run: |
+          echo "🔍 Checking for forbidden paths in repository..."
+
+          VIOLATIONS_FOUND=0
+
+          # Check for data_private/ directory
+          if find . -path "./data_private/*" -o -path "*/data_private/*" 2>/dev/null | grep -q .; then
+            echo "❌ ERROR: Found data_private/ directory in repository"
+            echo "Files:"
+            find . -path "./data_private/*" -o -path "*/data_private/*" 2>/dev/null
+            VIOLATIONS_FOUND=1
+          fi
+
+          # Check for transcripts/ directory
+          if find . -path "*/transcripts/*" 2>/dev/null | grep -q .; then
+            echo "❌ ERROR: Found transcripts/ directory in repository"
+            echo "Files:"
+            find . -path "*/transcripts/*" 2>/dev/null
+            VIOLATIONS_FOUND=1
+          fi
+
+          # Check for copyrighted_examples/ directory
+          if find . -path "*/copyrighted_examples/*" 2>/dev/null | grep -q .; then
+            echo "❌ ERROR: Found copyrighted_examples/ directory in repository"
+            VIOLATIONS_FOUND=1
+          fi
+
+          if [ $VIOLATIONS_FOUND -eq 0 ]; then
+            echo "✅ No forbidden paths found"
+          else
+            echo ""
+            echo "Repository contains forbidden paths."
+            echo "See DATA_POLICY.md for details."
+            exit 1
+          fi
+
+      - name: Check for transcript file extensions
+        run: |
+          echo "🔍 Checking for transcript file extensions..."
+
+          VIOLATIONS_FOUND=0
+
+          # Check for .srt files
+          if find . -name "*.srt" 2>/dev/null | grep -q .; then
+            echo "❌ ERROR: Found .srt (subtitle) files in repository"
+            find . -name "*.srt" 2>/dev/null
+            VIOLATIONS_FOUND=1
+          fi
+
+          # Check for .vtt files
+          if find . -name "*.vtt" 2>/dev/null | grep -q .; then
+            echo "❌ ERROR: Found .vtt (WebVTT) files in repository"
+            find . -name "*.vtt" 2>/dev/null
+            VIOLATIONS_FOUND=1
+          fi
+
+          # Check for .sbv files
+          if find . -name "*.sbv" 2>/dev/null | grep -q .; then
+            echo "❌ ERROR: Found .sbv (YouTube subtitle) files in repository"
+            find . -name "*.sbv" 2>/dev/null
+            VIOLATIONS_FOUND=1
+          fi
+
+          if [ $VIOLATIONS_FOUND -eq 0 ]; then
+            echo "✅ No transcript file extensions found"
+          else
+            echo ""
+            echo "Repository contains transcript files."
+            echo "These typically contain copyrighted material."
+            exit 1
+          fi
+
+      - name: Check for suspicious filenames
+        run: |
+          echo "🔍 Checking for suspicious filename patterns..."
+
+          VIOLATIONS_FOUND=0
+
+          # Check for files with 'transcript' in the name
+          if find . -name "*transcript*" -type f ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null | grep -qv "README"; then
+            echo "⚠️  WARNING: Found files with 'transcript' in the name"
+            find . -name "*transcript*" -type f ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null | grep -v "README" || true
+            # This is a warning, not a hard failure
+          fi
+
+          # Check for files with 'copyrighted' in the name
+          if find . -name "*copyrighted*" -type f ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null | grep -q .; then
+            echo "❌ ERROR: Found files with 'copyrighted' in the name"
+            find . -name "*copyrighted*" -type f ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null
+            VIOLATIONS_FOUND=1
+          fi
+
+          if [ $VIOLATIONS_FOUND -eq 1 ]; then
+            echo ""
+            echo "Suspicious filenames detected."
+            exit 1
+          fi
+
+          echo "✅ No obvious violations in filenames"
+
+      - name: Verify DATA_POLICY.md exists
+        run: |
+          echo "📄 Verifying DATA_POLICY.md exists..."
+
+          if [ ! -f "DATA_POLICY.md" ]; then
+            echo "❌ ERROR: DATA_POLICY.md not found"
+            echo "This file documents the copyright protection policy."
+            exit 1
+          fi
+
+          echo "✅ DATA_POLICY.md exists"
+
+      - name: Verify .gitignore has protections
+        run: |
+          echo "📋 Verifying .gitignore has copyright protections..."
+
+          if [ ! -f ".gitignore" ]; then
+            echo "❌ ERROR: .gitignore not found"
+            exit 1
+          fi
+
+          REQUIRED_PATTERNS=(
+            "data_private/"
+            "transcripts/"
+            "*.srt"
+            "*.vtt"
+          )
+
+          MISSING=0
+          for pattern in "${REQUIRED_PATTERNS[@]}"; do
+            if ! grep -q "$pattern" .gitignore; then
+              echo "❌ Missing pattern in .gitignore: $pattern"
+              MISSING=1
+            fi
+          done
+
+          if [ $MISSING -eq 1 ]; then
+            echo ""
+            echo ".gitignore is missing required copyright protection patterns"
+            exit 1
+          fi
+
+          echo "✅ .gitignore has required protections"
+
+      - name: Check for large files (potential corpora)
+        run: |
+          echo "📊 Checking for unusually large files..."
+
+          # Find files larger than 500KB (excluding known large files like dependencies)
+          LARGE_FILES=$(find . -type f -size +500k ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/package-lock.json" 2>/dev/null || true)
+
+          if [ -n "$LARGE_FILES" ]; then
+            echo "⚠️  WARNING: Found large files (>500KB) in repository:"
+            echo "$LARGE_FILES" | while read file; do
+              size=$(du -h "$file" | cut -f1)
+              echo "  $size - $file"
+            done
+            echo ""
+            echo "Large files may contain copyrighted corpora."
+            echo "Verify these are legitimate (e.g., bundled dependencies, not story collections)."
+            # This is a warning, not a failure
+          else
+            echo "✅ No unusually large files found"
+          fi
+
+      - name: Final summary
+        run: |
+          echo ""
+          echo "╔════════════════════════════════════════════════════╗"
+          echo "║  Copyright Protection Check Complete               ║"
+          echo "╚════════════════════════════════════════════════════╝"
+          echo ""
+          echo "✅ All copyright protection checks passed"
+          echo ""
+          echo "This repository does not appear to contain copyrighted"
+          echo "materials that should be kept private."
+          echo ""

@@ -1,0 +1,80 @@
+# SYNTHETIC EXAMPLE - Format Demonstration Only
+# Created: 2026-01-22 for rule-based-horror-generator project
+# Author: Project team (original work)
+# Purpose: Demonstrate minimal rule-based structure
+# This is NOT a complete story, just a format example
+
+## Story Fragment: The Night Attendant
+
+### Setting
+Overnight security position at a storage facility.
+
+### Rules Presented
+1. Check all locks on units 1-20 before midnight
+2. Never open unit 13, regardless of alarms
+3. If you see someone in the hallway after hours, do not acknowledge them
+4. Complete the logbook entry before leaving at 6 AM
+5. If the lights in the office flicker three times, leave the building immediately
+
+### Narrative Fragment (Minimal Example)
+
+The job posting had been straightforward: overnight security at Westside Storage,
+11 PM to 6 AM, five nights a week. The pay was good enough that I didn't ask
+questions about why the position was always available.
+
+My supervisor handed me a laminated card on my first night. "Read these carefully,"
+she said. "They're not suggestions."
+
+[Example showing rule introduction - explicit list format]
+
+The first few nights went smoothly. I made my rounds, checked the locks, filled
+out the logbook. Unit 13 had a different lock than the others—heavier, with no
+number visible in the dim light, just a position where it should be.
+
+[Example showing rule compliance]
+
+On night seven, I heard the alarm from unit 13 at 2:47 AM. The manual said to
+check any alarming units. The laminated card said never to open unit 13.
+
+I radioed for guidance. No response.
+
+[Example showing rule conflict and character decision point]
+
+The alarm continued for three minutes, then stopped abruptly. I marked it in the
+logbook: "Unit 13 alarm, 2:47-2:50 AM. Did not open per regulations."
+
+[Example showing compliance despite pressure]
+
+When I came back the next night, there was a new laminated card waiting. Same five
+rules, but rule 2 now said: "Never open unit 13, even if the alarm sounds. Especially
+if the alarm sounds."
+
+[Example showing rule system responding to conditions - rule clarification]
+
+### Structure Notes
+
+Entry Condition: new_hire (employment scenario)
+Discovery Method: explicit_list (laminated rules)
+Completeness: complete_but_misunderstood (rules seem clear but implications unclear)
+Violation Response: [not demonstrated in this fragment]
+Exit Condition: [not demonstrated in this fragment]
+
+### This Example Demonstrates
+- Clear rule enumeration
+- Entry condition setup
+- Rule presentation format
+- Character decision under pressure
+- Compliance despite conflict
+- Rule system adapting (clarification)
+
+### What This Example Does NOT Include
+- Complete narrative arc
+- Full character development
+- Detailed violation consequences
+- Resolution or ending
+- Copyrighted content from any source
+
+---
+
+**Note**: This is a minimal structural example, not a complete story.
+It demonstrates format only and is original content created for this project.

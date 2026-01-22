@@ -59,10 +59,108 @@ rule-based-horror/
 │       └── js/app.js         # Frontend logic
 ├── generated/                 # Output directory (created at runtime)
 ├── docs/                      # Additional documentation
+├── data_private/              # LOCAL ONLY - copyrighted materials (never committed)
+├── data_public_samples/       # Synthetic examples only (safe to commit)
 ├── server.js                  # Express server
 ├── package.json              # Dependencies
 └── README.md                 # This file
 ```
+
+## 🔒 Data Safety and Copyright Protection
+
+**CRITICAL:** This project implements strict protections against accidental publication of copyrighted materials.
+
+### Protected Content Policy
+
+The following are **NEVER committed** to version control:
+- ❌ Story transcripts from external sources
+- ❌ Copyrighted example stories or excerpts
+- ❌ Third-party analysis corpora
+- ❌ Any material that could constitute copyright redistribution
+
+### Folder Structure for Data Safety
+
+```
+data_private/              # LOCAL ONLY - Never committed
+├── transcripts/           # Story transcripts for analysis
+├── analysis_examples/     # Full-text examples from research
+└── test_corpora/         # Third-party reference materials
+
+data_public_samples/       # Safe to commit - synthetic examples only
+├── sample_rule_system_1.txt
+└── story_structure_example.json
+```
+
+### Setup for Development
+
+1. **Create private data folder** (if analyzing copyrighted materials):
+   ```bash
+   mkdir -p data_private/transcripts
+   mkdir -p data_private/analysis_examples
+   ```
+
+2. **Add your reference materials** (local only):
+   ```bash
+   # Place copyrighted materials ONLY in data_private/
+   cp your_transcript.csv data_private/transcripts/
+   ```
+
+3. **Verify protections are active**:
+   ```bash
+   ./verify_data_safety.sh
+   git status  # Should NOT show data_private/
+   ```
+
+4. **Install pre-commit hook** (prevents accidental commits):
+   ```bash
+   chmod +x .git-hooks/pre-commit
+   ln -sf ../../.git-hooks/pre-commit .git/hooks/pre-commit
+   ```
+
+### Multi-Layer Protection System
+
+1. **`.gitignore`** - Prevents staging of protected files
+2. **Pre-commit hook** - Blocks commits if violations detected
+3. **CI/CD pipeline** - Final check before merge (GitHub Actions)
+4. **Output packager** - Allowlist-based file inclusion
+5. **Code review** - Human verification for data file additions
+
+### Verification
+
+Before working with any copyrighted materials:
+
+```bash
+# Run comprehensive safety check
+./verify_data_safety.sh
+
+# Manual verification
+git status  # Should NOT show data_private/
+git ls-files | grep transcript  # Should return NOTHING
+```
+
+### What You CAN Commit
+
+✅ Original code and templates
+✅ System-generated stories (from YOUR use)
+✅ Synthetic examples (in `data_public_samples/`)
+✅ Metadata and analysis results (without original text)
+✅ Documentation and configuration
+
+### Emergency: Accidentally Committed Protected Data
+
+If you accidentally commit copyrighted materials:
+
+```bash
+# If NOT yet pushed
+git reset HEAD data_private/
+git rm --cached -r data_private/
+git commit --amend
+
+# If already pushed - ALERT TEAM IMMEDIATELY
+# History rewrite will be necessary
+```
+
+**For complete policy, see [`DATA_POLICY.md`](DATA_POLICY.md)**
 
 ## 🚀 Quick Start
 

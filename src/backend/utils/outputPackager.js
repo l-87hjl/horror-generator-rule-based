@@ -11,6 +11,137 @@ const { createWriteStream, createReadStream } = require('fs');
 class OutputPackager {
   constructor(outputDir = 'generated') {
     this.outputDir = path.join(process.cwd(), outputDir);
+
+    // Copyright protection: Define allowed and forbidden paths
+    this.ALLOWED_OUTPUT_PATHS = [
+      'generated/',
+      this.outputDir,
+      path.normalize(this.outputDir)
+    ];
+
+    this.FORBIDDEN_OUTPUT_PATHS = [
+      'data_private/',
+      'transcripts/',
+      'copyrighted_examples/',
+      'third_party_texts/',
+      'reference_materials/',
+      'source_materials/',
+      '../',      // Prevent path traversal
+      '../../',
+      '..\\',     // Windows path traversal
+      '..\\..\\',
+      '..',       // Prevent any relative path escapes
+    ];
+
+    this.FORBIDDEN_EXTENSIONS = [
+      '.srt',
+      '.vtt',
+      '.sbv',
+      '.sub'
+    ];
+  }
+
+  /**
+   * Copyright Protection: Check if file is safe to package
+   * Uses allowlist approach - file must be in allowed paths AND not in forbidden
+   *
+   * @param {string} filepath - Path to check
+   * @returns {boolean} - True if safe to package
+   */
+  isSafeToPackage(filepath) {
+    // Normalize the path to handle different separators and relative paths
+    const normalizedPath = path.normalize(filepath);
+    const absolutePath = path.resolve(filepath);
+
+    // Check 1: FORBIDDEN PATHS (security - check first)
+    for (const forbidden of this.FORBIDDEN_OUTPUT_PATHS) {
+      if (normalizedPath.includes(forbidden) || absolutePath.includes(forbidden)) {
+        console.warn(`⚠️  Copyright Protection: Blocking forbidden path: ${filepath}`);
+        console.warn(`   Matched forbidden pattern: ${forbidden}`);
+        return false;
+      }
+    }
+
+    // Check 2: FORBIDDEN EXTENSIONS (transcript files)
+    const ext = path.extname(normalizedPath).toLowerCase();
+    if (this.FORBIDDEN_EXTENSIONS.includes(ext)) {
+      console.warn(`⚠️  Copyright Protection: Blocking forbidden extension: ${filepath}`);
+      console.warn(`   Extension ${ext} indicates transcript/caption file`);
+      return false;
+    }
+
+    // Check 3: ALLOWED PATHS (must be in allowed directory)
+    let isInAllowedPath = false;
+    for (const allowed of this.ALLOWED_OUTPUT_PATHS) {
+      const allowedAbsolute = path.resolve(allowed);
+      if (absolutePath.startsWith(allowedAbsolute)) {
+        isInAllowedPath = true;
+        break;
+      }
+    }
+
+    if (!isInAllowedPath) {
+      console.warn(`⚠️  Copyright Protection: Blocking file outside allowed paths: ${filepath}`);
+      console.warn(`   File must be in: ${this.ALLOWED_OUTPUT_PATHS.join(', ')}`);
+      return false;
+    }
+
+    // Check 4: SPECIAL FILENAMES (additional protection)
+    const basename = path.basename(normalizedPath).toLowerCase();
+    const suspiciousPatterns = [
+      'transcript',
+      'copyrighted',
+      'third_party',
+      'source_material'
+    ];
+
+    for (const pattern of suspiciousPatterns) {
+      if (basename.includes(pattern)) {
+        console.warn(`⚠️  Copyright Protection: Blocking suspicious filename: ${filepath}`);
+        console.warn(`   Filename contains protected pattern: ${pattern}`);
+        return false;
+      }
+    }
+
+    // All checks passed - safe to package
+    return true;
+  }
+
+  /**
+   * Verify all files in session directory are safe before packaging
+   *
+   * @param {Array} files - List of file objects with paths
+   * @returns {Object} - Verification result with safe files and blocked files
+   */
+  verifySafetyBeforePackaging(files) {
+    const safeFiles = [];
+    const blockedFiles = [];
+
+    for (const file of files) {
+      if (this.isSafeToPackage(file.path)) {
+        safeFiles.push(file);
+      } else {
+        blockedFiles.push(file);
+        console.error(`❌ Copyright Protection: File blocked from package: ${file.path}`);
+      }
+    }
+
+    if (blockedFiles.length > 0) {
+      console.warn('');
+      console.warn('⚠️  COPYRIGHT PROTECTION ALERT ⚠️');
+      console.warn(`Blocked ${blockedFiles.length} file(s) from output package:`);
+      blockedFiles.forEach(f => console.warn(`  - ${f.path}`));
+      console.warn('');
+      console.warn('These files may contain copyrighted material.');
+      console.warn('See DATA_POLICY.md for details.');
+      console.warn('');
+    }
+
+    return {
+      safe: safeFiles,
+      blocked: blockedFiles,
+      allSafe: blockedFiles.length === 0
+    };
   }
 
   /**
@@ -278,9 +409,25 @@ class OutputPackager {
 
   /**
    * Create ZIP archive from session directory
+   * Includes copyright protection checks
    */
   async createZipArchive(sessionDir, sessionId, files) {
     const zipPath = path.join(this.outputDir, `${sessionId}.zip`);
+
+    // COPYRIGHT PROTECTION: Verify all files are safe before packaging
+    console.log('🔒 Running copyright protection checks...');
+    const verification = this.verifySafetyBeforePackaging(files);
+
+    if (!verification.allSafe) {
+      console.error('');
+      console.error('❌ COPYRIGHT PROTECTION: Cannot create package');
+      console.error(`Blocked ${verification.blocked.length} file(s) containing copyrighted material`);
+      console.error('See console output above for details');
+      console.error('');
+
+      // Still create the package with safe files only
+      console.warn('⚠️  Creating package with safe files only');
+    }
 
     return new Promise((resolve, reject) => {
       const output = createWriteStream(zipPath);
@@ -289,6 +436,11 @@ class OutputPackager {
       });
 
       output.on('close', () => {
+        if (verification.allSafe) {
+          console.log(`✅ Package created successfully with all ${verification.safe.length} files`);
+        } else {
+          console.warn(`⚠️  Package created with ${verification.safe.length} safe files (${verification.blocked.length} blocked)`);
+        }
         resolve(zipPath);
       });
 
@@ -296,10 +448,18 @@ class OutputPackager {
         reject(err);
       });
 
+      archive.on('warning', (err) => {
+        if (err.code === 'ENOENT') {
+          console.warn('Archiver warning:', err);
+        } else {
+          reject(err);
+        }
+      });
+
       archive.pipe(output);
 
-      // Add all files to archive
-      for (const file of files) {
+      // Add ONLY safe files to archive
+      for (const file of verification.safe) {
         archive.file(file.path, { name: file.name });
       }
 

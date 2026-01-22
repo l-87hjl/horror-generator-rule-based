@@ -1,0 +1,175 @@
+{
+  "_comment": "SYNTHETIC EXAMPLE - Format Demonstration Only",
+  "_created": "2026-01-22",
+  "_purpose": "Show expected metadata structure for story analysis",
+  "_notice": "This is synthetic data, not from any copyrighted source",
+
+  "story_metadata": {
+    "title": "Example Story (Synthetic)",
+    "source": "generated_synthetic_example",
+    "word_count": 1250,
+    "generation_date": "2026-01-22T10:30:00Z"
+  },
+
+  "inflection_points": {
+    "entry_condition": {
+      "type": "new_hire",
+      "description": "Narrator accepts employment at facility",
+      "established_at_line": 15
+    },
+    "rule_discovery": {
+      "method": "explicit_list",
+      "description": "Rules provided on laminated card",
+      "introduced_at_line": 42
+    },
+    "rule_completeness": {
+      "pattern": "complete_but_misunderstood",
+      "description": "All rules present but implications unclear",
+      "evidence": "Rule 2 requires clarification after first violation attempt"
+    },
+    "violation_response": {
+      "model": "escalation",
+      "description": "System responds with increasing severity",
+      "examples": [
+        {
+          "violation_type": "attempted_rule_2_violation",
+          "response": "Rule clarification (warning level)",
+          "line_number": 180
+        }
+      ]
+    },
+    "exit_condition": {
+      "type": "conditional_exit",
+      "description": "Can leave if shift completed successfully",
+      "established_at_line": 220
+    }
+  },
+
+  "rule_system": {
+    "rules": [
+      {
+        "number": 1,
+        "text": "Check all locks on units 1-20 before midnight",
+        "type": "obligation_rule",
+        "introduced_at_line": 45,
+        "violated": false
+      },
+      {
+        "number": 2,
+        "text": "Never open unit 13, regardless of alarms",
+        "type": "prohibition_rule",
+        "introduced_at_line": 46,
+        "clarified_at_line": 195,
+        "violated": false,
+        "notes": "Clarification added after alarm event"
+      },
+      {
+        "number": 3,
+        "text": "If you see someone in hallway after hours, do not acknowledge them",
+        "type": "conditional_rule",
+        "introduced_at_line": 47,
+        "violated": false
+      },
+      {
+        "number": 4,
+        "text": "Complete the logbook entry before leaving at 6 AM",
+        "type": "obligation_rule",
+        "introduced_at_line": 48,
+        "violated": false
+      },
+      {
+        "number": 5,
+        "text": "If lights flicker three times, leave building immediately",
+        "type": "conditional_rule",
+        "introduced_at_line": 49,
+        "violated": false,
+        "notes": "Emergency condition"
+      }
+    ],
+    "rule_interactions": [
+      {
+        "type": "conflict",
+        "description": "Rule 2 conflicts with standard alarm response procedure",
+        "rules_involved": [2],
+        "resolution": "Rule 2 takes precedence, manual procedure overridden"
+      }
+    ]
+  },
+
+  "structural_analysis": {
+    "rule_invariance": {
+      "score": "pass",
+      "notes": "Rules remain binding throughout. Rule 2 clarified but not changed."
+    },
+    "object_ontology": {
+      "score": "pass",
+      "significant_objects": [
+        {
+          "name": "laminated_card",
+          "role": "operative",
+          "function": "contains rules",
+          "established_at_line": 42
+        },
+        {
+          "name": "unit_13_lock",
+          "role": "symbolic",
+          "function": "marks forbidden boundary",
+          "established_at_line": 98
+        }
+      ],
+      "notes": "No ticket problem detected. Objects maintain stable roles."
+    },
+    "escalation_integrity": {
+      "score": "pass",
+      "escalation_sequence": [
+        {
+          "event": "alarm_sounds",
+          "line": 165,
+          "pressure_level": "medium"
+        },
+        {
+          "event": "rule_clarification_appears",
+          "line": 195,
+          "pressure_level": "high",
+          "notes": "System warns that violation was considered"
+        }
+      ],
+      "notes": "No state resets. Pressure escalates appropriately."
+    }
+  },
+
+  "quality_metrics": {
+    "overall_score": 85,
+    "grade": "good",
+    "critical_failures": 0,
+    "major_failures": 0,
+    "revision_rounds": 1,
+    "pass_criteria": {
+      "rule_enumeration": "pass",
+      "rule_invariance": "pass",
+      "object_ontology": "pass",
+      "escalation_integrity": "pass",
+      "thematic_payoff": "partial",
+      "resolution_discipline": "not_applicable"
+    }
+  },
+
+  "thematic_elements": {
+    "primary_theme": "surveillance_and_visibility",
+    "theme_integration": {
+      "score": "moderate",
+      "evidence": [
+        "Rules enforce specific behaviors under observation",
+        "Logbook creates permanent record",
+        "System responds to narrator's choices"
+      ]
+    }
+  },
+
+  "notes": {
+    "fragment_only": true,
+    "incomplete_narrative": "This example shows structure but not complete story",
+    "synthetic_data": "All content is original, created for format demonstration",
+    "not_copyrighted": "This does not contain material from any external source"
+  }
+}

@@ -1,5 +1,77 @@
 # Rule-Based Horror Story Generator - Git Ignore
 
+# ============================================================================
+# === COPYRIGHT PROTECTION - CRITICAL ===
+# Never commit copyrighted transcripts, stories, or third-party corpora
+# See DATA_POLICY.md for complete policy
+# ============================================================================
+
+# Private data folder (entire directory and all subdirectories)
+data_private/
+**/data_private/
+**/*_private/
+
+# Transcript files (any location, any format)
+**/transcripts/
+**/*transcript*
+**/*_transcript*
+**/subtitles/
+**/*subtitle*
+
+# Common transcript and caption formats
+**/*.srt
+**/*.vtt
+**/*.sbv
+**/*.sub
+**/*.ass
+**/*.ssa
+
+# Transcript data files (be specific to avoid blocking legitimate CSVs)
+**/*_transcript.csv
+**/*_transcripts.csv
+**/transcript_*.csv
+**/transcripts_*.csv
+
+# Analysis examples from copyrighted sources
+**/copyrighted_examples/
+**/third_party_texts/
+**/reference_materials/
+**/source_materials/
+
+# Story corpora and collections
+**/story_corpus/
+**/story_corpora/
+**/test_stories/
+**/example_stories/
+
+# Output directories (user-specific, not for repo)
+output/
+**/output/
+outputs/
+**/outputs/
+
+# Packaged outputs
+**/*.zip
+**/*.rar
+**/*.tar.gz
+**/*.7z
+
+# Logs that might contain copyrighted excerpts
+**/*_analysis_log.txt
+**/*_example_output.txt
+**/*_story_log.txt
+
+# Common document formats that might contain copyrighted material
+# (Only if they're in typical "private data" locations - adjust as needed)
+data_private/**/*.pdf
+data_private/**/*.doc
+data_private/**/*.docx
+data_private/**/*.txt
+
+# ============================================================================
+# === END COPYRIGHT PROTECTION ===
+# ============================================================================
+
 # Environment and secrets
 config/.env
 .env
@@ -20,9 +92,8 @@ yarn-error.log*
 package-lock.json
 yarn.lock
 
-# Generated content
+# Generated content (local storage)
 generated/
-*.zip
 
 # Logs
 logs/
