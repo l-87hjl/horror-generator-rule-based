@@ -15,7 +15,10 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'src/frontend')));
+
+// Serve static files from multiple directories
+app.use('/generator', express.static(path.join(__dirname, 'src/frontend')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Initialize orchestrator
 let orchestrator;
@@ -45,9 +48,17 @@ try {
 
 /**
  * GET /
- * Serve main HTML page
+ * Serve landing page
  */
 app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+/**
+ * GET /generator
+ * Serve story generator application
+ */
+app.get('/generator', (req, res) => {
   res.sendFile(path.join(__dirname, 'src/frontend/index.html'));
 });
 
