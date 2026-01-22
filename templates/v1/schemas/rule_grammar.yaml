@@ -40,9 +40,13 @@ rule_construction_patterns:
       - "Temptation or pressure to violate should exist"
 
     variations:
-      absolute: "NEVER [action]" (no context, absolute ban)
-      hierarchical: "NEVER [action] unless [emergency condition]"
-      threshold: "NEVER [action] more than [number] times"
+      absolute:
+        pattern: "NEVER [action]"
+        note: "no context, absolute ban"
+      hierarchical:
+        pattern: "NEVER [action] unless [emergency condition]"
+      threshold:
+        pattern: "NEVER [action] more than [number] times"
 
   obligation_rule:
     structure: "ALWAYS/MUST [action] WHEN/BEFORE/AFTER [trigger]"
