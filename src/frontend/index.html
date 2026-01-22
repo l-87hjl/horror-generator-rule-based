@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule-Based Horror Story Generator</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🕯️ Rule-Based Horror Story Generator</h1>
+            <p class="subtitle">Procedural horror with structural integrity</p>
+        </header>
+
+        <main id="app">
+            <!-- Generation Form -->
+            <section id="form-section" class="section">
+                <h2>Story Parameters</h2>
+
+                <form id="generation-form">
+                    <!-- Basic Parameters -->
+                    <div class="form-section">
+                        <h3>Basic Settings</h3>
+
+                        <div class="form-group">
+                            <label for="wordCount">Target Word Count</label>
+                            <input type="number" id="wordCount" name="wordCount"
+                                   min="5000" max="20000" value="10000" required>
+                            <small>Range: 5,000 - 20,000 words</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ruleCount">Number of Primary Rules</label>
+                            <input type="number" id="ruleCount" name="ruleCount"
+                                   min="3" max="12" value="7" required>
+                            <small>Range: 3 - 12 rules</small>
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="form-section">
+                        <h3>Location</h3>
+
+                        <div class="form-group">
+                            <label for="location">Primary Location</label>
+                            <select id="location" name="location" required>
+                                <option value="">Loading locations...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customLocation">Custom Location (Optional)</label>
+                            <input type="text" id="customLocation" name="customLocation"
+                                   placeholder="Leave blank to use selected location">
+                            <small>Describe a custom setting if you want something specific</small>
+                        </div>
+                    </div>
+
+                    <!-- Inflection Points -->
+                    <div class="form-section">
+                        <h3>Inflection Points</h3>
+
+                        <div class="form-group">
+                            <label for="entryCondition">Entry Condition</label>
+                            <select id="entryCondition" name="entryCondition" required>
+                                <option value="">Loading options...</option>
+                            </select>
+                            <small>How does the narrator arrive at the location?</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="discoveryMethod">Rule Discovery Method</label>
+                            <select id="discoveryMethod" name="discoveryMethod" required>
+                                <option value="">Loading options...</option>
+                            </select>
+                            <small>How are rules revealed to the narrator?</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="completenessPattern">Rule Completeness</label>
+                            <select id="completenessPattern" name="completenessPattern" required>
+                                <option value="">Loading options...</option>
+                            </select>
+                            <small>How complete is the rule system?</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="violationResponse">Violation Response Model</label>
+                            <select id="violationResponse" name="violationResponse" required>
+                                <option value="">Loading options...</option>
+                            </select>
+                            <small>How does the system respond to rule violations?</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endingType">Ending Type</label>
+                            <select id="endingType" name="endingType" required>
+                                <option value="">Loading options...</option>
+                            </select>
+                            <small>How can the narrator exit (or not)?</small>
+                        </div>
+                    </div>
+
+                    <!-- Theme and Style -->
+                    <div class="form-section">
+                        <h3>Theme & Style</h3>
+
+                        <div class="form-group">
+                            <label for="thematicFocus">Thematic Focus</label>
+                            <select id="thematicFocus" name="thematicFocus" required>
+                                <option value="">Loading themes...</option>
+                            </select>
+                            <small>Primary thematic concern</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="escalationStyle">Escalation Style</label>
+                            <select id="escalationStyle" name="escalationStyle" required>
+                                <option value="psychological">Psychological</option>
+                                <option value="physical">Physical</option>
+                                <option value="ontological">Ontological</option>
+                                <option value="mixed">Mixed</option>
+                            </select>
+                            <small>Primary mode of horror escalation</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ambiguityLevel">Ambiguity Level</label>
+                            <select id="ambiguityLevel" name="ambiguityLevel" required>
+                                <option value="minimal">Minimal</option>
+                                <option value="moderate" selected>Moderate</option>
+                                <option value="high">High</option>
+                            </select>
+                            <small>Note: Ambiguity must conceal structure, not replace it</small>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="form-actions">
+                        <button type="submit" id="generate-btn" class="btn btn-primary">
+                            Generate Story
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Progress Section -->
+            <section id="progress-section" class="section hidden">
+                <h2>Generation in Progress</h2>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <p id="progress-status" class="progress-status">Initializing...</p>
+                    <p class="progress-note">This may take 3-5 minutes. Please do not close this window.</p>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results-section" class="section hidden">
+                <h2>Generation Complete!</h2>
+
+                <div class="results-summary">
+                    <div class="summary-item">
+                        <span class="label">Session ID:</span>
+                        <span id="result-session-id" class="value"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Word Count:</span>
+                        <span id="result-word-count" class="value"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Quality Score:</span>
+                        <span id="result-quality-score" class="value"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Grade:</span>
+                        <span id="result-grade" class="value"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Revisions Applied:</span>
+                        <span id="result-revisions" class="value"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Duration:</span>
+                        <span id="result-duration" class="value"></span>
+                    </div>
+                </div>
+
+                <div class="results-actions">
+                    <button id="download-btn" class="btn btn-primary">
+                        Download Story Package (ZIP)
+                    </button>
+                    <button id="new-story-btn" class="btn btn-secondary">
+                        Generate Another Story
+                    </button>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section id="error-section" class="section hidden">
+                <h2>Generation Failed</h2>
+                <div class="error-message">
+                    <p id="error-text"></p>
+                </div>
+                <button id="retry-btn" class="btn btn-secondary">
+                    Try Again
+                </button>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with structural discipline. Powered by Claude Sonnet 4.5.</p>
+            <p class="version">v1.0.0 | Template Version: v1</p>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

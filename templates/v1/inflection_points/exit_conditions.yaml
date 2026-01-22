@@ -1,0 +1,315 @@
+# Exit Condition Structures Template v1.0
+# Defines how (and whether) narrator can leave the system
+# Exit type fundamentally shapes story's meaning and horror
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+exit_structures:
+  true_exit_with_cost:
+    description: "Narrator can leave but must pay permanent price"
+    characteristics:
+      - "Escape is possible and real"
+      - "Cost is significant and irreversible"
+      - "Something remains changed forever"
+    mechanical_requirements:
+      - "Must establish both exit path and cost upfront"
+      - "Cost cannot be undone or healed post-exit"
+      - "Exit success depends on narrator's choices, not luck"
+    narrative_structure:
+      - "Setup: Hint at exit possibility and price"
+      - "Middle: Narrator weighs cost vs staying"
+      - "Climax: Choice to pay cost and exit"
+      - "Resolution: Outside world, but narrator transformed"
+    cost_types:
+      physical: "Injury, amputation, permanent disability"
+      psychological: "Trauma, memory loss, broken relationships"
+      moral: "Complicity, betrayal, guilt"
+      ontological: "Partial transformation, contamination carried out"
+      social: "Cannot return home, lost identity, exile"
+    implementation_notes:
+      - "Cost should connect thematically to violation/engagement"
+      - "Must show narrator actually outside system (not ambiguous)"
+      - "Cost should affect narrator's future, not just past"
+    example_scenarios:
+      - "Escape by completing binding for someone else (moral cost)"
+      - "Leave but carry contamination (ontological cost)"
+      - "Exit through injury that prevents return (physical cost)"
+    best_for_themes:
+      - "Survival with consequences"
+      - "Price of knowledge"
+      - "Irreversible change"
+
+  conditional_exit:
+    description: "Exit possible only if specific conditions met"
+    characteristics:
+      - "Escape requires fulfilling requirements"
+      - "Requirements must be achievable but difficult"
+      - "Failure to meet conditions means no exit"
+    mechanical_requirements:
+      - "Conditions must be clearly stated or discoverable"
+      - "Should require understanding system, not just luck"
+      - "Success must depend on narrator's competence/choices"
+    narrative_structure:
+      - "Setup: Establish conditions for release"
+      - "Middle: Narrator works to meet requirements"
+      - "Climax: Attempt to satisfy conditions"
+      - "Resolution: Success (exit) or failure (trapped/transformed)"
+    condition_types:
+      performance: "Complete all rules perfectly for duration"
+      endurance: "Survive until time limit expires"
+      sacrifice: "Provide substitute or payment"
+      revelation: "Solve puzzle or discover truth"
+      ritual: "Complete specific sequence of actions"
+    implementation_notes:
+      - "Conditions should test narrator's growth/learning"
+      - "Should be difficult but not impossible"
+      - "Failure state should be meaningful (not just death)"
+    example_scenarios:
+      - "Work shift without violation, then allowed to leave"
+      - "Find and destroy binding object"
+      - "Provide substitute to take your place"
+    best_for_themes:
+      - "Earned freedom"
+      - "Competence under pressure"
+      - "Completing the trial"
+
+  false_exit:
+    description: "Apparent escape that's actually deeper entrapment"
+    characteristics:
+      - "Narrator believes they've escaped"
+      - "Revelation that exit was illusion or trap"
+      - "Actually in worse position than before"
+    mechanical_requirements:
+      - "Must establish plausible exit scenario"
+      - "Should include subtle wrongness clues"
+      - "Revelation must feel earned, not arbitrary"
+    narrative_structure:
+      - "Setup: Build toward exit"
+      - "False climax: Apparent successful escape"
+      - "Reversal: Discovery that exit was false"
+      - "True climax: Confronting deeper entrapment"
+    false_exit_types:
+      loop: "Exit returns narrator to beginning"
+      expansion: "Leaving one area enters larger system"
+      dream: "Escape was hallucination/simulation"
+      replacement: "Escaped location but system follows"
+      transformation: "Left physically but bound spiritually/mentally"
+    implementation_notes:
+      - "Should reward attentive readers who spotted clues"
+      - "Reversal should recontextualize earlier events"
+      - "Cannot feel like cheap trick—must be structurally sound"
+    example_scenarios:
+      - "Driving away but road loops back"
+      - "Waking up to realize still in dream"
+      - "Leaving building but system has expanded to city"
+    best_for_themes:
+      - "Inescapability"
+      - "Deepening trap"
+      - "Reality uncertainty"
+
+  deferred_exit:
+    description: "Exit delayed or postponed by system/circumstances"
+    characteristics:
+      - "Exit theoretically possible but constantly prevented"
+      - "New obligations or barriers arise"
+      - "Each delay deepens binding or changes narrator"
+    mechanical_requirements:
+      - "Must establish legitimate obstacles, not arbitrary delays"
+      - "Each deferral should cost narrator something"
+      - "Should build toward breaking point or acceptance"
+    narrative_structure:
+      - "Setup: Establish temporary nature of stay"
+      - "Middle: Repeated attempts to leave, each blocked"
+      - "Development: Narrator changing during delays"
+      - "Resolution: Either finally escape (changed) or accept permanence"
+    deferral_types:
+      obligation: "New duties prevent leaving"
+      circumstance: "External barriers (weather, transport, etc.)"
+      contamination: "Too changed to leave safely"
+      attachment: "Emotional bonds form"
+      threat: "Leaving would trigger worse consequence"
+    implementation_notes:
+      - "Each deferral should be different (not repetitive)"
+      - "Narrator's desperation should evolve"
+      - "Should track transformation during delays"
+    example_scenarios:
+      - "Each attempt to leave triggers emergency requiring stay"
+      - "Growing contamination makes outside world dangerous to narrator"
+      - "Developing attachment to people/place"
+    best_for_themes:
+      - "Gradual entrapment"
+      - "Boiling frog"
+      - "Acceptance vs resistance"
+
+  impossible_exit:
+    description: "No exit exists; narrator's entrapment is permanent"
+    characteristics:
+      - "System has no release mechanism"
+      - "Narrator must adapt or be destroyed"
+      - "Horror is inevitability, not escape attempt"
+    mechanical_requirements:
+      - "Must establish permanence clearly (not ambiguous)"
+      - "Should show why exit is impossible (not just absent)"
+      - "Story must work without escape as possible climax"
+    narrative_structure:
+      - "Setup: Hints that this is permanent"
+      - "Middle: Narrator's attempts to escape all fail"
+      - "Recognition: Acceptance of permanence"
+      - "Resolution: Adaptation, transformation, or destruction"
+    impossibility_types:
+      ontological: "Narrator has transformed beyond ability to leave"
+      spatial: "Location exists outside normal space/time"
+      binding: "Entry was irreversible contract"
+      death: "Narrator is actually dead/dying"
+      cosmic: "Reality itself has changed"
+    implementation_notes:
+      - "Should establish this early (not surprise ending)"
+      - "Focus shifts to survival/adaptation vs escape"
+      - "Narrator's arc about acceptance or resistance"
+    example_scenarios:
+      - "Afterlife or liminal space"
+      - "Transformation into system component"
+      - "Reality that has no 'outside'"
+    best_for_themes:
+      - "Acceptance"
+      - "Transformation into monster"
+      - "Eternal recurrence"
+
+  exit_through_completion:
+    description: "Must finish what was started to be released"
+    characteristics:
+      - "Entry created obligation"
+      - "Obligation must be fulfilled"
+      - "Completion grants release but changes narrator"
+    mechanical_requirements:
+      - "Obligation must be clearly defined"
+      - "Completion criteria must be specific"
+      - "Fulfillment should require sacrifice or compromise"
+    narrative_structure:
+      - "Setup: Establish obligation incurred"
+      - "Middle: Working toward completion"
+      - "Climax: Final steps of fulfillment"
+      - "Resolution: Released but transformed by process"
+    completion_types:
+      contract: "Fulfill terms of agreement"
+      duty: "Complete inherited task"
+      cycle: "Finish ritual or process"
+      transformation: "Become what system needs"
+      substitution: "Serve term then replace"
+    implementation_notes:
+      - "Completion should feel like mixed victory"
+      - "Process of completion should change narrator"
+      - "Should explore what fulfillment costs"
+    example_scenarios:
+      - "Serve full term then train replacement"
+      - "Complete deceased relative's unfinished work"
+      - "Fulfill contract terms no matter the cost"
+    best_for_themes:
+      - "Obligation and duty"
+      - "Becoming what you feared"
+      - "Price of freedom"
+
+  exit_through_refusal:
+    description: "Narrator rejects system entirely, consequences be damned"
+    characteristics:
+      - "Active choice to violate/reject rather than comply"
+      - "Acceptance of catastrophic consequence"
+      - "Autonomy through defiance"
+    mechanical_requirements:
+      - "Must establish what refusal costs"
+      - "Consequence must be severe and real"
+      - "Narrator's choice must be informed and volitional"
+    narrative_structure:
+      - "Setup: Establish system demands compliance"
+      - "Middle: Narrator considers compliance vs autonomy"
+      - "Climax: Decision to refuse despite cost"
+      - "Resolution: Consequence occurs but narrator chooses it"
+    refusal_types:
+      martyrdom: "Death rather than compliance"
+      defiance: "Breaking system despite personal cost"
+      sacrifice: "Destroying system by violating core rule"
+      transformation_rejected: "Remaining human despite consequences"
+      exposure: "Revealing system to outside despite retaliation"
+    implementation_notes:
+      - "Refusal should be empowered choice, not desperation"
+      - "Consequence should be terrible but chosen"
+      - "Should distinguish from failure (this is intentional)"
+    example_scenarios:
+      - "Refusing to take replacement's place, accepting death"
+      - "Breaking all rules to destroy binding"
+      - "Choosing human death over monstrous survival"
+    best_for_themes:
+      - "Autonomy vs survival"
+      - "Moral stand"
+      - "Chosen suffering over complicity"
+
+  ambiguous_exit:
+    description: "Unclear whether narrator truly escaped or still trapped"
+    characteristics:
+      - "Exit occurs but reality uncertain"
+      - "Evidence supports both interpretations"
+      - "Ambiguity is structural, not lack of planning"
+    mechanical_requirements:
+      - "Must work coherently under both interpretations"
+      - "Ambiguity should enhance horror, not hide weak plotting"
+      - "Should provide enough clues for reader to decide"
+    narrative_structure:
+      - "Setup: Establish both exit and trap mechanics"
+      - "Middle: Layer evidence for both states"
+      - "Climax: Exit that could be real or false"
+      - "Resolution: Evidence that supports both readings"
+    ambiguity_types:
+      unreliable_perception: "Narrator's senses compromised"
+      dual_reality: "Both states simultaneously true"
+      loop_uncertainty: "May be repeating unknown to narrator"
+      dream_logic: "Wake/sleep boundary unclear"
+      meta_horror: "Story itself is the trap"
+    implementation_notes:
+      - "Each interpretation should be complete and satisfying"
+      - "Should not feel like cop-out or indecision"
+      - "Reader should be able to construct argument for either"
+      - "Ambiguity should serve thematic purpose"
+    example_scenarios:
+      - "Escape but repeated elements suggest loop"
+      - "Outside but wrong details imply false memory/simulation"
+      - "Free but behavior suggests continued binding"
+    best_for_themes:
+      - "Reality uncertainty"
+      - "Unreliable narrator"
+      - "Meta-horror"
+
+# CRITICAL CONSTRAINTS:
+constraints:
+  - "Exit type must be established or strongly hinted early"
+  - "Cannot change exit type arbitrarily (false exit must be planned)"
+  - "Exit should resolve thematically, not just plotwise"
+  - "Narrator's arc should connect to exit type"
+  - "Exit must respect rule invariance (cannot break system logic)"
+
+# Resolution Discipline:
+resolution_principles:
+  - "Ending must resolve through cost/transformation, not convenience"
+  - "No deus ex machina or arbitrary solutions"
+  - "Something must be permanently lost or changed"
+  - "System should end because it resolves, not because story stops"
+  - "Exit (or lack thereof) should feel inevitable from setup"
+
+# Anti-patterns:
+anti_patterns:
+  - "Narrator escapes easily despite story suggesting impossibility"
+  - "Exit appears with no prior setup or earning"
+  - "Cost promised but not actually paid"
+  - "Ambiguous ending that's actually unclear plotting"
+  - "Happy ending that doesn't acknowledge what was sacrificed"
+  - "Narrator unchanged by experience"
+  - "Escape hatch that violates established rules"
+
+# Thematic Exit Alignment:
+thematic_guidance:
+  grief_avoidance: "Exit often impossible or requires facing what was avoided"
+  complicity: "Exit requires acknowledging/accepting complicity"
+  contamination: "Exit carries contamination out or requires staying contained"
+  forgotten_obligation: "Exit through completing or breaking inherited duty"
+  punishment: "Exit is survival with scarring"
+  transformation: "Exit is becoming something else"

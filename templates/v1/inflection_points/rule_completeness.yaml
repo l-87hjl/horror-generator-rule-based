@@ -1,0 +1,217 @@
+# Rule Completeness Patterns Template v1.0
+# Defines how complete/accessible the rule system is to the narrator
+# Completeness affects narrator's ability to navigate the system
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+completeness_patterns:
+  complete_but_misunderstood:
+    description: "All rules available but narrator misinterprets meaning"
+    characteristics:
+      - "Full access to rule documentation"
+      - "Rules seem straightforward initially"
+      - "True meaning revealed through context/testing"
+    horror_mechanism:
+      - "False sense of security"
+      - "Narrator realizes error after violation"
+      - "Reinterpretation changes everything"
+    narrative_structure:
+      - "Initial confidence in understanding"
+      - "Subtle evidence of misreading"
+      - "Revelation of true stakes/meaning"
+    implementation_requirements:
+      - "Rules must support dual interpretation"
+      - "Misunderstanding must be reasonable"
+      - "Correct interpretation discoverable through clues"
+      - "Consequences reveal true meaning"
+    example_scenarios:
+      - "Literal vs metaphorical interpretation"
+      - "Technical jargon masking true function"
+      - "Euphemistic language hiding grim reality"
+    best_for_themes:
+      - "Complicity (narrator was warned)"
+      - "Institutional horror"
+      - "Procedural dread"
+
+  complete_but_seemingly_arbitrary:
+    description: "All rules present but appear nonsensical or bureaucratic"
+    characteristics:
+      - "Rules seem like arbitrary procedure"
+      - "No obvious logic or pattern"
+      - "Meaning emerges through violation consequences"
+    horror_mechanism:
+      - "Mundane compliance conceals dire stakes"
+      - "Pattern recognition comes too late"
+      - "Arbitrary-seeming rules had hidden logic"
+    narrative_structure:
+      - "Initial dismissal as bureaucracy"
+      - "Growing unease at enforcement severity"
+      - "Revelation of underlying system"
+    implementation_requirements:
+      - "Rules must have hidden coherence"
+      - "Surface arbitrariness must be sustainable"
+      - "Pattern should be discoverable in retrospect"
+      - "Enforcement must be consistent even when logic isn't clear"
+    example_scenarios:
+      - "Specific timing requirements that protect from unseen threat"
+      - "Object placement rules that maintain boundary"
+      - "Behavioral restrictions that prevent triggering"
+    best_for_themes:
+      - "Cosmic horror (incomprehensible order)"
+      - "Institutional authority"
+      - "Hidden knowledge"
+
+  deliberately_incomplete:
+    description: "Rules intentionally missing information to test/punish"
+    characteristics:
+      - "Obvious gaps in documentation"
+      - "Missing sections marked or implied"
+      - "Incompleteness serves systemic purpose"
+    horror_mechanism:
+      - "Narrator knows they don't know"
+      - "Forced to take risks with partial knowledge"
+      - "Gaps are feature, not bug"
+    narrative_structure:
+      - "Recognition of incompleteness"
+      - "Attempts to find missing information"
+      - "Realization incompleteness is intentional"
+    implementation_requirements:
+      - "Must establish what's missing clearly"
+      - "Should hint at why it's missing"
+      - "Narrator's attempts to fill gaps must have consequences"
+      - "System must function with or without complete knowledge"
+    example_scenarios:
+      - "Redacted documentation"
+      - "Rules with numbered gaps (Rule 1, Rule 3, Rule 7...)"
+      - "Instructions with 'You'll know when' clauses"
+    best_for_themes:
+      - "Punishment or testing"
+      - "Inherited systems (knowledge lost)"
+      - "Initiation rituals"
+
+  accidentally_incomplete:
+    description: "Rules damaged, lost, or destroyed unintentionally"
+    characteristics:
+      - "Evidence of former completeness"
+      - "Reconstruction possible but difficult"
+      - "Gaps create genuine uncertainty"
+    horror_mechanism:
+      - "Knowledge was protected, now lost"
+      - "Predecessor's fate tied to missing information"
+      - "Narrator must rediscover with limited time"
+    narrative_structure:
+      - "Discovery of damage/loss"
+      - "Piecing together fragments"
+      - "Racing to complete understanding"
+    implementation_requirements:
+      - "Must show evidence of what existed"
+      - "Fragments should allow partial reconstruction"
+      - "Timeline pressure to discover before violation"
+      - "Consequences teach missing rules"
+    example_scenarios:
+      - "Burned logbook"
+      - "Water-damaged instructions"
+      - "Predecessor's notes scattered/destroyed"
+    best_for_themes:
+      - "Loss and consequence"
+      - "Inherited failure"
+      - "Urgency under ignorance"
+
+  evolving_incompleteness:
+    description: "Rule system expanding or changing during story"
+    characteristics:
+      - "Initial rules complete for initial state"
+      - "New rules emerge as situation changes"
+      - "System responds to narrator's actions"
+    horror_mechanism:
+      - "Safe navigation becomes impossible"
+      - "System adapts faster than understanding"
+      - "Compliance creates new binding"
+    narrative_structure:
+      - "Establish baseline rule set"
+      - "Trigger expansion/evolution"
+      - "Narrator overwhelmed by acceleration"
+    implementation_requirements:
+      - "Must establish rules CAN evolve"
+      - "Evolution must follow logic, not be arbitrary"
+      - "Narrator should recognize pattern of expansion"
+      - "Original rules must remain invariant even as new ones add"
+    example_scenarios:
+      - "Each rule followed opens new requirement"
+      - "Territory expansion creates new rules"
+      - "Engagement deepens binding"
+    best_for_themes:
+      - "Escalating entrapment"
+      - "Contamination spread"
+      - "Deepening complicity"
+
+  contradictory_completeness:
+    description: "Multiple complete rule sets that conflict"
+    characteristics:
+      - "Several full sources available"
+      - "Sources contradict each other"
+      - "Narrator must choose which to follow"
+    horror_mechanism:
+      - "Any choice may be wrong"
+      - "Following one violates another"
+      - "Conflict may be trap or test"
+    narrative_structure:
+      - "Discovery of contradiction"
+      - "Attempts to reconcile"
+      - "Forced choice under pressure"
+    implementation_requirements:
+      - "Contradictions must be irreconcilable"
+      - "Must establish which source (if any) is correct"
+      - "Choice consequences must teach system"
+      - "Should reveal why contradiction exists"
+    example_scenarios:
+      - "Old rules vs new rules"
+      - "Official vs unofficial guidance"
+      - "Multiple authority sources"
+    best_for_themes:
+      - "Authority and trust"
+      - "Historical change"
+      - "Competing systems"
+
+  strategically_obscured:
+    description: "Rules complete but deliberately hidden or encrypted"
+    characteristics:
+      - "Information exists but requires work to access"
+      - "Obscurity serves protective purpose"
+      - "Decoding is part of the challenge"
+    horror_mechanism:
+      - "Knowledge protected from unworthy"
+      - "Narrator must prove competence to access"
+      - "Time spent decoding is time in danger"
+    narrative_structure:
+      - "Recognize encoded information"
+      - "Work to decrypt/decode"
+      - "Race between understanding and consequence"
+    implementation_requirements:
+      - "Encoding must be consistent and solvable"
+      - "Should establish why obscurity was necessary"
+      - "Partial solutions should provide partial protection"
+      - "Complete solution must be achievable with available resources"
+    example_scenarios:
+      - "Code or cipher in documentation"
+      - "Symbolic language requiring interpretation"
+      - "Instructions hidden in seemingly innocuous text"
+    best_for_themes:
+      - "Initiation and worthiness"
+      - "Protected knowledge"
+      - "Intelligence vs survival"
+
+# Constraints:
+constraints:
+  - "Incompleteness must serve narrative purpose, not create arbitrary difficulty"
+  - "Narrator's ability to discover/understand should match their entry condition"
+  - "Whatever is incomplete, the rules themselves must remain invariant"
+  - "Reader should be able to track what narrator knows vs doesn't know"
+
+# Anti-patterns:
+anti_patterns:
+  - "Incompleteness used to hide author's lack of planning"
+  - "Rules change rather than narrator's understanding evolving"
+  - "Missing information impossible to discover or infer"
+  - "Narrator ignores obvious patterns without reason"

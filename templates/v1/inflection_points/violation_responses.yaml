@@ -1,0 +1,302 @@
+# Violation Response Models Template v1.0
+# Defines how the system responds to rule violations
+# CRITICAL: Violations must never reset or restore normalcy without cost
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+response_models:
+  contamination:
+    description: "Violation spreads corruption/change to narrator or environment"
+    characteristics:
+      - "Violation leaves permanent mark"
+      - "Contamination persists and may spread"
+      - "Multiple violations compound contamination"
+    mechanical_progression:
+      - "First violation: Initial contamination (subtle)"
+      - "Subsequent violations: Spread or intensification"
+      - "Late stage: Contamination overtakes normalcy"
+    narrative_effects:
+      - "Body horror or environmental decay"
+      - "Narrator becomes increasingly othered"
+      - "Sense of irreversible change"
+    implementation_requirements:
+      - "Contamination must be trackable (physical marks, behavioral changes, etc.)"
+      - "Should follow logical progression pattern"
+      - "Cannot be washed away or undone easily"
+      - "Late-stage contamination should affect narrator's capabilities/choices"
+    example_manifestations:
+      - "Physical transformation (rot, marks, changes)"
+      - "Perceptual contamination (seeing differently)"
+      - "Behavioral contamination (compulsions, limitations)"
+      - "Environmental spread (location changing)"
+    escalation_pattern:
+      - "Violation 1: Localized mark/change"
+      - "Violation 2-3: Spreading to new areas/faculties"
+      - "Violation 4+: Systemic transformation"
+    best_for_themes:
+      - "Becoming the monster"
+      - "Corruption"
+      - "Loss of humanity/normalcy"
+
+  reclassification:
+    description: "Violation changes narrator's category/status in the system"
+    characteristics:
+      - "Narrator moves from protected to vulnerable category"
+      - "Status change alters how rules apply"
+      - "System now treats narrator differently"
+    mechanical_progression:
+      - "Initial status: Observer/protected/employee/guest"
+      - "After violation: Intruder/prey/participant/bound"
+      - "New status comes with new rules or lack of protections"
+    narrative_effects:
+      - "Crossing threshold from safety to danger"
+      - "Recognition that protection is lost"
+      - "System's regard for narrator changes"
+    implementation_requirements:
+      - "Initial status must be established clearly"
+      - "Violation that triggers reclassification must be significant"
+      - "New status must come with observable differences"
+      - "Cannot be undone through simple reversal"
+    example_manifestations:
+      - "Guest becomes trespasser (no longer owed hospitality)"
+      - "Employee becomes intruder (facility turns hostile)"
+      - "Observer becomes participant (now subject to rules)"
+      - "Protected becomes prey (hunted rather than ignored)"
+    escalation_pattern:
+      - "Established status with privileges/protections"
+      - "Violation crosses threshold"
+      - "New status recognized by system"
+      - "Previous protections no longer apply"
+    best_for_themes:
+      - "Threshold crossing"
+      - "Loss of protection"
+      - "Status and vulnerability"
+
+  escalation:
+    description: "Each violation increases severity of consequences"
+    characteristics:
+      - "First violation: Warning or minor consequence"
+      - "Subsequent violations: Progressively worse outcomes"
+      - "System becomes less forgiving over time"
+    mechanical_progression:
+      - "Violation 1: Discomfort, warning, minor harm"
+      - "Violation 2: Pain, danger, clear threat"
+      - "Violation 3: Serious harm, permanent damage"
+      - "Violation 4+: Existential threat, transformation, death"
+    narrative_effects:
+      - "Rising tension and stakes"
+      - "Narrator's margin for error shrinks"
+      - "Sense that system is losing patience"
+    implementation_requirements:
+      - "Escalation scale must be established"
+      - "Each step should be noticeably worse than previous"
+      - "Should not skip steps arbitrarily"
+      - "Narrator must be able to recognize escalation pattern"
+    example_manifestations:
+      - "Physical: Discomfort → Pain → Injury → Mutilation"
+      - "Psychological: Unease → Fear → Panic → Breakdown"
+      - "Environmental: Strange → Dangerous → Hostile → Lethal"
+      - "Supernatural: Observed → Followed → Contacted → Claimed"
+    escalation_pattern:
+      - "Establish baseline (what compliance looks like)"
+      - "First violation: Survivable but unpleasant"
+      - "Second violation: Genuinely threatening"
+      - "Third+ violations: Each worse than last"
+    best_for_themes:
+      - "Mounting pressure"
+      - "Consequences of repeated failure"
+      - "Learning through cost"
+
+  immediate_catastrophic:
+    description: "Single violation triggers severe, irreversible consequence"
+    characteristics:
+      - "No warnings or gradual escalation"
+      - "One strike and you're transformed/dead/trapped"
+      - "Creates extreme pressure to avoid violation"
+    mechanical_progression:
+      - "Compliance: Safety maintained"
+      - "Violation: Immediate severe consequence"
+      - "No recovery or mitigation"
+    narrative_effects:
+      - "High-stakes tension"
+      - "Obsessive compliance behavior"
+      - "Horror when violation witnessed or nearly occurs"
+    implementation_requirements:
+      - "Must establish severity clearly in advance"
+      - "Narrator should know or strongly suspect stakes"
+      - "Should show consequence on others first when possible"
+      - "Violation must be avoidable with proper care"
+    example_manifestations:
+      - "Open the door after dark → immediate death/taking"
+      - "Speak to the figure → instant binding"
+      - "Enter forbidden area → transformation"
+    escalation_pattern:
+      - "Setup: Establish rule and hints at severity"
+      - "Demonstration: Show consequence on NPC/environment"
+      - "Narrator's navigation: High-tension avoidance"
+      - "Violation (if any): Catastrophic result"
+    best_for_themes:
+      - "Absolute boundaries"
+      - "Fragility of safety"
+      - "One fatal mistake"
+
+  accumulation_threshold:
+    description: "Violations accumulate until threshold triggers major change"
+    characteristics:
+      - "Individual violations may have minor consequences"
+      - "Total violations tracked by system"
+      - "Reaching threshold causes qualitative shift"
+    mechanical_progression:
+      - "Violations 1-X: Accumulating with minor effects"
+      - "Violation X+1: Threshold crossed"
+      - "Post-threshold: New state, new rules, or catastrophe"
+    narrative_effects:
+      - "Mounting dread as total approaches limit"
+      - "Realization that each small failure matters"
+      - "Dramatic shift when threshold reached"
+    implementation_requirements:
+      - "Threshold number should be established or discoverable"
+      - "System should provide warning as narrator approaches limit"
+      - "Individual violations should still have some consequence"
+      - "Threshold crossing should be significant event"
+    example_manifestations:
+      - "Three violations and status changes"
+      - "Seven marks and transformation begins"
+      - "Accumulating damage until system collapse"
+    escalation_pattern:
+      - "Establish that violations are being tracked"
+      - "Show accumulation (marks, tallies, changes)"
+      - "Warn as threshold approaches"
+      - "Dramatic threshold crossing event"
+    best_for_themes:
+      - "Death by a thousand cuts"
+      - "Point of no return"
+      - "Accumulating guilt/damage"
+
+  attention_attraction:
+    description: "Violation draws notice from otherwise dormant threat"
+    characteristics:
+      - "Compliance means being ignored/invisible"
+      - "Violation creates visibility to danger"
+      - "Once noticed, harder to return to invisibility"
+    mechanical_progression:
+      - "Pre-violation: Threat present but inattentive"
+      - "Violation: Threat becomes aware/interested"
+      - "Post-violation: Threat focused on narrator"
+    narrative_effects:
+      - "Rules as camouflage or protection"
+      - "Violation makes narrator vulnerable to predation"
+      - "Increased tension as threat awareness grows"
+    implementation_requirements:
+      - "Threat must exist before violation (established presence)"
+      - "Should explain why compliance prevents notice"
+      - "Attention once gained should persist or intensify"
+      - "Cannot easily become invisible again"
+    example_manifestations:
+      - "Making noise attracts hunters"
+      - "Showing fear makes narrator visible"
+      - "Breaking pattern draws overseer's notice"
+    escalation_pattern:
+      - "Establish threat exists but is ignoring narrator"
+      - "Violation creates perceptibility"
+      - "Threat begins investigating/stalking"
+      - "Active pursuit or engagement"
+    best_for_themes:
+      - "Being prey"
+      - "Surveillance and visibility"
+      - "Protective camouflage"
+
+  environmental_response:
+    description: "Location itself reacts to violations"
+    characteristics:
+      - "Place is active system, not passive setting"
+      - "Violation triggers environmental changes"
+      - "Changes persist and compound"
+    mechanical_progression:
+      - "Baseline: Environment in stable state"
+      - "Violation: Environment shifts (geometry, physics, ambiance)"
+      - "Continued violations: Environment increasingly hostile/alien"
+    narrative_effects:
+      - "Location as character/antagonist"
+      - "Erosion of safe spaces"
+      - "Reality becoming unreliable"
+    implementation_requirements:
+      - "Must establish location has agency/responsiveness"
+      - "Environmental changes should follow pattern"
+      - "Changes should affect narrator's capabilities"
+      - "Cannot simply reset to normal state"
+    example_manifestations:
+      - "Building reconfigures (doors, hallways change)"
+      - "Physics alterations (gravity, time, space)"
+      - "Atmosphere changes (temperature, light, sound)"
+      - "Decay acceleration"
+    escalation_pattern:
+      - "Establish baseline environment"
+      - "First violation: Subtle environmental shift"
+      - "Subsequent violations: More dramatic changes"
+      - "Late stage: Environment fully transformed/hostile"
+    best_for_themes:
+      - "Living locations"
+      - "Reality corruption"
+      - "Environmental horror"
+
+  binding_intensification:
+    description: "Violation deepens narrator's connection to system"
+    characteristics:
+      - "Each violation increases entanglement"
+      - "Becoming more subject to system's logic"
+      - "Harder to leave or resist"
+    mechanical_progression:
+      - "Initial: Voluntary participation or loose connection"
+      - "Violations: Each one tightens binding"
+      - "Late stage: Complete entrapment or integration"
+    narrative_effects:
+      - "Loss of autonomy and agency"
+      - "Gradual realization of trap"
+      - "Resistance becoming futile"
+    implementation_requirements:
+      - "Must establish initial level of freedom"
+      - "Each violation should remove options or increase compulsion"
+      - "Binding should have observable effects"
+      - "Should connect to specific actions/choices"
+    example_manifestations:
+      - "Growing compulsion to follow rules"
+      - "Inability to leave location"
+      - "Becoming part of system (staff, prisoner, component)"
+      - "Loss of will or identity"
+    escalation_pattern:
+      - "Establish narrator has agency initially"
+      - "First violation: Subtle increase in obligation"
+      - "Subsequent violations: Agency eroding"
+      - "Late stage: Narrator fully bound/transformed"
+    best_for_themes:
+      - "Entrapment"
+      - "Loss of autonomy"
+      - "Becoming the system"
+
+# CRITICAL CONSTRAINTS:
+constraints:
+  - "NEVER allow state reset after violation (no 'undo' button)"
+  - "NEVER restore normalcy without permanent cost"
+  - "Violations must worsen, transform, or contaminate—never simply reverse"
+  - "Consequences must follow logically from violation type"
+  - "Narrator's relationship to system must change, not just reset"
+  - "Multiple violations must compound, not replace previous consequences"
+
+# FORBIDDEN RESPONSES:
+forbidden_responses:
+  - "Violation happens, then reality resets to pre-violation state"
+  - "Consequence occurs but then disappears/heals completely"
+  - "Narrator violates rule but nothing actually changes"
+  - "Major violation has same consequence as minor one"
+  - "Consequences that feel random rather than systematically related to violation"
+  - "Ability to 'game' the system through exploitation"
+
+# Anti-patterns (The "Ticket Problem" and similar):
+anti_patterns:
+  - "Narrator violates rule, consequence happens, narrator does arbitrary action, consequence undone"
+  - "Objects or actions that negate consequences without being established as having that power"
+  - "System that punishes then forgives without narrative cost"
+  - "Violations that matter initially but stop mattering later"
+  - "Escape hatches that allow narrator to avoid permanent change"

@@ -1,0 +1,245 @@
+# Rule Interaction Types Template v1.0
+# Defines how multiple rules relate to each other in the system
+# Interactions create complexity without violating rule invariance
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+interaction_types:
+  dependency:
+    description: "One rule requires another to be followed first"
+    characteristics:
+      - "Sequential or prerequisite relationships"
+      - "Later rules build on earlier compliance"
+      - "Violation of prerequisite invalidates dependent rule"
+    mechanical_logic:
+      - "Rule A must be completed before Rule B applies"
+      - "Rule B only protects if Rule A was followed"
+      - "Chain of compliance creates cumulative safety/binding"
+    narrative_effects:
+      - "Creates procedural complexity"
+      - "Missed steps have cascading consequences"
+      - "Requires narrator to track sequence"
+    implementation_notes:
+      - "Dependency must be stated or discoverable"
+      - "Consequences of broken dependency must be logical"
+      - "Should not create impossible situations"
+    example_structures:
+      - "Must complete ritual A before entering area B"
+      - "Protection only works if previous rule followed"
+      - "Each step unlocks next requirement"
+    best_for_themes:
+      - "Procedural horror"
+      - "Ritual integrity"
+      - "Cascading failure"
+
+  threshold:
+    description: "Rules activate or change based on quantity/frequency"
+    characteristics:
+      - "Counting or accumulation triggers change"
+      - "System responds to total violations or actions"
+      - "Threshold crossing is irreversible"
+    mechanical_logic:
+      - "X violations triggers escalation"
+      - "Y actions complete binding"
+      - "Accumulation creates new state"
+    narrative_effects:
+      - "Creates mounting pressure"
+      - "Small violations compound"
+      - "Narrator must track total impact"
+    implementation_notes:
+      - "Threshold number must be established"
+      - "Should warn narrator they're approaching limit"
+      - "Crossing threshold must be significant event"
+    example_structures:
+      - "Three violations and system changes"
+      - "Each rule followed deepens commitment"
+      - "Accumulating contamination until transformation"
+    best_for_themes:
+      - "Escalation"
+      - "Contamination spread"
+      - "Point of no return"
+
+  conflict:
+    description: "Rules that appear to contradict or compete"
+    characteristics:
+      - "Following one seems to violate another"
+      - "Narrator must navigate apparent impossibility"
+      - "Resolution reveals hidden compatibility or forces choice"
+    mechanical_logic:
+      - "Rule A says do X, Rule B says don't do X"
+      - "Conflict may be apparent (resolved through interpretation)"
+      - "Or genuine (forcing prioritization choice)"
+    narrative_effects:
+      - "Creates decision paralysis"
+      - "Tests narrator's understanding"
+      - "Forces engagement with system logic"
+    implementation_notes:
+      - "Must establish whether conflict is real or apparent"
+      - "If apparent: solution must be discoverable"
+      - "If real: choice must have clear consequences"
+      - "Cannot be arbitrary puzzle—must have logical resolution"
+    example_structures:
+      - "Stay inside at night / Don't leave door unlocked (but only lock is outside)"
+      - "Serve all customers / Never serve those who arrive after dark"
+      - "Follow all instructions / Destroy this list"
+    best_for_themes:
+      - "Impossible situations"
+      - "System testing narrator"
+      - "Hidden knowledge requirements"
+
+  contextual_drift:
+    description: "Rules' application changes based on circumstances"
+    characteristics:
+      - "Rule remains same but context changes meaning"
+      - "Conditions shift what 'following the rule' means"
+      - "Narrator must adapt without changing rule"
+    mechanical_logic:
+      - "Rule says 'do X when Y' but Y's definition shifts"
+      - "Context determines which rule applies when"
+      - "Same action may comply or violate depending on state"
+    narrative_effects:
+      - "Creates uncertainty despite knowledge"
+      - "Requires situational awareness"
+      - "Understanding context becomes critical"
+    implementation_notes:
+      - "Rule text must remain constant"
+      - "Context changes must be trackable"
+      - "Should not feel like rule is changing, but application"
+      - "Narrator must have way to identify correct context"
+    example_structures:
+      - "'Lights off after dark' but definition of 'dark' varies"
+      - "'Serve regular customers' but determination of 'regular' evolves"
+      - "'Lock all doors' but which count as 'doors' changes"
+    best_for_themes:
+      - "Shifting realities"
+      - "Contextual horror"
+      - "Erosion of certainty"
+
+  mutual_exclusion:
+    description: "Only one rule from set can be followed at a time"
+    characteristics:
+      - "Multiple rules available but mutually exclusive"
+      - "Choosing one path locks out others"
+      - "Commitment to rule track is binding"
+    mechanical_logic:
+      - "If Rule A engaged, Rules B and C become unavailable"
+      - "Choice creates permanent path dependency"
+      - "Cannot switch between tracks once committed"
+    narrative_effects:
+      - "High-stakes decision making"
+      - "Commitment creates vulnerability"
+      - "Different paths available to different narrators"
+    implementation_notes:
+      - "Must clearly establish exclusivity"
+      - "Should signal when choice becomes binding"
+      - "Alternative paths should be meaningfully different"
+      - "Consequences of each path must be distinct"
+    example_structures:
+      - "Take day shift rules OR night shift rules (not both)"
+      - "Accept protection OR maintain autonomy"
+      - "Follow old covenant OR new one"
+    best_for_themes:
+      - "Binding choices"
+      - "Sacrifice and trade-offs"
+      - "Path dependency"
+
+  amplification:
+    description: "Rules that intensify each other's effects"
+    characteristics:
+      - "Following multiple rules increases power/danger"
+      - "Combination exceeds sum of parts"
+      - "Synergistic relationships between rules"
+    mechanical_logic:
+      - "Rule A + Rule B = enhanced effect C"
+      - "More rules followed = greater transformation"
+      - "Combination unlocks new states"
+    narrative_effects:
+      - "Rewards system mastery with greater stakes"
+      - "Creates acceleration toward climax"
+      - "Engagement deepens consequences"
+    implementation_notes:
+      - "Amplification must be logical from rule content"
+      - "Should hint at potential before full manifestation"
+      - "Cannot create arbitrary power-ups"
+      - "Enhanced state must maintain rule logic"
+    example_structures:
+      - "Each protection ritual also increases visibility to threat"
+      - "Following all rules grants power but completes binding"
+      - "Combination creates resonance effect"
+    best_for_themes:
+      - "Deepening complicity"
+      - "Power with cost"
+      - "Transformation through commitment"
+
+  temporal_sequencing:
+    description: "Rules must be followed in specific timing or order"
+    characteristics:
+      - "When you do it matters as much as what"
+      - "Timing windows create pressure"
+      - "Sequence violation has distinct consequences"
+    mechanical_logic:
+      - "Rule X must occur before time Y"
+      - "Rule A then Rule B, never reversed"
+      - "Interval between rules matters"
+    narrative_effects:
+      - "Creates time pressure"
+      - "Scheduling becomes survival tool"
+      - "Clock watching and urgency"
+    implementation_notes:
+      - "Timing requirements must be clear or discoverable"
+      - "Should provide way to track time"
+      - "Consequences of missed timing must be established"
+      - "Can create countdown tension"
+    example_structures:
+      - "Doors locked before sunset, unlocked before sunrise"
+      - "Offerings made at specific intervals"
+      - "Actions must complete within window"
+    best_for_themes:
+      - "Urgency and pressure"
+      - "Ritual precision"
+      - "Failure through timing"
+
+  conditional_activation:
+    description: "Rules that only apply under specific conditions"
+    characteristics:
+      - "Dormant rules that trigger situationally"
+      - "Conditions must be recognized to know rule applies"
+      - "May create sudden rule set expansion"
+    mechanical_logic:
+      - "If condition X, then Rule Y becomes active"
+      - "Rules exist but aren't binding until triggered"
+      - "Trigger must be detectable (at least in retrospect)"
+    narrative_effects:
+      - "Creates surprise rule enforcement"
+      - "Requires vigilance for condition recognition"
+      - "Narrator must learn trigger conditions"
+    implementation_notes:
+      - "Conditions must be stated or discoverable"
+      - "First trigger should teach the pattern"
+      - "Narrator must have way to identify active rules"
+      - "Cannot feel arbitrary—trigger must make sense"
+    example_structures:
+      - "Rules for 'if stranger arrives'"
+      - "Emergency procedures for specific events"
+      - "Conditional protections based on threat type"
+    best_for_themes:
+      - "Hidden complexity"
+      - "System responsiveness"
+      - "Contextual danger"
+
+# Constraints for rule interactions:
+constraints:
+  - "Interactions must not violate individual rule invariance"
+  - "Complexity should emerge from interaction, not individual rule changes"
+  - "Narrator must be able to track and understand interactions"
+  - "Should create strategic depth without arbitrary impossibility"
+  - "Multiple interaction types can combine but must remain coherent"
+
+# Anti-patterns:
+anti_patterns:
+  - "Rules that change based on interactions (vs. application/effect changing)"
+  - "Interactions that create unsolvable paradoxes without narrative purpose"
+  - "Complexity that obscures rather than deepens engagement"
+  - "Arbitrary interactions with no logical basis"
+  - "Narrator unable to discover interaction patterns"

@@ -1,0 +1,446 @@
+# Revision Checklist Schema v1.0
+# Framework for post-generation structural audit
+# Based on research identifying common failure modes in rule-based horror
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+checklist_sections:
+  rule_logic_audit:
+    description: "Verify rules function as laws, not suggestions"
+    priority: "critical"
+
+    checks:
+      rule_enumeration:
+        question: "Can all rules be clearly enumerated?"
+        pass_criteria:
+          - "Reader can list all rules from story"
+          - "Rules are explicitly stated or clearly demonstrated"
+          - "No 'soft rules' that matter but aren't established"
+        fail_indicators:
+          - "Important restrictions that were never stated"
+          - "Rules that seem to exist only when violated"
+          - "Narrator follows unstated behavioral requirements"
+        severity_if_failed: "critical"
+        automated_check: false
+        ai_assisted: true
+
+      rule_invariance:
+        question: "Do rules remain binding and unchanged throughout?"
+        pass_criteria:
+          - "Rules stated early still apply at end"
+          - "Rule meaning doesn't shift arbitrarily"
+          - "If rules evolve, evolution follows established logic"
+        fail_indicators:
+          - "Rule stops mattering partway through"
+          - "Rule meaning changes without explanation"
+          - "Earlier rules contradicted by later events"
+        severity_if_failed: "critical"
+        automated_check: false
+        ai_assisted: true
+
+      soft_rule_detection:
+        question: "Are there 'soft rules' acting without being stated?"
+        pass_criteria:
+          - "All binding restrictions are established before enforcement"
+          - "Narrator never punished for violating unstated rule"
+          - "System logic is discoverable, not arbitrary"
+        fail_indicators:
+          - "Consequences for behaviors never identified as violations"
+          - "Retroactive establishment of rules"
+          - "Punishment before rule is knowable"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+  object_ontology_check:
+    description: "Verify objects have stable, established roles"
+    priority: "critical"
+
+    checks:
+      object_categorization:
+        question: "Is each significant object symbolic, operative, or explicitly dual?"
+        pass_criteria:
+          - "Objects' roles clear from introduction"
+          - "Symbolic objects don't solve problems"
+          - "Operative objects' powers established before needed"
+        fail_indicators:
+          - "Object is decoration until suddenly important"
+          - "Object's function changes arbitrarily"
+          - "Object solves problem it wasn't set up to solve"
+        severity_if_failed: "critical"
+        automated_check: true
+        extraction_pattern: "Identify all objects that narrator interacts with or that affect plot"
+
+      consequence_establishment:
+        question: "Are object interaction consequences established before they matter?"
+        pass_criteria:
+          - "What happens if object is lost/destroyed is known in advance"
+          - "Object powers demonstrated or explained before crisis"
+          - "No arbitrary object abilities appearing when convenient"
+        fail_indicators:
+          - "Object suddenly has power never hinted at"
+          - "Consequences of object loss invented when needed"
+          - "Object becomes 'get out of jail' card"
+        severity_if_failed: "critical"
+        automated_check: false
+        ai_assisted: true
+        example_failure: "The 'ticket problem'—eating ticket undoes violation without setup"
+
+      object_consistency:
+        question: "Do objects maintain consistent properties and limitations?"
+        pass_criteria:
+          - "Objects can't do more than established"
+          - "Limitations respected throughout"
+          - "Objects don't gain/lose powers arbitrarily"
+        fail_indicators:
+          - "Object suddenly ineffective when plot requires"
+          - "Object overcomes earlier limitations"
+          - "Arbitrary power fluctuation"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+  escalation_integrity:
+    description: "Verify violations escalate, never reset"
+    priority: "critical"
+
+    checks:
+      escalation_mapping:
+        question: "Can violation sequence be mapped: Observation → Pressure → Threshold → Consequence?"
+        pass_criteria:
+          - "Clear progression of stakes"
+          - "Each stage builds on previous"
+          - "Narrator's situation worsens or transforms"
+        fail_indicators:
+          - "Escalation plateaus or reverses"
+          - "Stakes decrease after rising"
+          - "Tension resets without resolution"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+      violation_consequences:
+        question: "Does each violation worsen, transform, or contaminate (never reset)?"
+        pass_criteria:
+          - "Every violation has lasting impact"
+          - "Consequences compound rather than replace"
+          - "No 'undo' or return to normalcy"
+        fail_indicators:
+          - "State reset after violation"
+          - "Consequence happens then disappears"
+          - "Danger undone without cost"
+        severity_if_failed: "critical"
+        automated_check: false
+        ai_assisted: true
+
+      forbidden_moves_detection:
+        question: "Are there forbidden moves: reality resets, danger undone, normalcy restored?"
+        pass_criteria:
+          - "No violations without permanent change"
+          - "No arbitrary danger removal"
+          - "No cost-free restoration of safety"
+        fail_indicators:
+          - "Violation followed by reset to pre-violation state"
+          - "Narrator in danger, then suddenly safe without cost"
+          - "Consequence erased by arbitrary action"
+        severity_if_failed: "critical"
+        automated_check: false
+        ai_assisted: true
+
+  ritual_integrity:
+    description: "Verify proper ritual structure: warning, choice, cost, persistence"
+    priority: "high"
+
+    checks:
+      warning_presence:
+        question: "Is there procedural wrongness or explicit warning before binding?"
+        pass_criteria:
+          - "Narrator warned (explicitly or through environmental evidence)"
+          - "Sense of wrongness before commitment"
+          - "Opportunity to recognize danger"
+        fail_indicators:
+          - "Narrator bound without any warning signals"
+          - "No indication of danger before entrapment"
+          - "Arbitrary trap with no foreshadowing"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+      autonomy_presence:
+        question: "Does narrator make volitional decision to engage?"
+        pass_criteria:
+          - "Clear moment of choice"
+          - "Narrator acts with agency (even if pressured)"
+          - "Decision is meaningful, not automatic"
+        fail_indicators:
+          - "Narrator forced without choice"
+          - "Binding happens without narrator's action"
+          - "No meaningful decision moment"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+      form_of_destruction:
+        question: "Does engagement shape (not just trigger) the outcome?"
+        pass_criteria:
+          - "How narrator engages determines consequences"
+          - "Narrator's choices affect form of horror"
+          - "Outcome reflects engagement pattern"
+        fail_indicators:
+          - "Outcome same regardless of narrator's choices"
+          - "Engagement is arbitrary trigger"
+          - "Narrator's actions don't matter to result"
+        severity_if_failed: "moderate"
+        automated_check: false
+        ai_assisted: true
+
+      cost_persistence:
+        question: "Is something permanently altered after resolution?"
+        pass_criteria:
+          - "Narrator changed forever"
+          - "Location/system transformed"
+          - "No return to pre-story state"
+        fail_indicators:
+          - "Everything back to normal"
+          - "No lasting consequences"
+          - "Narrator unchanged by experience"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+  resolution_discipline:
+    description: "Verify ending resolves through cost/transformation, not convenience"
+    priority: "critical"
+
+    checks:
+      ending_type_identification:
+        question: "Can ending type be clearly named?"
+        pass_criteria:
+          - "Ending fits established categories"
+          - "Resolution type is clear"
+          - "Not ambiguous due to unclear plotting"
+        acceptable_types:
+          - "Survival with cost"
+          - "Escape with contamination"
+          - "Compliance with damage"
+          - "Refusal with consequence"
+          - "Entrapment/transformation"
+          - "Conditional exit achieved"
+          - "Conditional exit failed"
+        fail_indicators:
+          - "Unclear what actually happened"
+          - "Ending doesn't fit any category"
+          - "Ambiguity hides weak resolution"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+      permanent_alteration:
+        question: "What is permanently lost or altered?"
+        pass_criteria:
+          - "Can identify specific irreversible change"
+          - "Change is significant and meaningful"
+          - "Cost reflects engagement"
+        fail_indicators:
+          - "Nothing permanently changed"
+          - "Changes trivial or offscreen"
+          - "Narrator essentially unchanged"
+        severity_if_failed: "critical"
+        automated_check: false
+        ai_assisted: true
+
+      system_resolution:
+        question: "Does system end because it resolves or because narration stops?"
+        pass_criteria:
+          - "System reaches completion/conclusion"
+          - "Rules determine ending"
+          - "Resolution follows from system logic"
+        fail_indicators:
+          - "System still active, story just ends"
+          - "Arbitrary stopping point"
+          - "Rules don't determine resolution"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+      convenience_detection:
+        question: "Are there convenience resolutions or escape hatches?"
+        pass_criteria:
+          - "Resolution earned through setup"
+          - "No deus ex machina"
+          - "No arbitrary solutions"
+        fail_indicators:
+          - "Problem solved by unestablished means"
+          - "Convenient rescue/revelation"
+          - "System broken without cost"
+        severity_if_failed: "critical"
+        automated_check: false
+        ai_assisted: true
+
+  thematic_payoff:
+    description: "Verify theme is enacted through structure, not just described"
+    priority: "high"
+
+    checks:
+      theme_clarity:
+        question: "Can theme be stated in one sentence?"
+        pass_criteria:
+          - "Theme emerges clearly from structure"
+          - "Reader can articulate thematic concern"
+          - "Theme is specific, not generic"
+        fail_indicators:
+          - "Unclear what story is about"
+          - "Multiple competing themes without integration"
+          - "Theme mentioned but not enacted"
+        severity_if_failed: "moderate"
+        automated_check: false
+        ai_assisted: true
+
+      rule_theme_integration:
+        question: "Do rules force engagement with theme?"
+        pass_criteria:
+          - "Rules embody thematic tension"
+          - "Following/violating rules is thematic choice"
+          - "System design enacts theme"
+        fail_indicators:
+          - "Rules unrelated to theme"
+          - "Theme imposed through description, not structure"
+          - "Could remove theme without changing rules"
+        severity_if_failed: "moderate"
+        automated_check: false
+        ai_assisted: true
+
+      ending_theme_alignment:
+        question: "Does ending enact thematic choice?"
+        pass_criteria:
+          - "Resolution reflects thematic position"
+          - "Narrator's fate demonstrates theme"
+          - "Ending crystallizes thematic meaning"
+        fail_indicators:
+          - "Ending disconnected from theme"
+          - "Thematic implications ignored"
+          - "Plot resolution without thematic resolution"
+        severity_if_failed: "moderate"
+        automated_check: false
+        ai_assisted: true
+
+  ai_failure_scan:
+    description: "Detect AI-specific failure modes"
+    priority: "high"
+
+    checks:
+      coherence_bias:
+        question: "Are there elements that 'feel connected' but aren't causally linked?"
+        pass_criteria:
+          - "All connections have clear causal logic"
+          - "Coherence comes from structure, not vibes"
+          - "Elements connect meaningfully or not at all"
+        fail_indicators:
+          - "Things mentioned together but not actually related"
+          - "Atmospheric coherence replacing causal coherence"
+          - "Reader can't explain why X relates to Y"
+        severity_if_failed: "moderate"
+        automated_check: false
+        ai_assisted: true
+
+      confabulation_detection:
+        question: "Are problems solved by invention rather than setup?"
+        pass_criteria:
+          - "Solutions established before needed"
+          - "No convenient inventions"
+          - "Setup and payoff clearly linked"
+        fail_indicators:
+          - "New information appears when convenient"
+          - "Object/ability introduced to solve problem"
+          - "Arbitrary solution without setup"
+        severity_if_failed: "critical"
+        automated_check: false
+        ai_assisted: true
+
+      handwave_test:
+        question: "If asked 'why did that work?', is there a clear non-handwavy answer?"
+        pass_criteria:
+          - "Every solution has logical basis"
+          - "Can explain mechanics of resolution"
+          - "No 'it just works' moments"
+        fail_indicators:
+          - "Solutions that feel arbitrary"
+          - "Can't explain why X affects Y"
+          - "Mechanics unexplained or illogical"
+        severity_if_failed: "major"
+        automated_check: false
+        ai_assisted: true
+
+# Scoring System:
+scoring:
+  severity_weights:
+    critical: 10
+    major: 5
+    moderate: 3
+    minor: 1
+
+  quality_calculation:
+    total_points: 100
+    deduction_formula: "subtract (failures × severity_weight)"
+    grade_scale:
+      excellent: "90-100 (ready for publication)"
+      good: "75-89 (minor revisions needed)"
+      acceptable: "60-74 (moderate revisions needed)"
+      needs_work: "40-59 (major revisions needed)"
+      failed: "0-39 (structural failure, needs rewrite)"
+
+  critical_failure_threshold:
+    description: "Any critical failure = automatic 'needs_work' or lower"
+    critical_checks:
+      - "rule_invariance"
+      - "object_ontology (ticket problem)"
+      - "violation_consequences (no reset)"
+      - "forbidden_moves_detection"
+      - "permanent_alteration"
+      - "convenience_detection"
+      - "confabulation_detection"
+
+# Output Format:
+output_format:
+  section_structure:
+    section_name: "string"
+    priority: "critical|high|moderate"
+    checks:
+      check_name:
+        question: "string"
+        result: "pass|fail|concern"
+        evidence: "Specific text excerpts or line numbers"
+        severity: "critical|major|moderate|minor"
+        notes: "Additional context or explanation"
+
+  summary_structure:
+    overall_score: "number (0-100)"
+    grade: "excellent|good|acceptable|needs_work|failed"
+    critical_failures: "number"
+    major_failures: "number"
+    total_failures: "number"
+    pass_rate: "percentage"
+    recommended_action: "publish|minor_revisions|moderate_revisions|major_revisions|rewrite"
+
+# Revision Guidance:
+revision_guidance:
+  critical_failures:
+    action: "Must fix before story is viable"
+    approach: "Surgical fixes if possible, rewrite section if needed"
+    priority: "Address immediately"
+
+  major_failures:
+    action: "Should fix for quality"
+    approach: "Targeted revisions to failing elements"
+    priority: "Address before considering complete"
+
+  moderate_failures:
+    action: "Consider fixing for polish"
+    approach: "Minor adjustments to improve coherence"
+    priority: "Optional but recommended"
+
+  minor_failures:
+    action: "Note for future improvement"
+    approach: "Track for pattern recognition"
+    priority: "Low priority"

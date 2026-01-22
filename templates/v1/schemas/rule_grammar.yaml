@@ -1,0 +1,358 @@
+# Rule Grammar Templates v1.0
+# Patterns for constructing internally consistent rule systems
+# Rules as laws with predictable structure and behavior
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+rule_construction_patterns:
+  conditional_rule:
+    structure: "IF [condition] THEN [requirement/prohibition]"
+    description: "Rule applies only when condition is met"
+
+    examples:
+      - "IF customer arrives after dark THEN do not serve them"
+      - "IF door is unlocked THEN it must remain unlocked until sunrise"
+      - "IF you hear knocking THEN count the knocks before responding"
+
+    requirements:
+      - "Condition must be detectable by narrator"
+      - "Requirement/prohibition must be actionable"
+      - "Scope of 'THEN' should be clear"
+
+    variations:
+      unless: "IF [condition] THEN [action] UNLESS [exception]"
+      duration: "IF [condition] THEN [action] FOR [time period]"
+      cascade: "IF [condition] THEN [action] AND [further consequence]"
+
+  prohibition_rule:
+    structure: "NEVER [action] WHEN/WHERE/IF [context]"
+    description: "Absolute restriction under specific circumstances"
+
+    examples:
+      - "Never open the basement door after midnight"
+      - "Never acknowledge the figure in the corner"
+      - "Never count the customers more than once"
+
+    requirements:
+      - "Action to avoid must be clear"
+      - "Context must be recognizable"
+      - "Temptation or pressure to violate should exist"
+
+    variations:
+      absolute: "NEVER [action]" (no context, absolute ban)
+      hierarchical: "NEVER [action] unless [emergency condition]"
+      threshold: "NEVER [action] more than [number] times"
+
+  obligation_rule:
+    structure: "ALWAYS/MUST [action] WHEN/BEFORE/AFTER [trigger]"
+    description: "Required action tied to trigger event"
+
+    examples:
+      - "Always lock all doors before sunset"
+      - "Must complete the checklist before leaving"
+      - "When the bell rings three times, go to the front desk immediately"
+
+    requirements:
+      - "Action must be specific and completable"
+      - "Trigger must be observable"
+      - "Consequences of non-compliance should be established"
+
+    variations:
+      sequence: "MUST [action 1] THEN [action 2] THEN [action 3]"
+      timing: "MUST [action] within [time limit] of [trigger]"
+      completion: "MUST [action] until [completion condition]"
+
+  boundary_rule:
+    structure: "DO NOT [cross/enter/touch] [location/object/boundary]"
+    description: "Spatial or physical restriction"
+
+    examples:
+      - "Do not enter the marked areas"
+      - "Do not touch anything belonging to customers"
+      - "Do not go past the tree line after dark"
+
+    requirements:
+      - "Boundary must be clearly marked or described"
+      - "Should establish what defines the boundary"
+      - "Violation must be detectable"
+
+    variations:
+      conditional_boundary: "DO NOT [cross] UNLESS [condition met]"
+      directional: "DO NOT [cross] FROM [side A] TO [side B]"
+      temporal: "DO NOT [cross] BETWEEN [time X] AND [time Y]"
+
+  sequence_rule:
+    structure: "[Action A] MUST PRECEDE [Action B]"
+    description: "Establishes required order of operations"
+
+    examples:
+      - "Lights must be checked before locking the doors"
+      - "Count inventory before accepting deliveries"
+      - "Read the names aloud before opening the register"
+
+    requirements:
+      - "Both actions must be clearly defined"
+      - "Order must matter (consequences if reversed)"
+      - "Narrator must be able to track sequence"
+
+    variations:
+      chain: "A before B before C before D"
+      interval: "A, then wait [duration], then B"
+      dependency: "A enables B (B impossible without A first)"
+
+  categorization_rule:
+    structure: "TREAT [category A] AS [behavior X], TREAT [category B] AS [behavior Y]"
+    description: "Different responses based on category"
+
+    examples:
+      - "Serve regular customers normally, decline to serve strangers"
+      - "Answer questions from day shift, ignore night shift inquiries"
+      - "Complete tasks in red folders immediately, blue folders by end of week"
+
+    requirements:
+      - "Categories must be distinguishable"
+      - "Category determination must have clear criteria"
+      - "Behaviors for each category must be specific"
+
+    variations:
+      hierarchy: "Priority: A > B > C (if conflict, A takes precedence)"
+      exclusion: "ONLY serve category A, refuse all others"
+      transformation: "After X violations, category A becomes category B"
+
+  counting_rule:
+    structure: "COUNT/TRACK [thing] AND [action based on count]"
+    description: "Numerical tracking with threshold-based responses"
+
+    examples:
+      - "Count every customer who enters; if count exceeds 13, close early"
+      - "Track all door checks; must reach exactly 7 before leaving"
+      - "Note every time the lights flicker; at 3, call supervisor"
+
+    requirements:
+      - "What to count must be unambiguous"
+      - "Threshold must be clear"
+      - "Response to threshold must be specific"
+
+    variations:
+      accumulation: "Track total violations; at X, consequences escalate"
+      exact: "Must perform action EXACTLY X times (not more, not less)"
+      reset: "Count resets at [trigger], begin counting again"
+
+  timing_rule:
+    structure: "[Action] MUST OCCUR AT/BY/DURING [specific time]"
+    description: "Time-dependent requirements"
+
+    examples:
+      - "All rituals must be completed before dawn"
+      - "Check the perimeter exactly at midnight"
+      - "Never look at the clock between 2 and 3 AM"
+
+    requirements:
+      - "Time reference must be determinable"
+      - "Action must be completable in timeframe"
+      - "Consequences of missing timing must be clear"
+
+    variations:
+      window: "Must occur between [start time] and [end time]"
+      interval: "Must occur every [duration] (e.g., every 30 minutes)"
+      deadline: "Must complete before [time], or [consequence]"
+
+  permission_rule:
+    structure: "MAY ONLY [action] IF [permission condition]"
+    description: "Action requires meeting permission criteria"
+
+    examples:
+      - "May only enter the office if the light is on"
+      - "May only leave if replacement has arrived"
+      - "May only speak to visitors who know the password"
+
+    requirements:
+      - "Permission condition must be verifiable"
+      - "Action without permission must have consequences"
+      - "Condition should be achievable but not guaranteed"
+
+    variations:
+      gatekeeper: "May only proceed with authorization from [authority]"
+      prerequisite: "May only do B after completing A"
+      token: "May only [action] while holding [object]"
+
+  transformation_rule:
+    structure: "AFTER [trigger/threshold], [state/category] BECOMES [new state]"
+    description: "Rules governing state changes in system"
+
+    examples:
+      - "After third violation, you are no longer protected"
+      - "Once the sun sets, all areas become restricted"
+      - "After accepting food, you are bound to the house"
+
+    requirements:
+      - "Trigger must be clear and detectable"
+      - "Initial and transformed states must be distinct"
+      - "Transformation should be irreversible (or reversal must be specified)"
+
+    variations:
+      graduated: "At X: state 1, at Y: state 2, at Z: state 3"
+      conditional_reversal: "State persists UNTIL [specific reversal condition]"
+      cascading: "Transformation in A triggers transformation in B"
+
+# Rule System Coherence Requirements:
+coherence_requirements:
+  consistency:
+    - "Rules must not contradict each other (unless conflict is intentional horror)"
+    - "Rule language should maintain consistent terminology"
+    - "Similar situations should invoke similar rules"
+
+  completeness:
+    - "Rule set should cover major decision points narrator faces"
+    - "Gaps in rules should be intentional (incomplete knowledge) not accidental"
+    - "Reader should be able to predict rule application"
+
+  comprehensibility:
+    - "Narrator (and reader) should be able to understand rules"
+    - "Complex interactions should build from simple components"
+    - "Rules should not require impossible knowledge to follow"
+
+# Rule Interaction Patterns:
+interaction_patterns:
+  dependency_chain:
+    pattern: "Rule A → Rule B → Rule C (each requires previous)"
+    example: "Check locks → Close blinds → Activate system"
+    considerations:
+      - "Broken chain should have clear consequences"
+      - "Narrator must be able to track progress"
+
+  mutual_exclusion:
+    pattern: "If Rule A applies, Rule B does not"
+    example: "Day shift rules vs night shift rules"
+    considerations:
+      - "Switching conditions must be clear"
+      - "Overlap cases should be addressed or impossible"
+
+  amplification:
+    pattern: "Following Rule A makes Rule B more important/dangerous"
+    example: "Each protection ritual increases entity's awareness"
+    considerations:
+      - "Amplification logic should be discoverable"
+      - "Should create meaningful tension"
+
+  threshold_triggering:
+    pattern: "Accumulating Rule A violations triggers Rule B"
+    example: "Three small violations activate major consequence rule"
+    considerations:
+      - "Threshold should be trackable"
+      - "Should warn before threshold reached"
+
+# Rule Presentation Formats:
+presentation_formats:
+  explicit_document:
+    format: "Written list, manual, posted rules"
+    advantages:
+      - "Clear reference for narrator"
+      - "Can number/organize rules"
+      - "Allows for bureaucratic/procedural tone"
+    considerations:
+      - "Should feel realistic for setting"
+      - "Can include seemingly arbitrary rules"
+      - "Language can foreshadow without being obvious"
+
+  oral_instruction:
+    format: "Told by predecessor, supervisor, local"
+    advantages:
+      - "Can be incomplete or biased"
+      - "Allows for emotional delivery"
+      - "Can include warnings and context"
+    considerations:
+      - "Informant credibility matters"
+      - "Narrator may question or forget"
+      - "Can include superstitious framing"
+
+  environmental_evidence:
+    format: "Inferred from signs, damage, patterns"
+    advantages:
+      - "Creates investigation engagement"
+      - "Allows for misinterpretation"
+      - "Builds atmospheric dread"
+    considerations:
+      - "Evidence must be consistent"
+      - "Should allow reasonable inference"
+      - "Can show consequences of violation"
+
+  experiential_learning:
+    format: "Discovered through violation and consequence"
+    advantages:
+      - "Creates visceral learning"
+      - "Each rule learned has cost"
+      - "Builds tension through mistakes"
+    considerations:
+      - "First violations should be survivable"
+      - "Pattern should emerge"
+      - "Consequences must teach clearly"
+
+# Anti-patterns (Rules to Avoid):
+anti_patterns:
+  vague_rule:
+    problem: "Rule too ambiguous to follow or violate clearly"
+    example: "Be respectful to the house"
+    why_fails: "No clear action, violation unclear, not falsifiable"
+
+  arbitrary_rule:
+    problem: "Rule with no internal logic or connection to system"
+    example: "Hop on one foot every third Tuesday"
+    why_fails: "Random without purpose, doesn't build coherence"
+    exception: "Can work if system's horror IS arbitrariness, but must be consistent"
+
+  contradictory_rule:
+    problem: "Rule that makes compliance impossible"
+    example: "Always keep door open AND always keep door closed"
+    why_fails: "Unless contradiction is the horror, creates frustration not fear"
+    exception: "Can work if discovering resolution is the challenge"
+
+  undetectable_condition:
+    problem: "Rule triggers on condition narrator can't perceive"
+    example: "If the entity is watching, don't move"
+    why_fails: "Narrator can't comply without information"
+    exception: "Can work if paranoia is theme and non-compliance survivable"
+
+  consequence_free_rule:
+    problem: "Rule stated but never enforced or tested"
+    example: "Don't touch the red book (but nothing happens if you do)"
+    why_fails: "Rules must be laws, not suggestions"
+
+  retroactive_rule:
+    problem: "Rule revealed after violation"
+    example: "Narrator punished, then told rule they broke"
+    why_fails: "Unfair to narrator, feels arbitrary to reader"
+    exception: "Can work if experiential learning is established pattern"
+
+# Rule Crafting Guidelines:
+crafting_guidelines:
+  specificity: "Prefer specific actions over vague attitudes"
+  falsifiability: "Should be clear when rule is followed vs violated"
+  consequence: "Every rule should have stakes (shown or implied)"
+  motivation: "Consider why rule exists (even if narrator doesn't know)"
+  testability: "Reader should be able to predict outcomes"
+  integration: "Rules should connect to theme and setting organically"
+
+# Example Rule Sets by Theme:
+example_rule_sets:
+  contamination_theme:
+    - "Never consume anything from the facility"
+    - "Wash hands after handling specimens"
+    - "If skin contact occurs, report immediately"
+    - "Contaminated items go in red bins, never regular trash"
+    - "After three exposures, staff must rotate out"
+
+  surveillance_theme:
+    - "Always face the camera when entering/exiting"
+    - "Never acknowledge being watched"
+    - "Maintain normal behavior at all times"
+    - "If questioned, answer truthfully and completely"
+    - "Do not discuss observations with others"
+
+  service_theme:
+    - "Customer is always right"
+    - "Serve all who enter"
+    - "Never refuse service"
+    - "Smile and maintain pleasant demeanor"
+    - "Complete transaction before customer leaves"

@@ -1,0 +1,377 @@
+# Thematic Elements Library v1.0
+# Core themes for rule-based horror with rule-system mappings
+# Themes should be enacted through rules, not just described
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+themes:
+  grief_and_avoidance:
+    description: "Horror arising from refusing to process loss or accept change"
+    core_tension: "Narrator uses system to avoid confronting grief/truth"
+
+    rule_system_mappings:
+      - "Rules provide ritual substitute for emotional processing"
+      - "Compliance becomes avoidance mechanism"
+      - "System offers false preservation (keeping dead thing 'alive')"
+      - "Violation forces confrontation with what was avoided"
+
+    narrative_requirements:
+      - "Establish what narrator is grieving/avoiding"
+      - "Show how rules enable avoidance"
+      - "Build pressure toward unavoidable confrontation"
+      - "Resolution requires facing the grief, not solving it"
+
+    rule_characteristics:
+      - "Preservation rules (keeping things unchanged)"
+      - "Ritual performance without understanding"
+      - "Rules that seem protective but prevent growth"
+      - "Violation reveals what was being avoided"
+
+    violation_responses:
+      - "Confrontation with loss/truth"
+      - "Collapse of avoidance structure"
+      - "Forced emotional reckoning"
+
+    exit_implications:
+      - "Exit requires accepting loss"
+      - "Cannot leave without processing"
+      - "Staying is eternal avoidance (becoming preservation itself)"
+
+    example_manifestations:
+      - "Maintaining dead relative's routines"
+      - "Following rules to 'keep them close'"
+      - "System that preserves but prevents healing"
+
+    best_paired_with:
+      entry: ["inherited_obligation", "returner"]
+      location: ["inherited_estate", "family_farm", "childhood_home"]
+      exit: ["exit_through_completion", "impossible_exit", "exit_with_cost"]
+
+  complicity_and_participation:
+    description: "Horror of becoming implicated in harmful system"
+    core_tension: "Survival requires actions that make narrator morally culpable"
+
+    rule_system_mappings:
+      - "Rules require harmful actions for narrator's benefit"
+      - "Compliance protects narrator at others' expense"
+      - "Each rule followed deepens moral debt"
+      - "System reveals narrator's willingness to harm for safety"
+
+    narrative_requirements:
+      - "Establish harm caused by rule compliance"
+      - "Show narrator's awareness of implications"
+      - "Create pressure that makes compliance tempting/necessary"
+      - "Track accumulating moral weight"
+
+    rule_characteristics:
+      - "Rules that benefit narrator through harming others"
+      - "Procedural language that obscures harm"
+      - "Bureaucratic rules hiding moral choice"
+      - "Escalating requirements of complicity"
+
+    violation_responses:
+      - "Refusal causes personal suffering but maintains morality"
+      - "Compliance causes external harm but protects narrator"
+      - "System makes complicity visible/permanent"
+
+    exit_implications:
+      - "Exit requires acknowledging complicity"
+      - "Cannot leave without moral reckoning"
+      - "Staying means full integration into harmful system"
+
+    example_manifestations:
+      - "Rules requiring sacrifice of others"
+      - "Customer service that serves dangerous entities"
+      - "Procedures that cause suffering"
+
+    best_paired_with:
+      entry: ["new_hire", "proxy", "investigator"]
+      location: ["institutional settings", "service industry", "employment"]
+      exit: ["exit_through_refusal", "exit_with_cost", "impossible_exit"]
+
+  contamination_and_corruption:
+    description: "Horror of gradual transformation into something other"
+    core_tension: "Narrator's essence/humanity eroding through exposure/violation"
+
+    rule_system_mappings:
+      - "Rules protect from contamination"
+      - "Violations spread corruption"
+      - "Contamination accumulates and spreads"
+      - "System tracks transformation progress"
+
+    narrative_requirements:
+      - "Establish baseline 'normal' state"
+      - "Show contamination as progressive and trackable"
+      - "Make transformation irreversible"
+      - "Narrator must recognize their own changing"
+
+    rule_characteristics:
+      - "Protective boundaries against contagion"
+      - "Purification or prevention rituals"
+      - "Rules defining contaminated vs clean"
+      - "Escalating restrictions as contamination spreads"
+
+    violation_responses:
+      - "Physical corruption (body horror)"
+      - "Perceptual contamination (seeing differently)"
+      - "Behavioral contamination (alien impulses)"
+      - "Ontological shift (becoming other)"
+
+    exit_implications:
+      - "Too contaminated to safely leave"
+      - "Exit spreads contamination to outside"
+      - "Must remain contained"
+      - "Transformation completes (no longer human enough to want exit)"
+
+    example_manifestations:
+      - "Physical marks/changes from violations"
+      - "Growing alien perspective"
+      - "Compulsions toward inhuman behavior"
+
+    best_paired_with:
+      entry: ["new_hire", "investigator", "accidental_arrival"]
+      location: ["research_station", "warehouse", "natural_spaces"]
+      exit: ["impossible_exit", "exit_with_cost", "conditional_exit"]
+
+  forgotten_obligation:
+    description: "Horror of inherited duty whose original purpose is lost"
+    core_tension: "Must fulfill ancient obligation without understanding why"
+
+    rule_system_mappings:
+      - "Rules inherited from predecessors"
+      - "Original context/reason lost to time"
+      - "Violation reveals why rules existed"
+      - "System perpetuates through succession"
+
+    narrative_requirements:
+      - "Establish lineage/inheritance of obligation"
+      - "Show gap between current knowledge and original purpose"
+      - "Create discovery process for true meaning"
+      - "Reveal stakes through violation or research"
+
+    rule_characteristics:
+      - "Ancient or historical rules"
+      - "Fragmentary or damaged documentation"
+      - "Rules that seem arbitrary until tested"
+      - "Generational transmission with degradation"
+
+    violation_responses:
+      - "Awakening of dormant threat"
+      - "Revelation of why rule existed"
+      - "Catastrophe that predecessors prevented"
+
+    exit_implications:
+      - "Obligation passes to next in line"
+      - "Must complete to be released"
+      - "Breaking obligation has generational consequences"
+
+    example_manifestations:
+      - "Family estate with unexplained rules"
+      - "Job with rituals nobody questions"
+      - "Land management with ancient restrictions"
+
+    best_paired_with:
+      entry: ["inherited_obligation", "returner", "summoned"]
+      location: ["inherited_estate", "family_farm", "lighthouse", "library"]
+      exit: ["exit_through_completion", "deferred_exit", "impossible_exit"]
+
+  surveillance_and_visibility:
+    description: "Horror of being watched and judged by inhuman observer"
+    core_tension: "Rules are enforced by observing presence; compliance is performance"
+
+    rule_system_mappings:
+      - "Rules enforced through observation"
+      - "Violations noticed and punished"
+      - "Visibility equals vulnerability"
+      - "Compliance is camouflage or appeasement"
+
+    narrative_requirements:
+      - "Establish observer exists and watches"
+      - "Show that violations are seen/noted"
+      - "Create paranoia about being watched"
+      - "Make observation mechanism alien/inexplicable"
+
+    rule_characteristics:
+      - "Behavioral restrictions (maintain appearance)"
+      - "Rules about visibility/concealment"
+      - "Performance requirements (acting normal)"
+      - "Attention-management rules"
+
+    violation_responses:
+      - "Attention attraction from observer"
+      - "Increased scrutiny/stalking"
+      - "Judgment and categorization"
+      - "Punishment for failing performance"
+
+    exit_implications:
+      - "Must escape observer's notice"
+      - "Watched even after leaving"
+      - "Exit depends on observer's permission/inattention"
+
+    example_manifestations:
+      - "Security system with awareness"
+      - "Inhuman overseer watching workplace"
+      - "Land that notices trespassers"
+
+    best_paired_with:
+      entry: ["new_hire", "investigator", "accidental_arrival"]
+      location: ["institutional", "employment", "natural_spaces"]
+      exit: ["conditional_exit", "false_exit", "exit_through_refusal"]
+
+  temporal_binding:
+    description: "Horror of being trapped in repeating time or temporal obligation"
+    core_tension: "Time itself is the prison; must repeat until condition met"
+
+    rule_system_mappings:
+      - "Rules tied to temporal cycles"
+      - "Violations reset or extend cycle"
+      - "Perfect compliance breaks loop"
+      - "Time experienced differently inside system"
+
+    narrative_requirements:
+      - "Establish temporal abnormality"
+      - "Show repetition or time distortion"
+      - "Create urgency within cyclical trap"
+      - "Revelation of loop/binding condition"
+
+    rule_characteristics:
+      - "Time-based restrictions (before X, after Y)"
+      - "Cyclical requirements (daily, seasonal)"
+      - "Sequence-dependent rules"
+      - "Rules about duration and timing"
+
+    violation_responses:
+      - "Cycle reset (restart from beginning)"
+      - "Time extension (trapped longer)"
+      - "Temporal fragmentation"
+      - "Aging/decay while location doesn't"
+
+    exit_implications:
+      - "Must complete cycle perfectly"
+      - "Exit only at specific temporal moment"
+      - "Eternal repetition if fail"
+
+    example_manifestations:
+      - "Shift that never ends"
+      - "Loop returning to same moment"
+      - "Seasonal obligation recurring eternally"
+
+    best_paired_with:
+      entry: ["new_hire", "inherited_obligation", "summoned"]
+      location: ["transit", "employment", "liminal_spaces"]
+      exit: ["impossible_exit", "conditional_exit", "exit_through_completion"]
+
+  spatial_wrongness:
+    description: "Horror of space that violates geometric/physical laws"
+    core_tension: "Location itself is impossible; rules maintain coherence"
+
+    rule_system_mappings:
+      - "Rules prevent spatial collapse/chaos"
+      - "Violations destabilize geometry"
+      - "Navigation requires rule compliance"
+      - "Space responds to rule adherence"
+
+    narrative_requirements:
+      - "Establish spatial abnormality"
+      - "Show rules maintaining/preventing spatial issues"
+      - "Violations cause geometric consequences"
+      - "Space as active system component"
+
+    rule_characteristics:
+      - "Navigation rules (paths, doors, boundaries)"
+      - "Spatial hierarchy (don't go to floor X)"
+      - "Occupancy restrictions"
+      - "Rules about perception/looking"
+
+    violation_responses:
+      - "Spatial reconfiguration"
+      - "Getting lost in impossible space"
+      - "Location becoming hostile/alien"
+      - "Geometry breaking down"
+
+    exit_implications:
+      - "Exit requires navigating impossible space"
+      - "Location has no 'outside'"
+      - "Leaving makes no spatial sense"
+
+    example_manifestations:
+      - "Building larger inside than outside"
+      - "Rooms that lead to impossible places"
+      - "Spaces that reconfigure"
+
+    best_paired_with:
+      entry: ["accidental_arrival", "investigator", "new_hire"]
+      location: ["service_tunnels", "apartment_building", "hospital", "archive"]
+      exit: ["impossible_exit", "false_exit", "conditional_exit"]
+
+  service_and_servitude:
+    description: "Horror of role/duty consuming identity"
+    core_tension: "Job requirements erase personhood; become function not person"
+
+    rule_system_mappings:
+      - "Rules define proper service behavior"
+      - "Compliance erases individual judgment"
+      - "Perfect service = loss of self"
+      - "Role requirements supersede humanity"
+
+    narrative_requirements:
+      - "Establish service role and requirements"
+      - "Show narrator's identity eroding through compliance"
+      - "Create tension between duty and personhood"
+      - "Track transformation into role"
+
+    rule_characteristics:
+      - "Customer service protocols"
+      - "Behavioral restrictions (always smile, never refuse)"
+      - "Appearance and manner requirements"
+      - "Deference and hierarchy rules"
+
+    violation_responses:
+      - "Punishment for individuality"
+      - "Forced recommitment to role"
+      - "Intensified servitude requirements"
+
+    exit_implications:
+      - "Too defined by role to leave"
+      - "Exit requires reclaiming identity"
+      - "Replacement required before release"
+
+    example_manifestations:
+      - "Waitress serving impossible customers"
+      - "Employee becoming automation"
+      - "Caretaker merging with facility"
+
+    best_paired_with:
+      entry: ["new_hire", "inherited_obligation", "proxy"]
+      location: ["hospitality", "institutional", "employment"]
+      exit: ["exit_through_completion", "impossible_exit", "exit_through_refusal"]
+
+# Thematic Constraints:
+constraints:
+  - "Theme must be enacted through rule system, not just described"
+  - "Rules should force engagement with thematic tension"
+  - "Violation responses should reflect thematic core"
+  - "Resolution must address theme, not just plot"
+  - "Theme should be statable in one sentence but complex in execution"
+
+# Anti-patterns:
+anti_patterns:
+  - "Theme mentioned but not structurally integrated"
+  - "Rules unrelated to thematic tension"
+  - "Resolution ignores thematic implications"
+  - "Theme changes partway through"
+  - "Multiple competing themes without integration"
+
+# Theme Selection Guidance:
+selection_guidance:
+  single_theme: "Focus intensifies horror; every element reinforces"
+  dual_themes: "Choose complementary themes that intersect (grief + obligation)"
+  avoid: "More than two primary themes dilutes effectiveness"
+
+# Thematic Payoff Requirements:
+payoff_requirements:
+  - "Ending must enact thematic choice (not just describe it)"
+  - "Narrator's fate should reflect thematic position"
+  - "Reader should be able to state theme from story structure alone"
+  - "Theme should feel inevitable from rule system design"

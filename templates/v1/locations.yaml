@@ -1,0 +1,360 @@
+# Location Database v1.0
+# Editable catalog of settings for horror story generation
+# Each location includes attributes relevant to rule-based horror
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+locations:
+  # TRANSIT & PASSAGE
+  ferry_terminal:
+    category: "transit"
+    isolation_level: "high"
+    infrastructure: "minimal"
+    temporal_liminality: "high"  # Between departure and arrival
+    natural_rhythms: ["tide", "fog", "seasonal weather"]
+    typical_roles: ["ferry operator", "ticket clerk", "passenger", "dock worker"]
+    rule_affordances:
+      - "Timing-based rules (departure schedules)"
+      - "Passenger/cargo distinctions"
+      - "Boarding/departure procedures"
+      - "Weather-dependent operations"
+    thematic_fit: ["obligation", "liminal spaces", "waiting", "passage"]
+    entry_conditions: ["new_hire", "inherited_obligation", "accidental_arrival"]
+
+  highway_rest_stop:
+    category: "transit"
+    isolation_level: "medium"
+    infrastructure: "basic"
+    temporal_liminality: "medium"
+    natural_rhythms: ["day/night traffic patterns", "seasonal travel"]
+    typical_roles: ["attendant", "cleaner", "security", "traveler"]
+    rule_affordances:
+      - "Day/night operational differences"
+      - "Transient vs lingering presence rules"
+      - "Facility access restrictions"
+      - "Service area boundaries"
+    thematic_fit: ["transience", "anonymity", "isolation amid traffic"]
+    entry_conditions: ["new_hire", "proxy", "accidental_arrival"]
+
+  airport_after_hours:
+    category: "transit"
+    isolation_level: "medium-high"
+    infrastructure: "complex"
+    temporal_liminality: "very high"
+    natural_rhythms: ["flight schedules", "shift changes", "security rotations"]
+    typical_roles: ["maintenance", "security", "cleaning crew", "delayed passenger"]
+    rule_affordances:
+      - "Access zone hierarchies"
+      - "Security protocols"
+      - "Restricted area rules"
+      - "Time-based access"
+    thematic_fit: ["institutional procedure", "surveillance", "liminal time"]
+    entry_conditions: ["new_hire", "proxy", "accidental_arrival", "investigator"]
+
+  # HOSPITALITY & SERVICE
+  desert_diner:
+    category: "hospitality"
+    isolation_level: "very high"
+    infrastructure: "minimal"
+    temporal_liminality: "medium"
+    natural_rhythms: ["day/night", "heat cycles", "rare storms"]
+    typical_roles: ["cook", "server", "owner", "customer"]
+    rule_affordances:
+      - "Customer service protocols"
+      - "Kitchen/dining area rules"
+      - "Operating hours"
+      - "Customer categorization"
+    thematic_fit: ["service obligation", "isolation", "hospitality rules"]
+    entry_conditions: ["new_hire", "inherited_obligation", "returner"]
+
+  roadside_motel:
+    category: "hospitality"
+    isolation_level: "high"
+    infrastructure: "basic"
+    temporal_liminality: "high"
+    natural_rhythms: ["check-in/check-out cycles", "night/day"]
+    typical_roles: ["manager", "cleaner", "desk clerk", "guest"]
+    rule_affordances:
+      - "Guest vs staff rules"
+      - "Room-specific restrictions"
+      - "Check-in/out procedures"
+      - "Occupied vs vacant room rules"
+    thematic_fit: ["temporary dwelling", "privacy/intrusion", "transient identities"]
+    entry_conditions: ["new_hire", "proxy", "accidental_arrival", "investigator"]
+
+  mountain_lodge:
+    category: "hospitality"
+    isolation_level: "very high"
+    infrastructure: "moderate"
+    temporal_liminality: "low-medium"
+    natural_rhythms: ["seasonal weather", "daylight hours", "storm patterns"]
+    typical_roles: ["caretaker", "cook", "guide", "guest"]
+    rule_affordances:
+      - "Weather-dependent rules"
+      - "Seasonal restrictions"
+      - "Guest capacity limits"
+      - "Supply management"
+    thematic_fit: ["isolation", "seasonal binding", "weather as enforcement"]
+    entry_conditions: ["new_hire", "returner", "inherited_obligation", "accidental_arrival"]
+
+  # EMPLOYMENT & INDUSTRIAL
+  warehouse_night_shift:
+    category: "industrial"
+    isolation_level: "medium"
+    infrastructure: "utilitarian"
+    temporal_liminality: "medium"
+    natural_rhythms: ["shift changes", "delivery schedules", "inventory cycles"]
+    typical_roles: ["warehouse worker", "forklift operator", "supervisor", "security"]
+    rule_affordances:
+      - "Safety protocols"
+      - "Restricted area access"
+      - "Inventory handling rules"
+      - "Shift-specific procedures"
+    thematic_fit: ["labor", "institutional procedure", "night isolation"]
+    entry_conditions: ["new_hire", "proxy"]
+
+  research_station:
+    category: "industrial"
+    isolation_level: "very high"
+    infrastructure: "specialized"
+    temporal_liminality: "low"
+    natural_rhythms: ["experiment cycles", "supply deliveries", "shift rotations"]
+    typical_roles: ["researcher", "technician", "support staff", "security"]
+    rule_affordances:
+      - "Safety protocols"
+      - "Containment procedures"
+      - "Access hierarchies"
+      - "Experimental schedules"
+    thematic_fit: ["knowledge danger", "containment failure", "professional obligation"]
+    entry_conditions: ["new_hire", "investigator", "proxy"]
+
+  fire_watch_tower:
+    category: "industrial"
+    isolation_level: "extreme"
+    infrastructure: "minimal"
+    temporal_liminality: "low"
+    natural_rhythms: ["day/night observation", "weather patterns", "fire season"]
+    typical_roles: ["watcher", "ranger", "supply runner"]
+    rule_affordances:
+      - "Observation protocols"
+      - "Communication schedules"
+      - "Emergency procedures"
+      - "Abandonment rules"
+    thematic_fit: ["extreme isolation", "observation/being observed", "duty"]
+    entry_conditions: ["new_hire", "proxy", "returner"]
+
+  # RESIDENTIAL & DOMESTIC
+  inherited_estate:
+    category: "residential"
+    isolation_level: "medium-high"
+    infrastructure: "variable"
+    temporal_liminality: "low"
+    natural_rhythms: ["seasonal maintenance", "property cycles"]
+    typical_roles: ["heir", "caretaker", "servant", "visitor"]
+    rule_affordances:
+      - "Property maintenance rituals"
+      - "Room access restrictions"
+      - "Family obligation rules"
+      - "Inheritance conditions"
+    thematic_fit: ["inherited obligation", "family secrets", "generational binding"]
+    entry_conditions: ["inherited_obligation", "returner"]
+
+  apartment_building:
+    category: "residential"
+    isolation_level: "low-medium"
+    infrastructure: "urban"
+    temporal_liminality: "low"
+    natural_rhythms: ["tenant cycles", "maintenance schedules", "noise ordinances"]
+    typical_roles: ["tenant", "superintendent", "landlord"]
+    rule_affordances:
+      - "Neighbor interaction rules"
+      - "Shared space protocols"
+      - "Quiet hours"
+      - "Tenant obligations"
+    thematic_fit: ["proximity horror", "community rules", "urban isolation"]
+    entry_conditions: ["new_hire", "returner", "accidental_arrival"]
+
+  family_farm:
+    category: "residential"
+    isolation_level: "high"
+    infrastructure: "agricultural"
+    temporal_liminality: "low"
+    natural_rhythms: ["planting/harvest cycles", "livestock care", "seasonal weather"]
+    typical_roles: ["farmer", "family member", "hired hand", "returner"]
+    rule_affordances:
+      - "Agricultural cycle rules"
+      - "Livestock care protocols"
+      - "Land boundary observances"
+      - "Seasonal rituals"
+    thematic_fit: ["generational obligation", "land binding", "rural isolation"]
+    entry_conditions: ["inherited_obligation", "returner", "new_hire"]
+
+  # INSTITUTIONAL
+  hospital_night_wing:
+    category: "institutional"
+    isolation_level: "medium"
+    infrastructure: "medical"
+    temporal_liminality: "medium-high"
+    natural_rhythms: ["shift changes", "rounds schedules", "visiting hours"]
+    typical_roles: ["nurse", "orderly", "security", "patient"]
+    rule_affordances:
+      - "Patient care protocols"
+      - "Restricted area access"
+      - "Medication schedules"
+      - "Emergency procedures"
+    thematic_fit: ["care vs control", "authority", "life/death boundaries"]
+    entry_conditions: ["new_hire", "proxy", "investigator"]
+
+  library_archive:
+    category: "institutional"
+    isolation_level: "medium"
+    infrastructure: "specialized"
+    temporal_liminality: "high"  # Timeless quality of archives
+    natural_rhythms: ["operating hours", "cataloging cycles", "preservation schedules"]
+    typical_roles: ["archivist", "librarian", "researcher", "security"]
+    rule_affordances:
+      - "Document handling protocols"
+      - "Access restrictions"
+      - "Preservation requirements"
+      - "Cataloging rules"
+    thematic_fit: ["forbidden knowledge", "preservation vs access", "historical weight"]
+    entry_conditions: ["new_hire", "investigator", "inherited_obligation"]
+
+  school_after_hours:
+    category: "institutional"
+    isolation_level: "medium"
+    infrastructure: "educational"
+    temporal_liminality: "high"
+    natural_rhythms: ["school calendar", "cleaning schedules", "security rounds"]
+    typical_roles: ["janitor", "security", "teacher", "trespasser"]
+    rule_affordances:
+      - "Access restrictions"
+      - "Cleaning protocols"
+      - "Security procedures"
+      - "After-hours rules"
+    thematic_fit: ["familiar made strange", "institutional memory", "authority"]
+    entry_conditions: ["new_hire", "proxy", "returner", "investigator"]
+
+  # NATURAL & WILDERNESS
+  cave_system:
+    category: "natural"
+    isolation_level: "extreme"
+    infrastructure: "none"
+    temporal_liminality: "very high"
+    natural_rhythms: ["water levels", "seasonal flooding", "geological activity"]
+    typical_roles: ["explorer", "guide", "researcher", "lost person"]
+    rule_affordances:
+      - "Navigation rules"
+      - "Safety protocols"
+      - "Depth-based restrictions"
+      - "Darkness procedures"
+    thematic_fit: ["underground horror", "navigation", "ancient presence"]
+    entry_conditions: ["investigator", "accidental_arrival", "summoned"]
+
+  forest_boundary:
+    category: "natural"
+    isolation_level: "high-very high"
+    infrastructure: "minimal"
+    temporal_liminality: "medium"
+    natural_rhythms: ["day/night", "seasonal changes", "weather patterns"]
+    typical_roles: ["ranger", "hiker", "hunter", "lost person"]
+    rule_affordances:
+      - "Boundary observance"
+      - "Trail vs off-trail rules"
+      - "Time-based restrictions"
+      - "Territorial rules"
+    thematic_fit: ["boundaries", "territory", "natural vs unnatural"]
+    entry_conditions: ["new_hire", "investigator", "accidental_arrival"]
+
+  coastal_facility:
+    category: "natural"
+    isolation_level: "high"
+    infrastructure: "variable"
+    temporal_liminality: "high"
+    natural_rhythms: ["tides", "storms", "fog", "seasonal weather"]
+    typical_roles: ["lighthouse keeper", "researcher", "coast guard", "fisherman"]
+    rule_affordances:
+      - "Tide-dependent rules"
+      - "Weather protocols"
+      - "Maritime traditions"
+      - "Lighthouse operations"
+    thematic_fit: ["isolation", "natural rhythms", "maritime horror"]
+    entry_conditions: ["new_hire", "inherited_obligation", "accidental_arrival"]
+
+  # LIMINAL & SPECIALIZED
+  storage_facility:
+    category: "liminal"
+    isolation_level: "medium"
+    infrastructure: "minimal"
+    temporal_liminality: "very high"  # Dead storage, frozen time
+    natural_rhythms: ["rental cycles", "access hours", "climate control"]
+    typical_roles: ["manager", "renter", "security", "inheritor"]
+    rule_affordances:
+      - "Access restrictions"
+      - "Unit-specific rules"
+      - "Property handling protocols"
+      - "Payment obligations"
+    thematic_fit: ["forgotten things", "storage as limbo", "obligation"]
+    entry_conditions: ["new_hire", "inherited_obligation", "investigator"]
+
+  service_tunnel_network:
+    category: "liminal"
+    isolation_level: "high"
+    infrastructure: "utilitarian"
+    temporal_liminality: "very high"
+    natural_rhythms: ["maintenance schedules", "shift changes"]
+    typical_roles: ["maintenance worker", "engineer", "security", "urban explorer"]
+    rule_affordances:
+      - "Access hierarchies"
+      - "Safety protocols"
+      - "Navigation rules"
+      - "Emergency procedures"
+    thematic_fit: ["hidden infrastructure", "beneath the surface", "institutional secrets"]
+    entry_conditions: ["new_hire", "investigator", "accidental_arrival"]
+
+  parking_structure:
+    category: "liminal"
+    isolation_level: "medium"
+    infrastructure: "urban"
+    temporal_liminality: "high"
+    natural_rhythms: ["business hours", "event cycles", "overnight periods"]
+    typical_roles: ["attendant", "security", "parker", "resident"]
+    rule_affordances:
+      - "Level-based rules"
+      - "Time-based access"
+      - "Vehicle vs pedestrian rules"
+      - "Payment protocols"
+    thematic_fit: ["urban liminal", "isolation amid population", "concrete horror"]
+    entry_conditions: ["new_hire", "proxy", "accidental_arrival"]
+
+# Location Selection Guidelines:
+selection_criteria:
+  isolation_level:
+    extreme: "No nearby help, communication difficult/impossible"
+    very_high: "Help far away, limited communication"
+    high: "Isolated but communication possible"
+    medium: "Some isolation, help available but delayed"
+    low: "Urban/populated, help theoretically available"
+
+  temporal_liminality:
+    very_high: "Exists outside normal time flow, eternal/frozen quality"
+    high: "Strong sense of time suspension or alteration"
+    medium: "Notable temporal dissonance"
+    low: "Normal time experience"
+
+  infrastructure:
+    none: "Natural environment, no human systems"
+    minimal: "Basic shelter/utilities only"
+    basic: "Essential facilities, limited complexity"
+    moderate: "Full facilities, some specialization"
+    complex: "Specialized systems, hierarchical access"
+    specialized: "Unique/technical infrastructure"
+
+# Usage Notes:
+usage_notes:
+  - "Match location isolation to entry condition (extreme isolation needs strong entry pressure)"
+  - "Consider infrastructure level when designing rule discovery (complex infrastructure = more rules)"
+  - "Temporal liminality affects rule type (high liminality supports time-based rules)"
+  - "Natural rhythms provide ready-made rule frameworks"
+  - "Typical roles suggest narrator positions and rule relationships"

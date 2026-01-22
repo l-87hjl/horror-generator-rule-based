@@ -1,0 +1,29 @@
+{
+  "api": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-5-20250929",
+    "max_tokens": 16000,
+    "temperature": 0.7
+  },
+  "generation": {
+    "default_word_count": 10000,
+    "min_word_count": 5000,
+    "max_word_count": 20000,
+    "default_rule_count": 7,
+    "min_rule_count": 3,
+    "max_rule_count": 12
+  },
+  "templates": {
+    "version": "v1",
+    "base_path": "templates"
+  },
+  "output": {
+    "generated_dir": "generated",
+    "archive_format": "zip"
+  },
+  "revision": {
+    "max_revision_rounds": 3,
+    "critical_failure_threshold": 1,
+    "auto_refine_on_failure": true
+  }
+}

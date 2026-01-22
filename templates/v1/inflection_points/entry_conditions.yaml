@@ -1,0 +1,127 @@
+# Entry Conditions Template v1.0
+# Defines how and why the narrator arrives at the location
+# Each condition must establish narrative pressure and limit easy escape
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+entry_conditions:
+  new_hire:
+    description: "Narrator accepts employment at location"
+    narrative_pressure:
+      - "Economic necessity"
+      - "Lack of alternatives"
+      - "Desperation or need"
+    setup_requirements:
+      - "Establish why job is available (turnover, isolation, etc.)"
+      - "Create initial investment (travel, relocation, burned bridges)"
+      - "Introduce procedural normalcy before wrongness"
+    examples:
+      - "Taking overnight shift at isolated facility"
+      - "Accepting position after long unemployment"
+      - "Replacing predecessor who left suddenly"
+
+  returner:
+    description: "Narrator returns to familiar place after absence"
+    narrative_pressure:
+      - "Obligation to family/community"
+      - "Unfinished business"
+      - "Inheritance or duty"
+    setup_requirements:
+      - "Establish changed relationship to place"
+      - "Create guilt or responsibility dynamic"
+      - "Show familiarity that makes wrongness more unsettling"
+    examples:
+      - "Returning to childhood home after parent's death"
+      - "Taking over family business"
+      - "Fulfilling deathbed promise"
+
+  proxy:
+    description: "Narrator substitutes for someone else"
+    narrative_pressure:
+      - "Favor or debt owed"
+      - "Emergency substitution"
+      - "Covering for incapacitated person"
+    setup_requirements:
+      - "Establish incomplete knowledge transfer"
+      - "Create time pressure or urgency"
+      - "Show narrator is unprepared but committed"
+    examples:
+      - "Covering coworker's shift as favor"
+      - "Taking deceased sibling's place"
+      - "Emergency replacement without training"
+
+  inherited_obligation:
+    description: "Narrator receives duty through inheritance or succession"
+    narrative_pressure:
+      - "Legal or cultural requirement"
+      - "Only remaining family member"
+      - "Obligation predates awareness"
+    setup_requirements:
+      - "Establish binding nature of inheritance"
+      - "Create discovery process for rules"
+      - "Show social/legal pressure preventing refusal"
+    examples:
+      - "Inheriting estate with attendant duties"
+      - "Last living member of lineage"
+      - "Discovering clause in will or contract"
+
+  investigator:
+    description: "Narrator arrives to examine, document, or investigate"
+    narrative_pressure:
+      - "Professional duty"
+      - "Personal curiosity or obsession"
+      - "Searching for missing person/truth"
+    setup_requirements:
+      - "Establish stakes of investigation"
+      - "Create transition from observer to participant"
+      - "Show moment investigation becomes binding"
+    examples:
+      - "Journalist investigating disappearances"
+      - "Inspector auditing facility"
+      - "Researcher studying phenomenon"
+
+  accidental_arrival:
+    description: "Narrator arrives by circumstance, not choice"
+    narrative_pressure:
+      - "Stranded by breakdown or weather"
+      - "Lost or displaced"
+      - "Seeking emergency shelter"
+    setup_requirements:
+      - "Establish genuine need to stay temporarily"
+      - "Create moment of accepting hospitality/entry"
+      - "Show transition from visitor to bound participant"
+    examples:
+      - "Car breaks down in remote area"
+      - "Seeking shelter from storm"
+      - "Wrong turn leading to isolated location"
+
+  summoned:
+    description: "Narrator responds to direct summons or invitation"
+    narrative_pressure:
+      - "Mysterious letter or message"
+      - "Authority figure's request"
+      - "Formal legal summons"
+    setup_requirements:
+      - "Establish compulsion to respond"
+      - "Create ambiguity about summoner's intent"
+      - "Show moment of crossing threshold"
+    examples:
+      - "Letter from unknown relative"
+      - "Court summons to remote location"
+      - "Invitation to exclusive event"
+
+# Constraints for all entry conditions:
+constraints:
+  - "Must establish why narrator cannot easily leave"
+  - "Must create initial buy-in before wrongness evident"
+  - "Should limit outside communication/support"
+  - "Cannot rely on narrator stupidity—motivation must be credible"
+  - "Should establish time pressure or deadline"
+
+# Anti-patterns to avoid:
+anti_patterns:
+  - "Narrator stays despite clear danger and no pressure"
+  - "Entry occurs through pure curiosity without stakes"
+  - "Easy escape route exists but narrator ignores it"
+  - "Motivation disappears partway through story"

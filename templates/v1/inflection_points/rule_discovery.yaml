@@ -1,0 +1,184 @@
+# Rule Discovery Methods Template v1.0
+# Defines how rules are revealed to the narrator
+# Discovery method shapes narrator's relationship to rule system
+
+version: "1.0"
+last_updated: "2026-01-22"
+
+discovery_methods:
+  explicit_list:
+    description: "Rules provided as complete written document"
+    characteristics:
+      - "All rules available from start"
+      - "Narrator has reference material"
+      - "Horror comes from interpretation, not discovery"
+    narrative_effects:
+      - "Creates procedural horror"
+      - "Focuses on compliance vs violation choice"
+      - "Allows for rules that seem reasonable until tested"
+    best_used_for:
+      - "Employment scenarios"
+      - "Institutional settings"
+      - "Inherited obligations with documentation"
+    implementation_notes:
+      - "Rules should seem bureaucratic or mundane initially"
+      - "Number rules for reference (Rule 1, Rule 2, etc.)"
+      - "Include seemingly arbitrary details that gain meaning"
+    example_framing:
+      - "Employee handbook section"
+      - "Instructions left by predecessor"
+      - "Posted notices and signs"
+
+  environmental_discovery:
+    description: "Rules learned through observation of environment"
+    characteristics:
+      - "Physical evidence of rule system"
+      - "Narrator must interpret meaning"
+      - "Progressive revelation through exploration"
+    narrative_effects:
+      - "Creates investigative engagement"
+      - "Allows for misinterpretation"
+      - "Builds dread through implication"
+    best_used_for:
+      - "Abandoned or isolated locations"
+      - "Investigator entry types"
+      - "Accidental arrivals"
+    implementation_notes:
+      - "Evidence must be consistent and cumulative"
+      - "Should include failed compliance evidence (bloodstains, damage, etc.)"
+      - "Narrator's interpretations can be wrong but must be logical"
+    example_framing:
+      - "Scratches on walls suggesting patterns"
+      - "Arrangement of objects implying ritual"
+      - "Damage consistent with specific behaviors"
+
+  oral_tradition:
+    description: "Rules conveyed through warning or instruction from person"
+    characteristics:
+      - "Rules filtered through informant's knowledge/bias"
+      - "Possibility of incomplete or distorted transmission"
+      - "Social pressure to accept guidance"
+    narrative_effects:
+      - "Creates interpersonal dynamic"
+      - "Allows for unreliable information"
+      - "Narrator must weigh trust vs evidence"
+    best_used_for:
+      - "Community-based settings"
+      - "Returner scenarios"
+      - "Inherited obligations"
+    implementation_notes:
+      - "Informant credibility must be established"
+      - "Consider informant's motivation for helping/warning"
+      - "Can include superstitious framing vs literal truth"
+    example_framing:
+      - "Nervous coworker's warnings"
+      - "Elder's cryptic advice"
+      - "Note from predecessor"
+
+  fragmented_discovery:
+    description: "Rules pieced together from partial sources"
+    characteristics:
+      - "Multiple incomplete sources"
+      - "Narrator assembles coherent system"
+      - "Potential gaps or contradictions"
+    narrative_effects:
+      - "Creates puzzle-solving engagement"
+      - "Allows for dangerous mistakes"
+      - "Builds tension through incomplete knowledge"
+    best_used_for:
+      - "Destroyed or lost documentation"
+      - "Investigative scenarios"
+      - "Long-abandoned locations"
+    implementation_notes:
+      - "Fragments must eventually form coherent whole"
+      - "Order of discovery shapes interpretation"
+      - "Can include decoy or obsolete fragments"
+    example_framing:
+      - "Burned logbook with surviving pages"
+      - "Multiple sources that contradict"
+      - "Instructions with sections redacted or destroyed"
+
+  behavioral_inference:
+    description: "Rules deduced from others' behavior patterns"
+    characteristics:
+      - "No explicit statement of rules"
+      - "Narrator observes compliance behavior"
+      - "Must infer underlying logic"
+    narrative_effects:
+      - "Creates paranoid uncertainty"
+      - "Social pressure to mimic without understanding"
+      - "Risk of cargo-cult compliance"
+    best_used_for:
+      - "Insular communities"
+      - "Situations with silent/unhelpful locals"
+      - "Ritualistic settings"
+    implementation_notes:
+      - "Observed behaviors must be consistent"
+      - "Narrator's inferences should be testable"
+      - "Actual rules must exist even if never stated"
+    example_framing:
+      - "Everyone avoids certain areas without explanation"
+      - "Rituals performed identically by all"
+      - "Unspoken timing or sequences everyone follows"
+
+  contradictory_sources:
+    description: "Multiple sources provide conflicting rule information"
+    characteristics:
+      - "Apparent contradictions in rule system"
+      - "Narrator must determine true rules"
+      - "Sources may be outdated, corrupted, or deceptive"
+    narrative_effects:
+      - "Creates decision paralysis"
+      - "Forces narrator to test rules empirically"
+      - "Allows for evolving rule understanding"
+    best_used_for:
+      - "Long-running systems with history"
+      - "Locations with multiple authorities"
+      - "Situations where rules have changed"
+    implementation_notes:
+      - "Contradictions must ultimately resolve logically"
+      - "Can represent rule evolution, not true contradiction"
+      - "Narrator must have method to test/validate"
+    example_framing:
+      - "Old manual vs new instructions"
+      - "Official rules vs local practice"
+      - "Written rules vs observed enforcement"
+
+  experiential_learning:
+    description: "Rules learned through violation and consequence"
+    characteristics:
+      - "No advance warning"
+      - "Trial and error discovery"
+      - "Each violation reveals rule through cost"
+    narrative_effects:
+      - "Creates escalating dread"
+      - "Makes narrator complicit in own education"
+      - "Each lesson has permanent cost"
+    best_used_for:
+      - "Punishment-based systems"
+      - "Situations without guides"
+      - "Stories focusing on contamination"
+    implementation_notes:
+      - "First violations should be survivable"
+      - "Consequences must teach without being arbitrary"
+      - "Pattern should emerge across violations"
+    example_framing:
+      - "Each mistake reveals new boundary"
+      - "Pain/damage teaches avoidance"
+      - "System shapes behavior through cost"
+
+# Constraints for rule discovery:
+constraints:
+  - "Discovery method must match entry condition logically"
+  - "Rules discovered must remain invariant once established"
+  - "Narrator's knowledge can grow but rules cannot change"
+  - "Discovery should create engagement, not confusion"
+  - "Method should support narrative tension, not delay it arbitrarily"
+
+# Anti-patterns to avoid:
+anti_patterns:
+  - "Rules change after discovery (unless that's the horror)"
+  - "Information withheld to create false mystery"
+  - "Narrator ignores clear evidence without reason"
+  - "Discovery method incompatible with setting"
+  - "Rules too obscure to be discovered reasonably"
