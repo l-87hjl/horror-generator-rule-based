@@ -44,6 +44,8 @@ class CheckpointManager {
 
       try {
         // Step 1: Generate chunk
+        console.log(`   Calling Claude API for chunk ${sceneNumber}...`);
+
         const chunk = await this.generateChunk({
           userParams,
           sceneNumber,
@@ -57,7 +59,7 @@ class CheckpointManager {
         currentWordCount += chunk.wordCount;
         previousProse = chunk.prose;
 
-        console.log(`✅ Chunk generated: ${chunk.wordCount} words`);
+        console.log(`✅ Chunk ${sceneNumber} generated: ${chunk.wordCount} words`);
 
         // Step 2: Extract state delta
         console.log(`Extracting state delta...`);

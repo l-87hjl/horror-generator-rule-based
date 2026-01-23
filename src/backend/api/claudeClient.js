@@ -12,20 +12,28 @@ class ClaudeClient {
     }
 
     this.client = new Anthropic({
-      apiKey: apiKey
+      apiKey: apiKey,
+      timeout: config.timeout || 300000, // 5 minutes default timeout
+      maxRetries: config.maxRetries || 2  // Retry failed requests
     });
 
     this.config = {
       model: config.model || 'claude-sonnet-4-5-20250929',
       maxTokens: config.maxTokens || 16000,
-      temperature: config.temperature || 0.7
+      temperature: config.temperature || 0.7,
+      timeout: config.timeout || 300000
     };
+
+    console.log(`✅ Claude client initialized with ${this.config.timeout/1000}s timeout, ${this.config.maxTokens} max tokens`);
   }
 
   /**
    * Generate story from prompt
    */
   async generateStory(systemPrompt, userPrompt, options = {}) {
+    const startTime = Date.now();
+    console.log('🤖 Calling Claude API for story generation...');
+
     try {
       const response = await this.client.messages.create({
         model: options.model || this.config.model,
@@ -40,6 +48,10 @@ class ClaudeClient {
         ]
       });
 
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`✅ Claude API response received (${duration}s)`);
+      console.log(`   Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`);
+
       return {
         content: response.content[0].text,
         usage: {
@@ -50,6 +62,18 @@ class ClaudeClient {
         stopReason: response.stop_reason
       };
     } catch (error) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.error(`❌ Claude API error after ${duration}s: ${error.message}`);
+
+      // Check for specific error types
+      if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
+        throw new Error(`Claude API timeout after ${duration}s - try reducing story length or check network connection`);
+      } else if (error.status === 429) {
+        throw new Error(`Claude API rate limit exceeded - please wait a moment and try again`);
+      } else if (error.status === 500 || error.status === 503) {
+        throw new Error(`Claude API service error (${error.status}) - please try again in a moment`);
+      }
+
       throw new Error(`Claude API error during story generation: ${error.message}`);
     }
   }
