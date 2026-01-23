@@ -184,7 +184,91 @@ header h1 {
     min-width: 200px;
 }
 
+/* Token & Cost Estimator */
+.estimator-box {
+    background: linear-gradient(135deg, rgba(139, 0, 0, 0.1) 0%, rgba(165, 42, 42, 0.05) 100%);
+    border: 2px solid rgba(139, 0, 0, 0.3);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+}
+
+.estimator-box h3 {
+    color: var(--color-primary-light);
+    margin: 0 0 var(--spacing-md) 0;
+    font-size: 1.2rem;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.estimate-grid {
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.estimate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xs) 0;
+}
+
+.estimate-label {
+    color: var(--color-text-dim);
+    font-size: 0.95rem;
+}
+
+.estimate-value {
+    color: var(--color-text);
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+
+.estimate-note {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid rgba(139, 0, 0, 0.2);
+    font-size: 0.85rem;
+    color: var(--color-text-dim);
+    font-style: italic;
+    text-align: center;
+}
+
 /* Progress Section */
+.progress-info-box {
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.progress-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xs) 0;
+}
+
+.info-label {
+    color: var(--color-text-dim);
+    font-weight: 500;
+}
+
+.info-value {
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+}
+
+.progress-info-box code {
+    background-color: var(--color-surface);
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--color-border);
+}
+
 .progress-container {
     text-align: center;
 }

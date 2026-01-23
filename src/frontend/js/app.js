@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         await loadFormOptions();
         setupEventListeners();
+        setupCostEstimator();
         console.log('App initialized successfully');
     } catch (error) {
         console.error('Failed to initialize app:', error);
@@ -130,6 +131,70 @@ function setupEventListeners() {
 }
 
 /**
+ * Setup cost estimator with live updates
+ */
+function setupCostEstimator() {
+    // Initial calculation
+    updateCostEstimate();
+
+    // List of form inputs that affect cost
+    const costRelevantInputs = [
+        'wordCount',
+        'ruleCount'
+    ];
+
+    // Attach listeners to relevant inputs
+    costRelevantInputs.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', updateCostEstimate);
+            element.addEventListener('change', updateCostEstimate);
+        }
+    });
+}
+
+/**
+ * Update cost estimate based on current form values
+ */
+function updateCostEstimate() {
+    const wordCount = parseInt(document.getElementById('wordCount')?.value || 10000);
+    const ruleCount = parseInt(document.getElementById('ruleCount')?.value || 7);
+
+    // Get user params for estimation
+    const userParams = {
+        wordCount: wordCount,
+        ruleCount: ruleCount,
+        autoRefine: true  // Auto-refine is enabled by default
+    };
+
+    // Get estimate from TokenEstimator
+    const estimate = TokenEstimator.estimate(userParams);
+
+    // Update display elements
+    const tokenEl = document.getElementById('token-estimate');
+    const costEl = document.getElementById('cost-estimate');
+    const methodEl = document.getElementById('generation-method');
+
+    if (tokenEl) {
+        tokenEl.textContent = TokenEstimator.formatTokens(estimate.totalTokens);
+    }
+
+    if (costEl) {
+        costEl.textContent = `${TokenEstimator.formatCost(estimate.estimatedCost)} ±20%`;
+    }
+
+    if (methodEl) {
+        if (estimate.metadata.useChunkedGeneration) {
+            methodEl.textContent = `Chunked (${estimate.metadata.chunkCount} chunks)`;
+            methodEl.title = 'Story will be generated in multiple chunks due to length';
+        } else {
+            methodEl.textContent = 'Single-call';
+            methodEl.title = 'Story will be generated in a single API call';
+        }
+    }
+}
+
+/**
  * Handle form submission
  */
 async function handleFormSubmit(event) {
@@ -156,8 +221,8 @@ async function handleFormSubmit(event) {
     // Show progress section
     showSection('progress-section');
 
-    // Start progress simulation
-    simulateProgress();
+    // Initialize progress display
+    initializeProgressDisplay();
 
     try {
         // Kick off an async generation job
@@ -264,6 +329,59 @@ function finalizeSuccessfulGeneration(data) {
 }
 
 /**
+ * Initialize progress display with session ID and timing
+ */
+function initializeProgressDisplay() {
+    // Generate a client-side session ID for display
+    const timestamp = new Date().toISOString()
+        .replace(/[:.]/g, '-')
+        .replace('Z', '')
+        .substring(0, 19);
+    const displaySessionId = `job-${timestamp}`;
+
+    // Set session ID
+    const sessionIdEl = document.getElementById('progress-session-id');
+    if (sessionIdEl) {
+        sessionIdEl.textContent = displaySessionId;
+    }
+
+    // Set start time
+    const startTime = new Date();
+    const startTimeEl = document.getElementById('progress-start-time');
+    if (startTimeEl) {
+        startTimeEl.textContent = startTime.toLocaleTimeString();
+    }
+
+    // Start elapsed time tracker
+    startElapsedTimeTracker(startTime);
+
+    // Start progress simulation
+    simulateProgress();
+}
+
+/**
+ * Track elapsed time during generation
+ */
+function startElapsedTimeTracker(startTime) {
+    const elapsedEl = document.getElementById('progress-elapsed');
+
+    if (!elapsedEl) return;
+
+    // Update elapsed time every second
+    const elapsedInterval = setInterval(() => {
+        const now = new Date();
+        const elapsedMs = now - startTime;
+        const minutes = Math.floor(elapsedMs / 60000);
+        const seconds = Math.floor((elapsedMs % 60000) / 1000);
+
+        elapsedEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+
+    // Store interval ID for cleanup
+    window.elapsedTimeInterval = elapsedInterval;
+}
+
+/**
  * Simulate progress bar (since we can't get real-time updates easily)
  */
 function simulateProgress() {
@@ -305,9 +423,12 @@ function simulateProgress() {
  * Display generation results
  */
 function displayResults(data) {
-    // Clear progress interval if running
+    // Clear progress intervals if running
     if (window.progressInterval) {
         clearInterval(window.progressInterval);
+    }
+    if (window.elapsedTimeInterval) {
+        clearInterval(window.elapsedTimeInterval);
     }
 
     const { sessionId, summary } = data;
@@ -395,6 +516,14 @@ function showSection(sectionId) {
  * Show error message
  */
 function showError(message) {
+    // Clear progress intervals if running
+    if (window.progressInterval) {
+        clearInterval(window.progressInterval);
+    }
+    if (window.elapsedTimeInterval) {
+        clearInterval(window.elapsedTimeInterval);
+    }
+
     document.getElementById('error-text').textContent = message;
     showSection('error-section');
 }
