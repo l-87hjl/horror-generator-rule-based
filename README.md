@@ -1,6 +1,25 @@
 # Rule-Based Horror Story Generator
 
+**Status:** ✅ Production Stable | **Version:** 1.0.1 | **Live:** [l-horror.onrender.com](https://l-horror.onrender.com)
+
 A web-based procedural horror story generator that creates, refines, and validates rule-based horror stories following established structural principles. The system maintains strict rule integrity, performs post-generation revision audits, and outputs comprehensive documentation of the entire process.
+
+## 🚀 Quick Start
+
+**Try it now:** [https://l-horror.onrender.com](https://l-horror.onrender.com)
+
+1. Click "Start Generating Stories"
+2. Configure your story parameters
+3. Click "Generate Story"
+4. Wait 3-5 minutes
+5. Download complete documentation package (ZIP)
+
+## 📖 Documentation
+
+- **[STABLE_RELEASE_v1.0.1.md](STABLE_RELEASE_v1.0.1.md)** - Latest release notes
+- **[PRODUCTION_FIXES.md](PRODUCTION_FIXES.md)** - Production fixes documentation
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Deployment instructions
+- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Local development setup
 
 ## 🎯 Overview
 
