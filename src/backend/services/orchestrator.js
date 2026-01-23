@@ -46,6 +46,8 @@ class Orchestrator {
     const sessionData = {
       sessionId,
       userInput,
+      status: 'in_progress', // Track workflow status
+      currentStage: 'initialization', // Track current stage
       metadata: {
         startTime: new Date().toISOString(),
         apiUsage: []
@@ -72,6 +74,7 @@ class Orchestrator {
       const useChunkedGeneration = userInput.wordCount > 12000;
 
       if (useChunkedGeneration) {
+        sessionData.currentStage = 'chunked_generation';
         console.log('📝 Step 1: Generating story in chunks (Phase 2)...');
         console.log(`   Strategy: Chunked generation (~1500 words/chunk)`);
         console.log(`   Reason: Target word count (${userInput.wordCount}) exceeds single-call limit\n`);
@@ -140,6 +143,7 @@ class Orchestrator {
 
       } else {
         // Step 1: Generate initial story (single-call)
+        sessionData.currentStage = 'story_generation';
         console.log('📝 Step 1: Generating initial story (single-call)...');
         console.log(`   Strategy: Single API call`);
         console.log(`   Reason: Target word count (${userInput.wordCount}) within single-call limit\n`);
@@ -157,6 +161,7 @@ class Orchestrator {
       }
 
       // Step 1.5: Enforce hard constraints (Phase 4)
+      sessionData.currentStage = 'constraint_enforcement';
       console.log('🔒 Step 1.5: Enforcing hard constraints...');
       const constraintCheck = constraintEnforcer.enforceConstraints(sessionData.initialStory);
       sessionData.constraintCheck = constraintCheck;
@@ -176,6 +181,7 @@ class Orchestrator {
       }
 
       // Step 2: Perform revision audit
+      sessionData.currentStage = 'revision_audit';
       console.log('🔍 Step 2: Performing revision audit...');
       const auditResult = await this.revisionAuditor.auditStory(
         sessionData.initialStory,
@@ -196,6 +202,7 @@ class Orchestrator {
 
       // Step 3: Refine if needed
       if (this.config.autoRefine && this.revisionAuditor.needsRefinement(auditResult.scores)) {
+        sessionData.currentStage = 'refinement';
         console.log('🔧 Step 3: Refinement needed - applying fixes...');
 
         const refinementResult = await this.storyRefiner.refineStory(
@@ -226,6 +233,7 @@ class Orchestrator {
       }
 
       // Step 4: Save state file
+      sessionData.currentStage = 'state_saving';
       console.log('💾 Step 4: Saving state file...');
       const stateFilePath = path.join(
         this.outputPackager.getOutputDir(),
@@ -237,9 +245,12 @@ class Orchestrator {
       console.log(`✅ State saved\n`);
 
       // Step 5: Package output
+      sessionData.currentStage = 'packaging';
       console.log('📦 Step 5: Creating output package...');
       const packageResult = await this.outputPackager.createPackage(sessionData);
 
+      sessionData.status = 'completed';
+      sessionData.currentStage = 'complete';
       sessionData.metadata.endTime = new Date().toISOString();
       sessionData.metadata.duration = this.calculateDuration(
         sessionData.metadata.startTime,
@@ -267,16 +278,37 @@ class Orchestrator {
     } catch (error) {
       console.error('❌ Workflow failed:', error.message);
 
-      // Log the error
+      // Mark as failed and record error details
+      sessionData.status = 'failed';
+      sessionData.metadata.endTime = new Date().toISOString();
+      sessionData.metadata.failureStage = sessionData.currentStage;
+
+      // Log the error with context
       sessionData.errorLog.unresolvedIssues.push({
         title: 'Workflow Error',
         description: error.message,
         severity: 'critical',
+        stage: sessionData.currentStage,
+        stackTrace: error.stack,
         timestamp: new Date().toISOString()
       });
 
+      // Determine what artifacts are available
+      const availableArtifacts = [];
+      if (sessionData.initialStory) availableArtifacts.push('initial_story');
+      if (sessionData.auditReport) availableArtifacts.push('audit_report');
+      if (sessionData.revisedStory) availableArtifacts.push('revised_story');
+      if (sessionData.changeLog && sessionData.changeLog.length > 0) availableArtifacts.push('change_log');
+      if (sessionData.stateManager) availableArtifacts.push('state_file');
+      if (sessionData.checkpoints && sessionData.checkpoints.length > 0) availableArtifacts.push('checkpoints');
+      if (sessionData.chunks && sessionData.chunks.length > 0) availableArtifacts.push('chunks');
+
+      console.log(`\n⚠️  PARTIAL GENERATION RECOVERY`);
+      console.log(`   Failed at stage: ${sessionData.currentStage}`);
+      console.log(`   Available artifacts: ${availableArtifacts.join(', ')}`);
+
       // Try to save what we have
-      if (sessionData.initialStory) {
+      if (availableArtifacts.length > 0) {
         try {
           // Save state if available
           if (sessionData.stateManager) {
@@ -289,10 +321,29 @@ class Orchestrator {
             sessionData.stateFilePath = stateFilePath;
           }
 
+          // Package partial artifacts
           const packageResult = await this.outputPackager.createPackage(sessionData);
-          console.log(`⚠️ Partial output saved: ${packageResult.zipPath}`);
+          console.log(`   ✅ Partial output saved: ${packageResult.zipPath}\n`);
+
+          return {
+            success: false,
+            sessionId,
+            error: error.message,
+            failureStage: sessionData.currentStage,
+            availableArtifacts,
+            outputPackage: packageResult,
+            partialRecovery: true
+          };
         } catch (packagingError) {
-          console.error('Failed to save partial output:', packagingError.message);
+          console.error(`   ❌ Failed to save partial output: ${packagingError.message}\n`);
+          return {
+            success: false,
+            sessionId,
+            error: error.message,
+            failureStage: sessionData.currentStage,
+            packagingError: packagingError.message,
+            partialRecovery: false
+          };
         }
       }
 
@@ -300,7 +351,9 @@ class Orchestrator {
         success: false,
         sessionId,
         error: error.message,
-        sessionData
+        failureStage: sessionData.currentStage,
+        availableArtifacts: [],
+        partialRecovery: false
       };
     }
   }
