@@ -33,8 +33,8 @@ class StoryGenerator {
     // Load necessary templates
     const templates = await this.loadTemplates(parameters);
 
-    // Build generation prompts
-    const { systemPrompt, userPrompt } = await this.buildGenerationPrompts(parameters, templates);
+    // Build generation prompts (Phase 5: Pass stateManager for state injection)
+    const { systemPrompt, userPrompt } = await this.buildGenerationPrompts(parameters, templates, stateManager);
 
     // Generate story
     console.log('Generating story...');
@@ -143,10 +143,162 @@ class StoryGenerator {
   }
 
   /**
-   * Build system and user prompts for story generation
+   * Build state constraints section for system prompt (Phase 5)
+   * Injects specific state constraints to prevent violations during generation
+   *
+   * @param {object} state - Session state from StateManager
+   * @returns {string} Formatted state constraints section
    */
-  async buildGenerationPrompts(parameters, templates) {
-    const systemPrompt = this.buildSystemPrompt(templates);
+  buildStateConstraintsSection(state) {
+    if (!state || !state.canonical_state) {
+      return ''; // No state yet (first generation)
+    }
+
+    const canonicalState = state.canonical_state;
+    const constraints = [];
+
+    constraints.push('# MANDATORY STATE CONSTRAINTS - DO NOT VIOLATE');
+    constraints.push('');
+    constraints.push('The following represent the CURRENT STATE of the story world.');
+    constraints.push('You MUST respect all constraints below. Violations will be rejected.');
+    constraints.push('');
+
+    // Active rules section
+    const activeRules = canonicalState.rules.filter(r => r.text && r.active);
+    if (activeRules.length > 0) {
+      constraints.push('## Active Rules in Story:');
+      constraints.push('');
+      activeRules.forEach(rule => {
+        const status = rule.violated ? '❌ VIOLATED' : '✅ Active';
+        constraints.push(`- ${rule.text} [${status}]`);
+        if (rule.violated) {
+          constraints.push(`  * Violation Count: ${rule.violation_count}/${rule.violation_threshold}`);
+          constraints.push(`  * YOU MAY NOT show this rule as unbroken or compliance as intact`);
+        }
+      });
+      constraints.push('');
+    }
+
+    // Consequences already applied
+    const violations = canonicalState.rules.filter(r => r.violated);
+    if (violations.length > 0) {
+      constraints.push('## Rule Consequences Already Applied:');
+      constraints.push('');
+      constraints.push('These effects are PERMANENT and CANNOT be reversed:');
+      constraints.push('');
+      violations.forEach(rule => {
+        if (rule.consequences.immediate && rule.consequences.immediate.length > 0) {
+          rule.consequences.immediate.forEach(consequence => {
+            constraints.push(`- ${consequence} (from ${rule.rule_id} violation)`);
+          });
+        }
+        if (rule.consequences.permanent && rule.consequences.permanent.length > 0) {
+          rule.consequences.permanent.forEach(consequence => {
+            constraints.push(`- ${consequence} (from ${rule.rule_id} violation)`);
+          });
+        }
+      });
+      constraints.push('');
+    }
+
+    // Entity capabilities
+    const capabilities = Object.keys(canonicalState.entity_capabilities);
+    if (capabilities.length > 0) {
+      constraints.push('## Entity Current Capabilities:');
+      constraints.push('');
+      constraints.push('The entity has GAINED these abilities and MUST demonstrate them:');
+      constraints.push('');
+      Object.entries(canonicalState.entity_capabilities).forEach(([capability, value]) => {
+        const status = value ? '✅ CAN' : '❌ CANNOT';
+        const capabilityDisplay = capability.replace(/_/g, ' ');
+        constraints.push(`- ${status} ${capabilityDisplay}`);
+      });
+      constraints.push('');
+      constraints.push('YOU MAY NOT show the entity lacking abilities it has gained.');
+      constraints.push('');
+    }
+
+    // Irreversible flags
+    const flagsSet = Object.entries(canonicalState.irreversible_flags).filter(
+      ([key, value]) => {
+        if (key === 'violations') return false; // Skip violations array
+        return value === true || value === false || (typeof value === 'number' && value > 0);
+      }
+    );
+
+    if (flagsSet.length > 0) {
+      constraints.push('## Irreversible Events/States:');
+      constraints.push('');
+      flagsSet.forEach(([flag, value]) => {
+        const flagDisplay = flag.replace(/_/g, ' ');
+        if (typeof value === 'boolean') {
+          constraints.push(`- ${flagDisplay}: ${value ? 'TRUE' : 'FALSE'} (cannot be reversed)`);
+        } else {
+          constraints.push(`- ${flagDisplay}: ${value}`);
+        }
+      });
+      constraints.push('');
+    }
+
+    // Timeline commitments
+    if (canonicalState.world_facts.timeline_commitments &&
+        canonicalState.world_facts.timeline_commitments.length > 0) {
+      constraints.push('## Timeline Commitments:');
+      constraints.push('');
+      constraints.push('These events have ALREADY occurred and cannot be contradicted:');
+      constraints.push('');
+      canonicalState.world_facts.timeline_commitments.forEach(tc => {
+        const commitment = typeof tc === 'string' ? tc : tc.commitment;
+        constraints.push(`- ${commitment}`);
+      });
+      constraints.push('');
+    }
+
+    // Explicit prohibitions based on state
+    constraints.push('## EXPLICIT PROHIBITIONS Based on Current State:');
+    constraints.push('');
+    constraints.push('YOU MAY NOT:');
+
+    if (violations.length > 0) {
+      constraints.push(`- Show violated rules (${violations.map(r => r.rule_id).join(', ')}) as unbroken`);
+      constraints.push('- Reset any violation status or count');
+    }
+
+    if (capabilities.length > 0) {
+      constraints.push('- Remove or ignore entity capabilities already gained');
+      constraints.push('- Show entity without abilities it has acquired');
+    }
+
+    if (flagsSet.length > 0) {
+      constraints.push('- Reverse any irreversible flags or states');
+    }
+
+    if (canonicalState.world_facts.timeline_commitments &&
+        canonicalState.world_facts.timeline_commitments.length > 0) {
+      constraints.push('- Contradict established timeline commitments');
+    }
+
+    constraints.push('- Introduce new entity behaviors without state support');
+    constraints.push('- Restore normalcy or safety that has been compromised');
+    constraints.push('');
+
+    constraints.push('Remember: The state above is CANON. Deviations will be detected and rejected.');
+
+    return constraints.join('\n');
+  }
+
+  /**
+   * Build system and user prompts for story generation
+   *
+   * @param {object} parameters - Generation parameters
+   * @param {object} templates - Loaded templates
+   * @param {object} stateManager - StateManager instance (optional, Phase 5)
+   */
+  async buildGenerationPrompts(parameters, templates, stateManager = null) {
+    // Get current state for constraint injection (Phase 5)
+    const sessionState = stateManager ? stateManager.getState() : null;
+
+    const systemPrompt = this.buildSystemPrompt(templates, sessionState);
     const userPrompt = this.buildUserPrompt(parameters, templates);
 
     return { systemPrompt, userPrompt };
@@ -154,9 +306,12 @@ class StoryGenerator {
 
   /**
    * Build comprehensive system prompt
+   *
+   * @param {object} templates - Loaded templates
+   * @param {object} sessionState - Current session state (optional, Phase 5)
    */
-  buildSystemPrompt(templates) {
-    return `You are a specialized horror fiction writer creating rule-based horror stories with rigorous structural discipline.
+  buildSystemPrompt(templates, sessionState = null) {
+    let prompt = `You are a specialized horror fiction writer creating rule-based horror stories with rigorous structural discipline.
 
 # CORE PRINCIPLES
 
@@ -201,9 +356,17 @@ You must NEVER:
 - Restore normalcy without cost
 - Use ambiguity to hide incoherent logic
 - Provide convenient resolutions
-- Create arbitrary solutions without setup
+- Create arbitrary solutions without setup`;
 
-# NARRATIVE REQUIREMENTS
+    // Phase 5: Inject state constraints if available
+    if (sessionState) {
+      const stateConstraints = this.buildStateConstraintsSection(sessionState);
+      if (stateConstraints) {
+        prompt += `\n\n---\n\n${stateConstraints}\n\n---`;
+      }
+    }
+
+    prompt += `\n\n# NARRATIVE REQUIREMENTS
 
 - Target word count must be met (±10%)
 - Rules must be enumerable by reader
@@ -213,6 +376,8 @@ You must NEVER:
 - Narrator's choices must matter to outcome
 
 Write structurally sound rule-based horror, not free-form creative fiction. The system is the story.`;
+
+    return prompt;
   }
 
   /**
