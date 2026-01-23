@@ -4,10 +4,12 @@
  */
 
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
 const StoryGenerator = require('./storyGenerator');
 const RevisionAuditor = require('../audit/revisionAuditor');
 const StoryRefiner = require('./storyRefiner');
 const OutputPackager = require('../utils/outputPackager');
+const StateManager = require('./stateManager');
 
 class Orchestrator {
   constructor(apiKey, config = {}) {
@@ -50,6 +52,13 @@ class Orchestrator {
         apiCalls: []
       }
     };
+
+    // Initialize state tracking
+    console.log('📊 Initializing state tracking...');
+    const stateManager = new StateManager();
+    const state = stateManager.initializeState(sessionId, userInput);
+    sessionData.stateManager = stateManager;
+    console.log(`✅ State initialized: ${stateManager.getSummary().total_rules} rule slots created\n`);
 
     try {
       // Step 1: Generate initial story
@@ -115,8 +124,19 @@ class Orchestrator {
         sessionData.changeLog = [];
       }
 
-      // Step 4: Package output
-      console.log('📦 Step 4: Creating output package...');
+      // Step 4: Save state file
+      console.log('💾 Step 4: Saving state file...');
+      const stateFilePath = path.join(
+        this.outputPackager.getOutputDir(),
+        sessionId,
+        'session_state.json'
+      );
+      await sessionData.stateManager.saveState(stateFilePath);
+      sessionData.stateFilePath = stateFilePath;
+      console.log(`✅ State saved\n`);
+
+      // Step 5: Package output
+      console.log('📦 Step 5: Creating output package...');
       const packageResult = await this.outputPackager.createPackage(sessionData);
 
       sessionData.metadata.endTime = new Date().toISOString();
@@ -157,6 +177,17 @@ class Orchestrator {
       // Try to save what we have
       if (sessionData.initialStory) {
         try {
+          // Save state if available
+          if (sessionData.stateManager) {
+            const stateFilePath = path.join(
+              this.outputPackager.getOutputDir(),
+              sessionId,
+              'session_state.json'
+            );
+            await sessionData.stateManager.saveState(stateFilePath);
+            sessionData.stateFilePath = stateFilePath;
+          }
+
           const packageResult = await this.outputPackager.createPackage(sessionData);
           console.log(`⚠️ Partial output saved: ${packageResult.zipPath}`);
         } catch (packagingError) {

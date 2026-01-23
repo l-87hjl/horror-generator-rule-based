@@ -190,10 +190,18 @@ class OutputPackager {
       revisedStory,
       changeLog,
       metadata,
-      errorLog
+      errorLog,
+      stateFilePath,
+      stateManager
     } = sessionData;
 
     const files = [];
+
+    // 0. Session State (JSON) - if available
+    if (stateFilePath && stateManager) {
+      // State file already saved by orchestrator, just add to files list
+      files.push({ name: 'session_state.json', path: stateFilePath });
+    }
 
     // 1. User Input Log (JSON)
     const userInputPath = path.join(sessionDir, '00_user_input_log.json');
@@ -380,8 +388,12 @@ class OutputPackager {
       revisedStory,
       auditReport,
       changeLog,
-      metadata
+      metadata,
+      stateManager
     } = sessionData;
+
+    // Get state summary if available
+    const stateSummary = stateManager ? stateManager.getSummary() : null;
 
     return {
       generation_date: new Date().toISOString(),
@@ -400,9 +412,10 @@ class OutputPackager {
       overall_quality_score: auditReport ? auditReport.scores.overallScore : null,
       quality_grade: auditReport ? auditReport.scores.grade : null,
       api_usage: metadata ? metadata.apiUsage : null,
+      state_tracking: stateSummary,
       version: {
         templates: 'v1',
-        system: '1.0.0'
+        system: '1.1.0'
       }
     };
   }
