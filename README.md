@@ -1,21 +1,32 @@
 # Rule-Based Horror Story Generator
 
-**Status:** ✅ Production Stable | **Version:** 1.0.1 | **Live:** [l-horror.onrender.com](https://l-horror.onrender.com)
+**Status:** 🔒 Production Stable with Authentication | **Version:** 1.1.0 | **Live:** [l-horror.onrender.com](https://l-horror.onrender.com)
 
 A web-based procedural horror story generator that creates, refines, and validates rule-based horror stories following established structural principles. The system maintains strict rule integrity, performs post-generation revision audits, and outputs comprehensive documentation of the entire process.
 
+## 🔐 Access Information
+
+**The application is password-protected to prevent unauthorized use.**
+
+- **URL:** [https://l-horror.onrender.com](https://l-horror.onrender.com)
+- **Username:** `admin`
+- **Password:** Contact the administrator for access
+
+When you visit the site, your browser will prompt for credentials. Enter the username and password to access the application.
+
 ## 🚀 Quick Start
 
-**Try it now:** [https://l-horror.onrender.com](https://l-horror.onrender.com)
+**After logging in:**
 
 1. Click "Start Generating Stories"
 2. Configure your story parameters
 3. Click "Generate Story"
-4. Wait 3-5 minutes
+4. Wait 3-5 minutes (progress shown)
 5. Download complete documentation package (ZIP)
 
 ## 📖 Documentation
 
+- **[SECURITY_IMPLEMENTATION.md](SECURITY_IMPLEMENTATION.md)** - Password protection documentation
 - **[STABLE_RELEASE_v1.0.1.md](STABLE_RELEASE_v1.0.1.md)** - Latest release notes
 - **[PRODUCTION_FIXES.md](PRODUCTION_FIXES.md)** - Production fixes documentation
 - **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Deployment instructions

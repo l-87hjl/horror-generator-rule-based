@@ -7,6 +7,7 @@ require('dotenv').config({ path: './config/.env' });
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const basicAuth = require('express-basic-auth');
 const Orchestrator = require('./src/backend/services/orchestrator');
 
 const app = express();
@@ -28,6 +29,31 @@ function createJobId() {
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Password Protection
+// Protect all routes except /api/health (needed for Render health checks)
+const adminPassword = process.env.ADMIN_PASSWORD;
+
+if (!adminPassword) {
+  console.error('WARNING: ADMIN_PASSWORD not set - application will be publicly accessible!');
+  console.error('Set ADMIN_PASSWORD environment variable to enable password protection');
+} else {
+  console.log('✅ Password protection enabled');
+
+  app.use((req, res, next) => {
+    // Skip authentication for health check endpoint
+    if (req.path === '/api/health') {
+      return next();
+    }
+
+    // Apply basic auth to all other routes
+    return basicAuth({
+      users: { 'admin': adminPassword },
+      challenge: true,
+      realm: 'Rule-Based Horror Story Generator'
+    })(req, res, next);
+  });
+}
 
 // Serve static files from multiple directories
 app.use('/generator', express.static(path.join(__dirname, 'src/frontend')));
