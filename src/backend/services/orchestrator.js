@@ -5,12 +5,14 @@
 
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+const fs = require('fs').promises;
 const StoryGenerator = require('./storyGenerator');
 const RevisionAuditor = require('../audit/revisionAuditor');
 const StoryRefiner = require('./storyRefiner');
 const OutputPackager = require('../utils/outputPackager');
 const StateManager = require('./stateManager');
 const ConstraintEnforcer = require('../audit/constraintEnforcer');
+const CheckpointManager = require('./checkpointManager');
 
 class Orchestrator {
   constructor(apiKey, config = {}) {
@@ -66,18 +68,93 @@ class Orchestrator {
     sessionData.constraintEnforcer = constraintEnforcer;
 
     try {
-      // Step 1: Generate initial story
-      console.log('📝 Step 1: Generating initial story...');
-      const generationResult = await this.storyGenerator.generateStory(userInput, stateManager);
-      sessionData.initialStory = generationResult.story;
-      sessionData.errorLog.apiCalls.push({
-        type: 'Initial Generation',
-        model: generationResult.metadata.model,
-        usage: generationResult.metadata.usage,
-        timestamp: generationResult.metadata.timestamp
-      });
+      // Determine generation strategy (Phase 2)
+      const useChunkedGeneration = userInput.wordCount > 12000;
 
-      console.log(`✅ Initial story generated (${generationResult.story.split(/\s+/).length} words)\n`);
+      if (useChunkedGeneration) {
+        console.log('📝 Step 1: Generating story in chunks (Phase 2)...');
+        console.log(`   Strategy: Chunked generation (~1500 words/chunk)`);
+        console.log(`   Reason: Target word count (${userInput.wordCount}) exceeds single-call limit\n`);
+
+        // Initialize CheckpointManager
+        const checkpointManager = new CheckpointManager(
+          this.storyGenerator,
+          stateManager,
+          this.storyGenerator.getClaudeClient()
+        );
+
+        // Generate story in chunks with state tracking
+        const chunkedResult = await checkpointManager.generateChunkedStory(
+          userInput,
+          userInput.wordCount
+        );
+
+        sessionData.initialStory = chunkedResult.story;
+        sessionData.chunks = chunkedResult.chunks;
+        sessionData.checkpoints = chunkedResult.checkpoints;
+        sessionData.chunkMetadata = chunkedResult.metadata;
+
+        // Log API calls for each chunk
+        chunkedResult.chunks.forEach((chunk, index) => {
+          sessionData.errorLog.apiCalls.push({
+            type: `Chunk ${chunk.scene_number} Generation`,
+            model: chunk.model,
+            usage: chunk.usage,
+            timestamp: chunk.timestamp
+          });
+
+          // Log delta extraction API call
+          sessionData.errorLog.apiCalls.push({
+            type: `Chunk ${chunk.scene_number} Delta Extraction`,
+            model: 'claude-sonnet-4-20250514',
+            usage: { input_tokens: 0, output_tokens: 0 }, // Estimated
+            timestamp: chunk.timestamp
+          });
+        });
+
+        console.log(`✅ Chunked story generated:`);
+        console.log(`   Total chunks: ${chunkedResult.metadata.total_chunks}`);
+        console.log(`   Total words: ${chunkedResult.metadata.total_words}`);
+        console.log(`   Checkpoints: ${chunkedResult.checkpoints.length}\n`);
+
+        // Save checkpoint files
+        console.log('💾 Saving checkpoint files...');
+        const checkpointDir = path.join(
+          this.outputPackager.getOutputDir(),
+          sessionId,
+          'checkpoints'
+        );
+        await fs.mkdir(checkpointDir, { recursive: true });
+
+        for (const checkpoint of chunkedResult.checkpoints) {
+          const checkpointPath = path.join(
+            checkpointDir,
+            `checkpoint_scene_${checkpoint.scene_number}.json`
+          );
+          await fs.writeFile(
+            checkpointPath,
+            JSON.stringify(checkpoint, null, 2)
+          );
+        }
+        console.log(`✅ ${chunkedResult.checkpoints.length} checkpoint files saved\n`);
+
+      } else {
+        // Step 1: Generate initial story (single-call)
+        console.log('📝 Step 1: Generating initial story (single-call)...');
+        console.log(`   Strategy: Single API call`);
+        console.log(`   Reason: Target word count (${userInput.wordCount}) within single-call limit\n`);
+
+        const generationResult = await this.storyGenerator.generateStory(userInput, stateManager);
+        sessionData.initialStory = generationResult.story;
+        sessionData.errorLog.apiCalls.push({
+          type: 'Initial Generation',
+          model: generationResult.metadata.model,
+          usage: generationResult.metadata.usage,
+          timestamp: generationResult.metadata.timestamp
+        });
+
+        console.log(`✅ Initial story generated (${generationResult.story.split(/\s+/).length} words)\n`);
+      }
 
       // Step 1.5: Enforce hard constraints (Phase 4)
       console.log('🔒 Step 1.5: Enforcing hard constraints...');
@@ -274,8 +351,9 @@ class Orchestrator {
   validateInput(userInput) {
     const errors = [];
 
-    if (!userInput.wordCount || userInput.wordCount < 5000 || userInput.wordCount > 20000) {
-      errors.push('Word count must be between 5,000 and 20,000');
+    // Phase 2: Increased limit with chunked generation support
+    if (!userInput.wordCount || userInput.wordCount < 5000 || userInput.wordCount > 50000) {
+      errors.push('Word count must be between 5,000 and 50,000');
     }
 
     if (!userInput.location) {

@@ -203,6 +203,24 @@ class OutputPackager {
       files.push({ name: 'session_state.json', path: stateFilePath });
     }
 
+    // 0.5. Checkpoint Files (JSON) - Phase 2
+    if (sessionData.checkpoints && sessionData.checkpoints.length > 0) {
+      const checkpointDir = path.join(sessionDir, 'checkpoints');
+
+      for (const checkpoint of sessionData.checkpoints) {
+        const checkpointPath = path.join(
+          checkpointDir,
+          `checkpoint_scene_${checkpoint.scene_number}.json`
+        );
+        files.push({
+          name: `checkpoints/checkpoint_scene_${checkpoint.scene_number}.json`,
+          path: checkpointPath
+        });
+      }
+
+      console.log(`   Added ${sessionData.checkpoints.length} checkpoint files`);
+    }
+
     // 1. User Input Log (JSON)
     const userInputPath = path.join(sessionDir, '00_user_input_log.json');
     await fs.writeFile(userInputPath, JSON.stringify(userInput, null, 2));
@@ -453,7 +471,9 @@ class OutputPackager {
       changeLog,
       metadata,
       stateManager,
-      constraintCheck
+      constraintCheck,
+      chunkMetadata,
+      checkpoints
     } = sessionData;
 
     // Get state summary if available
@@ -491,9 +511,19 @@ class OutputPackager {
       api_usage: metadata ? metadata.apiUsage : null,
       state_tracking: stateSummary,
       constraint_enforcement: constraintSummary,
+      chunked_generation: chunkMetadata ? {
+        enabled: true,
+        total_chunks: chunkMetadata.total_chunks,
+        total_words: chunkMetadata.total_words,
+        target_words: chunkMetadata.target_words,
+        checkpoint_count: checkpoints ? checkpoints.length : 0,
+        checkpoint_version: chunkMetadata.checkpoint_version
+      } : {
+        enabled: false
+      },
       version: {
         templates: 'v1',
-        system: '1.2.0'
+        system: '1.5.0' // Phase 2: Checkpoint Protocol
       }
     };
   }

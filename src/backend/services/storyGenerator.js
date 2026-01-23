@@ -532,6 +532,219 @@ Begin the story now.`;
   }
 
   /**
+   * Generate a single story chunk (Phase 2: Checkpoint Protocol)
+   *
+   * @param {object} chunkPrompt - Chunk generation parameters
+   * @param {object} currentState - Current state from StateManager
+   * @param {number} sceneNumber - Current scene number
+   * @returns {object} Generated chunk with prose and metadata
+   */
+  async generateStoryChunk(chunkPrompt, currentState, sceneNumber) {
+    const {
+      isFirstChunk,
+      isFinalChunk,
+      targetWords,
+      previousProse,
+      continuationInstructions,
+      finalChunkInstructions
+    } = chunkPrompt;
+
+    console.log(`\n🎬 Generating Scene ${sceneNumber}...`);
+    console.log(`   Target: ${targetWords} words`);
+    console.log(`   Type: ${isFirstChunk ? 'FIRST' : isFinalChunk ? 'FINAL' : 'CONTINUATION'}`);
+
+    // Load templates if this is the first chunk
+    let templates = {};
+    if (isFirstChunk) {
+      templates = await this.loadTemplates(chunkPrompt);
+    }
+
+    // Build chunk-specific system prompt
+    const systemPrompt = this.buildChunkSystemPrompt(
+      templates,
+      currentState,
+      isFirstChunk,
+      isFinalChunk,
+      continuationInstructions
+    );
+
+    // Build chunk-specific user prompt
+    const userPrompt = this.buildChunkUserPrompt(
+      chunkPrompt,
+      templates,
+      targetWords,
+      sceneNumber,
+      isFirstChunk,
+      isFinalChunk,
+      previousProse,
+      finalChunkInstructions
+    );
+
+    // Generate chunk
+    const generationResult = await this.claudeClient.generateStory(systemPrompt, userPrompt);
+
+    return {
+      prose: generationResult.content,
+      wordCount: this.countWords(generationResult.content),
+      usage: generationResult.usage,
+      model: generationResult.model,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Build system prompt for chunk generation
+   *
+   * @param {object} templates - Loaded templates (first chunk only)
+   * @param {object} currentState - Current session state
+   * @param {boolean} isFirstChunk - Is this the first chunk?
+   * @param {boolean} isFinalChunk - Is this the final chunk?
+   * @param {string} continuationInstructions - Continuation instructions
+   * @returns {string} System prompt
+   */
+  buildChunkSystemPrompt(templates, currentState, isFirstChunk, isFinalChunk, continuationInstructions) {
+    let prompt = '';
+
+    if (isFirstChunk) {
+      // Use full system prompt for first chunk
+      prompt = this.buildSystemPrompt(templates, currentState);
+    } else {
+      // Abbreviated system prompt for continuation chunks
+      prompt = `You are a specialized horror fiction writer continuing a rule-based horror story with rigorous structural discipline.
+
+# CORE PRINCIPLES
+
+Your continuation must embody these non-negotiable principles:
+
+## Rule Logic
+- Rules behave as LAWS, not suggestions
+- Rules remain INVARIANT throughout the story
+- Rule violations have LASTING consequences
+
+## Escalation Integrity
+- Violations must ESCALATE, TRANSFORM, or CONTAMINATE
+- State NEVER resets after violation
+- Consequences COMPOUND, they don't replace previous consequences
+
+## CONTINUATION REQUIREMENTS
+${continuationInstructions}
+
+# FORBIDDEN MOVES
+
+You must NEVER:
+- Reset state after rule violations
+- Contradict established facts
+- Ignore previously established entity capabilities
+- Restore normalcy without cost
+- Recap or summarize previous events`;
+
+      // Add state constraints
+      if (currentState) {
+        const stateConstraints = this.buildStateConstraintsSection(currentState);
+        if (stateConstraints) {
+          prompt += `\n\n---\n\n${stateConstraints}\n\n---`;
+        }
+      }
+
+      prompt += `\n\nContinue the story seamlessly from where it left off. Do NOT recap. Pick up exactly where the previous chunk ended.`;
+    }
+
+    if (isFinalChunk) {
+      prompt += `\n\n# FINAL CHUNK INSTRUCTIONS
+
+This is the FINAL chunk of the story. You must:
+- Bring the narrative to a complete resolution
+- Apply the established exit condition
+- Show permanent cost or transformation
+- Provide a definitive ending (no cliffhangers)
+- Respect all established state constraints`;
+    }
+
+    return prompt;
+  }
+
+  /**
+   * Build user prompt for chunk generation
+   *
+   * @param {object} chunkPrompt - Chunk parameters
+   * @param {object} templates - Loaded templates
+   * @param {number} targetWords - Target word count
+   * @param {number} sceneNumber - Scene number
+   * @param {boolean} isFirstChunk - Is first chunk?
+   * @param {boolean} isFinalChunk - Is final chunk?
+   * @param {string} previousProse - Previous chunk prose
+   * @param {string} finalChunkInstructions - Final chunk instructions
+   * @returns {string} User prompt
+   */
+  buildChunkUserPrompt(chunkPrompt, templates, targetWords, sceneNumber, isFirstChunk, isFinalChunk, previousProse, finalChunkInstructions) {
+    if (isFirstChunk) {
+      // Use full user prompt for first chunk
+      return this.buildUserPrompt(chunkPrompt, templates);
+    }
+
+    // Continuation chunk prompt
+    let prompt = `Continue the rule-based horror story.
+
+# CHUNK PARAMETERS
+
+**Scene Number**: ${sceneNumber}
+**Target Length**: ${targetWords} words
+**Chunk Type**: ${isFinalChunk ? 'FINAL CHUNK' : 'CONTINUATION'}
+
+# PREVIOUS PROSE ENDING
+
+The story currently ends with:
+
+---
+${this.getLastParagraphs(previousProse, 3)}
+---
+
+# CONTINUATION INSTRUCTIONS
+
+- Pick up EXACTLY where the previous chunk left off
+- Do NOT recap or summarize what happened before
+- Do NOT restart the narrative
+- Maintain seamless flow and continuity
+- Continue developing tension and escalation
+- Respect all state constraints (see system prompt)
+
+${isFinalChunk ? `\n${finalChunkInstructions}\n` : ''}
+
+# OUTPUT FORMAT
+
+Provide ONLY the continuation prose. No preamble, no meta-commentary.
+Start writing the continuation now.`;
+
+    return prompt;
+  }
+
+  /**
+   * Get last N paragraphs from prose
+   *
+   * @param {string} prose - Full prose text
+   * @param {number} count - Number of paragraphs
+   * @returns {string} Last N paragraphs
+   */
+  getLastParagraphs(prose, count = 3) {
+    if (!prose) return '';
+
+    const paragraphs = prose.split('\n\n').filter(p => p.trim().length > 0);
+    const lastParagraphs = paragraphs.slice(-count);
+    return lastParagraphs.join('\n\n');
+  }
+
+  /**
+   * Count words in text
+   *
+   * @param {string} text - Text to count
+   * @returns {number} Word count
+   */
+  countWords(text) {
+    if (!text) return 0;
+    return text.trim().split(/\s+/).length;
+  }
+
+  /**
    * Get template loader instance
    */
   getTemplateLoader() {

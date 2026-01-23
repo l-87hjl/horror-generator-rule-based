@@ -792,6 +792,242 @@ class StateManager {
     return `StateManager[${this.sessionId}]: ${summary.active_rules}/${summary.total_rules} rules active, ` +
            `${summary.violated_rules} violated, ${summary.delta_log_entries} delta entries`;
   }
+
+  // ============================================================================
+  // PHASE 2: CHECKPOINT PROTOCOL METHODS
+  // ============================================================================
+
+  /**
+   * Apply state delta from checkpoint
+   *
+   * @param {number} sceneNumber - Scene number
+   * @param {object} delta - Delta object with changes array
+   * @returns {object} Application result
+   */
+  applyDelta(sceneNumber, delta) {
+    if (!this.state) {
+      throw new Error('State not initialized. Call initializeState() first.');
+    }
+
+    if (!delta || !delta.changes) {
+      console.warn('⚠️  Empty delta provided');
+      return { applied: 0, failed: 0 };
+    }
+
+    console.log(`\n=== Applying Delta for Scene ${sceneNumber} ===`);
+    console.log(`Changes to apply: ${delta.changes.length}`);
+
+    const results = {
+      applied: 0,
+      failed: 0,
+      changes: []
+    };
+
+    // Process each change
+    delta.changes.forEach((change, index) => {
+      try {
+        console.log(`  [${index + 1}/${delta.changes.length}] ${change.type}: ${JSON.stringify(change).substring(0, 80)}...`);
+        this.processChange(change);
+        results.applied++;
+        results.changes.push({
+          change,
+          status: 'applied',
+          error: null
+        });
+      } catch (error) {
+        console.error(`  ❌ Failed to apply change:`, error.message);
+        results.failed++;
+        results.changes.push({
+          change,
+          status: 'failed',
+          error: error.message
+        });
+      }
+    });
+
+    // Log delta application
+    this.logDelta(sceneNumber, [
+      `Delta applied: ${results.applied} changes applied, ${results.failed} failed`,
+      ...delta.changes.map(c => `${c.type}: ${JSON.stringify(c).substring(0, 60)}`)
+    ]);
+
+    console.log(`✅ Delta applied: ${results.applied} successful, ${results.failed} failed\n`);
+
+    return results;
+  }
+
+  /**
+   * Process individual change from delta
+   *
+   * @param {object} change - Change object
+   * @returns {boolean} True if processed successfully
+   */
+  processChange(change) {
+    if (!change || !change.type) {
+      throw new Error('Invalid change object: missing type');
+    }
+
+    switch (change.type) {
+      case 'rule_violation':
+        return this.processRuleViolation(change);
+
+      case 'entity_capability':
+        return this.processEntityCapability(change);
+
+      case 'irreversible_flag':
+        return this.processIrreversibleFlag(change);
+
+      case 'world_fact':
+        return this.processWorldFact(change);
+
+      case 'timeline_commitment':
+        return this.processTimelineCommitment(change);
+
+      default:
+        console.warn(`⚠️  Unknown change type: ${change.type}`);
+        return false;
+    }
+  }
+
+  /**
+   * Process rule violation change
+   *
+   * @param {object} change - Change object
+   * @returns {boolean} True if processed successfully
+   */
+  processRuleViolation(change) {
+    const { rule_id, scene_number } = change;
+
+    if (!rule_id) {
+      throw new Error('Rule violation change missing rule_id');
+    }
+
+    const rule = this.getRule(rule_id);
+    if (!rule) {
+      console.warn(`⚠️  Rule not found: ${rule_id} - skipping violation`);
+      return false;
+    }
+
+    // Check if rule already violated at or above threshold
+    if (rule.violated && rule.violation_count >= rule.violation_threshold) {
+      console.log(`   ℹ️  Rule ${rule_id} already at threshold - skipping`);
+      return true; // Not an error, just already violated
+    }
+
+    // Apply violation with consequences
+    this.violateRule(rule_id, scene_number);
+    console.log(`   ✅ Rule violation applied: ${rule_id}`);
+
+    return true;
+  }
+
+  /**
+   * Process entity capability change
+   *
+   * @param {object} change - Change object
+   * @returns {boolean} True if processed successfully
+   */
+  processEntityCapability(change) {
+    const { capability, value } = change;
+
+    if (!capability) {
+      throw new Error('Entity capability change missing capability name');
+    }
+
+    // Check if capability already exists with same value
+    const currentValue = this.state.canonical_state.entity_capabilities[capability];
+    if (currentValue === value) {
+      console.log(`   ℹ️  Capability ${capability} already set to ${value} - skipping`);
+      return true;
+    }
+
+    this.addEntityCapability(capability, value);
+    console.log(`   ✅ Entity capability applied: ${capability} = ${value}`);
+
+    return true;
+  }
+
+  /**
+   * Process irreversible flag change
+   *
+   * @param {object} change - Change object
+   * @returns {boolean} True if processed successfully
+   */
+  processIrreversibleFlag(change) {
+    const { flag, value } = change;
+
+    if (!flag) {
+      throw new Error('Irreversible flag change missing flag name');
+    }
+
+    // Check if flag already exists with same value
+    const currentValue = this.state.canonical_state.irreversible_flags[flag];
+    if (currentValue === value) {
+      console.log(`   ℹ️  Flag ${flag} already set to ${value} - skipping`);
+      return true;
+    }
+
+    // Irreversible flags should not be reversed
+    if (currentValue !== undefined && currentValue !== value) {
+      console.warn(`   ⚠️  Attempting to change irreversible flag ${flag} from ${currentValue} to ${value}`);
+      // Still apply but log warning
+    }
+
+    this.setIrreversibleFlag(flag, value);
+    console.log(`   ✅ Irreversible flag applied: ${flag} = ${value}`);
+
+    return true;
+  }
+
+  /**
+   * Process world fact change
+   *
+   * @param {object} change - Change object
+   * @returns {boolean} True if processed successfully
+   */
+  processWorldFact(change) {
+    const { key, value } = change;
+
+    if (!key) {
+      throw new Error('World fact change missing key');
+    }
+
+    this.addWorldFact(key, value);
+    console.log(`   ✅ World fact applied: ${key} = ${value}`);
+
+    return true;
+  }
+
+  /**
+   * Process timeline commitment change
+   *
+   * @param {object} change - Change object
+   * @returns {boolean} True if processed successfully
+   */
+  processTimelineCommitment(change) {
+    const { commitment } = change;
+
+    if (!commitment) {
+      throw new Error('Timeline commitment change missing commitment text');
+    }
+
+    // Check if commitment already exists
+    const existingCommitments = this.state.canonical_state.world_facts.timeline_commitments || [];
+    const exists = existingCommitments.some(tc => {
+      const existingText = typeof tc === 'string' ? tc : tc.commitment;
+      return existingText === commitment;
+    });
+
+    if (exists) {
+      console.log(`   ℹ️  Timeline commitment already exists - skipping`);
+      return true;
+    }
+
+    this.addTimelineCommitment(commitment);
+    console.log(`   ✅ Timeline commitment applied: ${commitment.substring(0, 60)}...`);
+
+    return true;
+  }
 }
 
 module.exports = StateManager;
