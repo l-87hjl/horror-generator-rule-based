@@ -10,6 +10,7 @@ const RevisionAuditor = require('../audit/revisionAuditor');
 const StoryRefiner = require('./storyRefiner');
 const OutputPackager = require('../utils/outputPackager');
 const StateManager = require('./stateManager');
+const ConstraintEnforcer = require('../audit/constraintEnforcer');
 
 class Orchestrator {
   constructor(apiKey, config = {}) {
@@ -60,6 +61,10 @@ class Orchestrator {
     sessionData.stateManager = stateManager;
     console.log(`✅ State initialized: ${stateManager.getSummary().total_rules} rule slots created\n`);
 
+    // Initialize constraint enforcer (Phase 4)
+    const constraintEnforcer = new ConstraintEnforcer(stateManager);
+    sessionData.constraintEnforcer = constraintEnforcer;
+
     try {
       // Step 1: Generate initial story
       console.log('📝 Step 1: Generating initial story...');
@@ -73,6 +78,25 @@ class Orchestrator {
       });
 
       console.log(`✅ Initial story generated (${generationResult.story.split(/\s+/).length} words)\n`);
+
+      // Step 1.5: Enforce hard constraints (Phase 4)
+      console.log('🔒 Step 1.5: Enforcing hard constraints...');
+      const constraintCheck = constraintEnforcer.enforceConstraints(sessionData.initialStory);
+      sessionData.constraintCheck = constraintCheck;
+
+      if (!constraintCheck.passed) {
+        console.warn(`⚠️  Constraint violations detected:`);
+        console.warn(`   Total violations: ${constraintCheck.summary.totalViolations}`);
+        console.warn(`   Critical: ${constraintCheck.summary.criticalViolations}`);
+        console.warn(`   Major: ${constraintCheck.summary.majorViolations}`);
+        console.warn(`   See output logs for details\n`);
+
+        // Add to error log
+        sessionData.errorLog.constraintViolations = {
+          summary: constraintCheck.summary,
+          details: constraintCheck.results
+        };
+      }
 
       // Step 2: Perform revision audit
       console.log('🔍 Step 2: Performing revision audit...');

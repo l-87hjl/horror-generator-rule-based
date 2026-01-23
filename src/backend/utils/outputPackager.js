@@ -359,6 +359,69 @@ class OutputPackager {
       output += `- Needs Revision: ${auditReport.scores.needsRevision ? 'Yes' : 'No'}\n\n`;
     }
 
+    // Phase 4: Hard Constraint Check Results
+    if (errorLog && errorLog.constraintViolations) {
+      const cv = errorLog.constraintViolations;
+      output += `## Hard Constraint Check Results (Phase 4)\n\n`;
+      output += `**Overall Status:** ${cv.summary.totalViolations === 0 ? '✅ PASS' : '⚠️ FAIL'}\n\n`;
+      output += `- Total Violations: ${cv.summary.totalViolations}\n`;
+      output += `- Critical Violations: ${cv.summary.criticalViolations}\n`;
+      output += `- Major Violations: ${cv.summary.majorViolations}\n\n`;
+
+      // No-Retcon Rule
+      output += `### No-Retcon Rule: ${cv.details.noRetcon.passed ? 'PASS' : 'FAIL'}\n\n`;
+      if (cv.details.noRetcon.violations && cv.details.noRetcon.violations.length > 0) {
+        output += `**Violations Detected:** ${cv.details.noRetcon.violations.length}\n\n`;
+        for (const violation of cv.details.noRetcon.violations) {
+          output += `- **Type:** ${violation.type}\n`;
+          output += `  - **Severity:** ${violation.severity}\n`;
+          output += `  - **Description:** ${violation.description}\n`;
+          if (violation.detected_text) {
+            output += `  - **Detected:** "${violation.detected_text}"\n`;
+          }
+          output += `\n`;
+        }
+      } else {
+        output += `No violations detected.\n\n`;
+      }
+
+      // Knowledge Consistency
+      output += `### Knowledge Consistency: ${cv.details.knowledge.passed ? 'PASS' : 'FAIL'}\n\n`;
+      if (cv.details.knowledge.issues && cv.details.knowledge.issues.length > 0) {
+        output += `**Issues Detected:** ${cv.details.knowledge.issues.length}\n\n`;
+        for (const issue of cv.details.knowledge.issues) {
+          output += `- **Type:** ${issue.type}\n`;
+          output += `  - **Severity:** ${issue.severity}\n`;
+          output += `  - **Description:** ${issue.description}\n`;
+          if (issue.suggestion) {
+            output += `  - **Suggestion:** ${issue.suggestion}\n`;
+          }
+          output += `\n`;
+        }
+      } else {
+        output += `No issues detected.\n\n`;
+      }
+
+      // Escalation Traceability
+      output += `### Escalation Traceability: ${cv.details.escalation.passed ? 'PASS' : 'FAIL'}\n\n`;
+      if (cv.details.escalation.untracedEscalations && cv.details.escalation.untracedEscalations.length > 0) {
+        output += `**Untraced Escalations:** ${cv.details.escalation.untracedEscalations.length}\n\n`;
+        for (const escalation of cv.details.escalation.untracedEscalations) {
+          output += `- **Type:** ${escalation.type}\n`;
+          output += `  - **Severity:** ${escalation.severity}\n`;
+          output += `  - **Description:** ${escalation.description}\n`;
+          if (escalation.suggestion) {
+            output += `  - **Suggestion:** ${escalation.suggestion}\n`;
+          }
+          output += `\n`;
+        }
+      } else {
+        output += `No untraced escalations detected.\n\n`;
+      }
+
+      output += `---\n\n`;
+    }
+
     if (errorLog && errorLog.apiCalls) {
       output += `## API Call Metadata\n\n`;
       for (const call of errorLog.apiCalls) {
@@ -389,11 +452,25 @@ class OutputPackager {
       auditReport,
       changeLog,
       metadata,
-      stateManager
+      stateManager,
+      constraintCheck
     } = sessionData;
 
     // Get state summary if available
     const stateSummary = stateManager ? stateManager.getSummary() : null;
+
+    // Get constraint check summary if available (Phase 4)
+    const constraintSummary = constraintCheck ? {
+      passed: constraintCheck.passed,
+      total_violations: constraintCheck.summary.totalViolations,
+      critical_violations: constraintCheck.summary.criticalViolations,
+      major_violations: constraintCheck.summary.majorViolations,
+      checks: {
+        no_retcon: constraintCheck.results.noRetcon.passed,
+        knowledge_consistency: constraintCheck.results.knowledge.passed,
+        escalation_traceability: constraintCheck.results.escalation.passed
+      }
+    } : null;
 
     return {
       generation_date: new Date().toISOString(),
@@ -413,9 +490,10 @@ class OutputPackager {
       quality_grade: auditReport ? auditReport.scores.grade : null,
       api_usage: metadata ? metadata.apiUsage : null,
       state_tracking: stateSummary,
+      constraint_enforcement: constraintSummary,
       version: {
         templates: 'v1',
-        system: '1.1.0'
+        system: '1.2.0'
       }
     };
   }
