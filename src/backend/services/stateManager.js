@@ -61,7 +61,8 @@ class StateManager {
   }
 
   /**
-   * Initialize empty rule slots
+   * Initialize empty rule slots (basic structure)
+   * For structured rules, use setStructuredRules() instead
    *
    * @param {number} ruleCount - Number of rule slots to create
    * @returns {array} Array of empty rule objects
@@ -72,15 +73,46 @@ class StateManager {
       rules.push({
         rule_id: `rule_${i}`,
         text: null,
-        type: null, // boundary|temporal|behavioral|object_interaction
+        type: null, // boundary|temporal|behavioral|object_interaction|procedural
         active: false,
         violated: false,
         violation_count: 0,
         established_at_scene: null,
-        notes: ''
+        notes: '',
+
+        // Structured rule fields (Phase 3)
+        violation_threshold: 1,
+        consequences: {
+          immediate: [],
+          delayed: [],
+          permanent: []
+        },
+        reversibility: {
+          reversible: false,
+          reversal_conditions: null
+        },
+        dependencies: {
+          requires_rules: [],
+          enables_rules: [],
+          conflicts_with: []
+        }
       });
     }
     return rules;
+  }
+
+  /**
+   * Replace rules array with structured rules from RuleBuilder
+   *
+   * @param {array} structuredRules - Array of structured rule objects
+   */
+  setStructuredRules(structuredRules) {
+    if (!this.state) {
+      throw new Error('State not initialized. Call initializeState() first.');
+    }
+
+    this.state.canonical_state.rules = structuredRules;
+    this.updateTimestamp();
   }
 
   /**
@@ -165,7 +197,7 @@ class StateManager {
   }
 
   /**
-   * Mark rule as violated
+   * Mark rule as violated (basic version - Phase 1)
    *
    * @param {string} ruleId - Rule identifier
    * @param {number} sceneNumber - Scene where violation occurred
@@ -184,6 +216,318 @@ class StateManager {
 
     this.updateTimestamp();
     return rule;
+  }
+
+  // ============================================================================
+  // PHASE 3: STRUCTURED RULE METHODS
+  // ============================================================================
+
+  /**
+   * Get rule by ID
+   *
+   * @param {string} ruleId - Rule identifier
+   * @returns {object|null} Rule object or null
+   */
+  getRule(ruleId) {
+    if (!this.state) return null;
+    return this.state.canonical_state.rules.find(r => r.rule_id === ruleId) || null;
+  }
+
+  /**
+   * Check if rule can be violated (hasn't exceeded threshold)
+   *
+   * @param {string} ruleId - Rule identifier
+   * @returns {boolean} True if rule can be violated
+   */
+  canRuleBeViolated(ruleId) {
+    const rule = this.getRule(ruleId);
+    if (!rule) return false;
+
+    return rule.violation_count < rule.violation_threshold;
+  }
+
+  /**
+   * Get rule status with full context
+   *
+   * @param {string} ruleId - Rule identifier
+   * @returns {object} Rule status object
+   */
+  getRuleStatus(ruleId) {
+    const rule = this.getRule(ruleId);
+    if (!rule) {
+      return { exists: false };
+    }
+
+    return {
+      exists: true,
+      active: rule.active,
+      violated: rule.violated,
+      violation_count: rule.violation_count,
+      violation_threshold: rule.violation_threshold,
+      can_be_violated: this.canRuleBeViolated(ruleId),
+      reversible: rule.reversibility.reversible
+    };
+  }
+
+  /**
+   * Activate a rule (make it enforceable)
+   *
+   * @param {string} ruleId - Rule identifier
+   * @returns {object} Updated rule
+   */
+  activateRule(ruleId) {
+    const rule = this.getRule(ruleId);
+    if (!rule) {
+      throw new Error(`Rule not found: ${ruleId}`);
+    }
+
+    rule.active = true;
+    this.updateTimestamp();
+
+    console.log(`✅ Rule activated: ${ruleId}`);
+    return rule;
+  }
+
+  /**
+   * Deactivate a rule (make it non-enforceable)
+   *
+   * @param {string} ruleId - Rule identifier
+   * @returns {object} Updated rule
+   */
+  deactivateRule(ruleId) {
+    const rule = this.getRule(ruleId);
+    if (!rule) {
+      throw new Error(`Rule not found: ${ruleId}`);
+    }
+
+    rule.active = false;
+    this.updateTimestamp();
+
+    console.log(`⚠️  Rule deactivated: ${ruleId}`);
+    return rule;
+  }
+
+  /**
+   * Violate rule with automatic consequence application (Phase 3)
+   *
+   * @param {string} ruleId - Rule identifier
+   * @param {number} sceneNumber - Scene where violation occurred
+   * @returns {object} Violation result with applied consequences
+   */
+  violateRule(ruleId, sceneNumber = null) {
+    const rule = this.getRule(ruleId);
+    if (!rule) {
+      throw new Error(`Rule not found: ${ruleId}`);
+    }
+
+    // Check if rule can be violated
+    if (!this.canRuleBeViolated(ruleId)) {
+      console.warn(`⚠️  Rule ${ruleId} already at violation threshold (${rule.violation_count}/${rule.violation_threshold})`);
+    }
+
+    // Mark rule as violated
+    rule.violated = true;
+    rule.violation_count += 1;
+
+    // Add to irreversible violations log
+    this.state.canonical_state.irreversible_flags.violations.push({
+      rule_id: ruleId,
+      scene: sceneNumber,
+      timestamp: new Date().toISOString(),
+      violation_number: rule.violation_count
+    });
+
+    const appliedConsequences = {
+      immediate: [],
+      delayed: [],
+      permanent: []
+    };
+
+    // Apply immediate consequences
+    if (rule.consequences.immediate) {
+      rule.consequences.immediate.forEach(consequence => {
+        try {
+          this.applyConsequence(consequence);
+          appliedConsequences.immediate.push(consequence);
+        } catch (error) {
+          console.error(`Failed to apply immediate consequence "${consequence}":`, error.message);
+        }
+      });
+    }
+
+    // Apply permanent consequences
+    if (rule.consequences.permanent) {
+      rule.consequences.permanent.forEach(consequence => {
+        try {
+          this.applyConsequence(consequence);
+          appliedConsequences.permanent.push(consequence);
+        } catch (error) {
+          console.error(`Failed to apply permanent consequence "${consequence}":`, error.message);
+        }
+      });
+    }
+
+    // Check and activate dependent rules
+    if (rule.dependencies.enables_rules && rule.dependencies.enables_rules.length > 0) {
+      rule.dependencies.enables_rules.forEach(enabledRuleId => {
+        try {
+          this.checkRuleDependencies(enabledRuleId);
+        } catch (error) {
+          console.error(`Failed to check dependencies for "${enabledRuleId}":`, error.message);
+        }
+      });
+    }
+
+    // Log the violation and consequences
+    const deltaChanges = [
+      `Rule ${ruleId} violated (${rule.violation_count}/${rule.violation_threshold})`
+    ];
+
+    if (appliedConsequences.immediate.length > 0) {
+      deltaChanges.push(`Immediate consequences: ${appliedConsequences.immediate.join(', ')}`);
+    }
+
+    if (appliedConsequences.permanent.length > 0) {
+      deltaChanges.push(`Permanent consequences: ${appliedConsequences.permanent.join(', ')}`);
+    }
+
+    this.logDelta(sceneNumber, deltaChanges);
+    this.updateTimestamp();
+
+    console.log(`🚨 Rule violated: ${ruleId} (count: ${rule.violation_count}/${rule.violation_threshold})`);
+    console.log(`   Applied consequences:`, appliedConsequences);
+
+    return {
+      rule,
+      appliedConsequences,
+      violation_count: rule.violation_count,
+      at_threshold: rule.violation_count >= rule.violation_threshold
+    };
+  }
+
+  /**
+   * Apply a consequence to state
+   *
+   * @param {string} consequence - Consequence identifier
+   * @returns {boolean} True if applied successfully
+   */
+  applyConsequence(consequence) {
+    // Consequence type mapping
+    const consequenceHandlers = {
+      // Protection/Safety
+      'protection_void': () => {
+        this.setIrreversibleFlag('protected', false);
+        console.log('   → Protection voided');
+      },
+      'boundary_breached': () => {
+        this.setIrreversibleFlag('boundary_intact', false);
+        console.log('   → Boundary breached');
+      },
+
+      // Entity capabilities
+      'entity_can_reach_vehicle': () => {
+        this.addEntityCapability('can_enter_vehicle', true);
+        console.log('   → Entity can now enter vehicle');
+      },
+      'entity_can_imitate_narrator': () => {
+        this.addEntityCapability('can_imitate_narrator', true);
+        console.log('   → Entity can imitate narrator');
+      },
+      'entity_knows_name': () => {
+        this.addEntityCapability('knows_narrator_name', true);
+        console.log('   → Entity knows narrator name');
+      },
+      'attention_drawn': () => {
+        this.addEntityCapability('aware_of_narrator', true);
+        console.log('   → Entity attention drawn');
+      },
+
+      // Contamination/Marking
+      'marked_for_collection': () => {
+        this.setIrreversibleFlag('marked', true);
+        this.state.canonical_state.irreversible_flags.contamination_level += 1;
+        console.log('   → Narrator marked for collection');
+      },
+      'marked_for_observation': () => {
+        this.setIrreversibleFlag('under_observation', true);
+        this.state.canonical_state.irreversible_flags.contamination_level += 1;
+        console.log('   → Narrator under observation');
+      },
+      'contamination_spread': () => {
+        this.state.canonical_state.irreversible_flags.contamination_level += 2;
+        console.log('   → Contamination spread');
+      },
+
+      // Temporal/Reality
+      'temporal_slip': () => {
+        this.addWorldFact('temporal_stability', 'unstable');
+        console.log('   → Temporal stability compromised');
+      },
+      'reality_degradation': () => {
+        this.setIrreversibleFlag('reality_stable', false);
+        console.log('   → Reality degrading');
+      },
+
+      // Procedural
+      'procedure_disrupted': () => {
+        this.addWorldFact('procedure_intact', false);
+        console.log('   → Procedure disrupted');
+      },
+      'system_instability': () => {
+        this.setIrreversibleFlag('system_stable', false);
+        console.log('   → System unstable');
+      },
+
+      // Object state
+      'object_state_changed': () => {
+        this.addWorldFact('object_pristine', false);
+        console.log('   → Object state changed');
+      },
+      'interaction_irreversible': () => {
+        this.setIrreversibleFlag('can_undo_interaction', false);
+        console.log('   → Interaction irreversible');
+      }
+    };
+
+    const handler = consequenceHandlers[consequence];
+    if (handler) {
+      handler();
+      return true;
+    } else {
+      console.warn(`⚠️  Unknown consequence: ${consequence}`);
+      return false;
+    }
+  }
+
+  /**
+   * Check rule dependencies and activate rules if requirements met
+   *
+   * @param {string} ruleId - Rule to check
+   * @returns {boolean} True if rule can be activated
+   */
+  checkRuleDependencies(ruleId) {
+    const rule = this.getRule(ruleId);
+    if (!rule) {
+      throw new Error(`Rule not found: ${ruleId}`);
+    }
+
+    // Check if all required rules are violated
+    if (rule.dependencies.requires_rules && rule.dependencies.requires_rules.length > 0) {
+      const allRequirementsMet = rule.dependencies.requires_rules.every(requiredRuleId => {
+        const requiredRule = this.getRule(requiredRuleId);
+        return requiredRule && requiredRule.violated;
+      });
+
+      if (allRequirementsMet && !rule.active) {
+        this.activateRule(ruleId);
+        this.logDelta(null, [`Rule ${ruleId} activated (dependencies met)`]);
+        return true;
+      }
+
+      return allRequirementsMet;
+    }
+
+    return true; // No dependencies
   }
 
   /**

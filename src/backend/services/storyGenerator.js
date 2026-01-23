@@ -5,20 +5,30 @@
 
 const ClaudeClient = require('../api/claudeClient');
 const TemplateLoader = require('../utils/templateLoader');
+const RuleBuilder = require('./ruleBuilder');
 const path = require('path');
 
 class StoryGenerator {
   constructor(apiKey, config = {}) {
     this.claudeClient = new ClaudeClient(apiKey, config);
     this.templateLoader = new TemplateLoader();
+    this.ruleBuilder = new RuleBuilder();
   }
 
   /**
    * Generate complete story with all parameters
+   *
+   * @param {object} parameters - Generation parameters
+   * @param {object} stateManager - StateManager instance (optional, Phase 3)
    */
-  async generateStory(parameters) {
+  async generateStory(parameters, stateManager = null) {
     // Validate parameters
     this.validateParameters(parameters);
+
+    // Phase 3: Initialize structured rules if stateManager provided
+    if (stateManager) {
+      this.initializeStructuredRules(parameters, stateManager);
+    }
 
     // Load necessary templates
     const templates = await this.loadTemplates(parameters);
@@ -40,6 +50,46 @@ class StoryGenerator {
         timestamp: new Date().toISOString()
       }
     };
+  }
+
+  /**
+   * Initialize structured rules using RuleBuilder (Phase 3)
+   *
+   * @param {object} parameters - Generation parameters
+   * @param {object} stateManager - StateManager instance
+   */
+  initializeStructuredRules(parameters, stateManager) {
+    const ruleCount = parameters.ruleCount || 7;
+
+    console.log(`🔧 Building structured rules (${ruleCount} rules)...`);
+
+    // Build structured rule set with theme-specific customizations
+    const structuredRules = this.ruleBuilder.buildRuleSet(ruleCount, {
+      thematicFocus: parameters.thematicFocus,
+      location: parameters.location,
+      violationResponse: parameters.violationResponse
+    });
+
+    // Set up rule dependencies (example: last rule enables terminal phase)
+    if (ruleCount >= 7) {
+      // Example: Rule 7 violation enables a terminal consequence
+      const rule7 = structuredRules[6]; // rule_7
+      rule7.consequences.permanent.push('system_instability', 'boundary_breached');
+      rule7.violation_threshold = 1; // Single violation triggers end
+    }
+
+    // Replace basic rules with structured rules
+    stateManager.setStructuredRules(structuredRules);
+
+    console.log(`✅ Structured rules initialized:`);
+    console.log(`   Total rules: ${structuredRules.length}`);
+
+    const typeCount = {};
+    structuredRules.forEach(rule => {
+      typeCount[rule.type] = (typeCount[rule.type] || 0) + 1;
+    });
+
+    console.log(`   Type distribution:`, typeCount);
   }
 
   /**

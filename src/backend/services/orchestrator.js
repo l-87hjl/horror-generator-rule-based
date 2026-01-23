@@ -63,7 +63,7 @@ class Orchestrator {
     try {
       // Step 1: Generate initial story
       console.log('📝 Step 1: Generating initial story...');
-      const generationResult = await this.storyGenerator.generateStory(userInput);
+      const generationResult = await this.storyGenerator.generateStory(userInput, stateManager);
       sessionData.initialStory = generationResult.story;
       sessionData.errorLog.apiCalls.push({
         type: 'Initial Generation',
