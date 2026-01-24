@@ -37,9 +37,12 @@ A web-based procedural horror story generator that creates, refines, and validat
 - **Render Dashboard**: https://dashboard.render.com
 
 ### Documentation
-- **[SESSIONS.md](SESSIONS.md)** - ⭐ **READ THIS FIRST** - Guide for Claude instances
 - **[CHANGELOG.md](CHANGELOG.md)** - Complete history of changes and solutions
-- **[runs/](runs/)** - Session artifacts and debugging materials
+- **[PRIVACY.md](PRIVACY.md)** - ⚠️ **IMPORTANT** - Data protection policy (for contributors)
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Deployment instructions
+- **[SECURITY_IMPLEMENTATION.md](SECURITY_IMPLEMENTATION.md)** - Password protection details
+
+**Note**: Internal documentation (SESSIONS.md, runs/ contents) is protected and not publicly accessible.
 
 ## 🔐 Access Information
 

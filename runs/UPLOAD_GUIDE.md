@@ -1,5 +1,9 @@
 # File Upload Guide
 
+⚠️ **PRIVACY NOTE**: The contents of this `runs/` folder (artifacts, errors, logs, screenshots, PDFs, etc.) are **protected and NOT committed to git**. Only this guide and README.md files within runs/ are public. All your uploaded content remains private. See [PRIVACY.md](../PRIVACY.md) for complete data protection policy.
+
+---
+
 ## Where to Upload Your Files
 
 ### For This Session (Run 001)

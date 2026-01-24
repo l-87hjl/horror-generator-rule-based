@@ -72,6 +72,49 @@ data_private/**/*.txt
 # === END COPYRIGHT PROTECTION ===
 # ============================================================================
 
+# ============================================================================
+# === PRIVACY & WORK PRODUCT PROTECTION ===
+# Protect user testing data, run artifacts, and sensitive documentation
+# ============================================================================
+
+# Session documentation - For Claude instances only, not public
+SESSIONS.md
+SESSIONS_INTERNAL.md
+CLAUDE_NOTES.md
+
+# Runs folder - Contains user testing data, work product, and sensitive info
+# Block everything in runs/ first
+runs/*
+
+# Then allow only specific documentation files
+!runs/UPLOAD_GUIDE.md
+!runs/*/
+!runs/*/README.md
+
+# Block all content within run folders except README.md
+runs/*/artifacts/
+runs/*/errors/
+runs/*/notes.md
+runs/*/summary.md
+runs/**/*.md
+!runs/*/README.md
+!runs/UPLOAD_GUIDE.md
+
+# Block all media and documents in runs
+runs/**/*.png
+runs/**/*.jpg
+runs/**/*.jpeg
+runs/**/*.gif
+runs/**/*.pdf
+runs/**/*.doc
+runs/**/*.docx
+runs/**/*.txt
+runs/**/*.zip
+
+# ============================================================================
+# === END PRIVACY PROTECTION ===
+# ============================================================================
+
 # Environment and secrets
 config/.env
 .env
