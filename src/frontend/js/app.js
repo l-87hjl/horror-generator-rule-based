@@ -133,6 +133,27 @@ function setupEventListeners() {
     if (viewLogsBtn) {
         viewLogsBtn.addEventListener('click', handleViewLogs);
     }
+
+    // Debug logs buttons (multiple locations)
+    const downloadDebugBtn = document.getElementById('download-debug-btn');
+    if (downloadDebugBtn) {
+        downloadDebugBtn.addEventListener('click', handleDownloadDebugLogs);
+    }
+
+    const progressDebugBtn = document.getElementById('progress-debug-btn');
+    if (progressDebugBtn) {
+        progressDebugBtn.addEventListener('click', handleDownloadDebugLogs);
+    }
+
+    const errorDebugBtn = document.getElementById('error-debug-btn');
+    if (errorDebugBtn) {
+        errorDebugBtn.addEventListener('click', handleDownloadDebugLogs);
+    }
+
+    const errorPartialBtn = document.getElementById('error-partial-btn');
+    if (errorPartialBtn) {
+        errorPartialBtn.addEventListener('click', handleDownloadPartial);
+    }
 }
 
 /**
@@ -572,6 +593,151 @@ function showError(message) {
 
     document.getElementById('error-text').textContent = message;
     showSection('error-section');
+}
+
+/**
+ * Handle download debug logs button click
+ */
+async function handleDownloadDebugLogs() {
+    const sessionId = currentSessionId;
+    if (!sessionId) {
+        // Try to get session ID from the job
+        if (currentJobId) {
+            try {
+                const resp = await fetch(`/api/status/${currentJobId}`);
+                const data = await safeReadJson(resp);
+                if (data.sessionId) {
+                    currentSessionId = data.sessionId;
+                }
+            } catch (e) {
+                console.error('Failed to get session ID:', e);
+            }
+        }
+    }
+
+    if (!currentSessionId) {
+        alert('No session ID available. Debug logs may not exist for this session.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/session/${currentSessionId}/debug-logs`);
+        const data = await safeReadJson(response);
+
+        if (!data.success) {
+            alert('Failed to fetch debug logs: ' + (data.error || 'Unknown error'));
+            return;
+        }
+
+        // Show a modal or list of available files
+        const downloads = data.downloads || [];
+        if (downloads.length === 0) {
+            alert('No debug logs available for this session yet.');
+            return;
+        }
+
+        // Create download links for each file
+        let message = 'Available debug files:\n\n';
+        for (const file of downloads) {
+            message += `- ${file.name} (${file.type})\n`;
+        }
+        message += '\nClick OK to download the main debug log (text format).';
+
+        if (confirm(message)) {
+            // Download the text log
+            const txtLog = downloads.find(d => d.name === 'debug_log.txt');
+            if (txtLog) {
+                window.location.href = txtLog.url;
+            } else if (downloads.length > 0) {
+                window.location.href = downloads[0].url;
+            }
+        }
+
+    } catch (error) {
+        console.error('Error fetching debug logs:', error);
+        alert('Failed to fetch debug logs: ' + error.message);
+    }
+}
+
+/**
+ * Handle download partial output button click
+ */
+async function handleDownloadPartial() {
+    const sessionId = currentSessionId;
+    if (!sessionId) {
+        // Try to get session ID from the job
+        if (currentJobId) {
+            try {
+                const resp = await fetch(`/api/status/${currentJobId}`);
+                const data = await safeReadJson(resp);
+                if (data.sessionId) {
+                    currentSessionId = data.sessionId;
+                }
+            } catch (e) {
+                console.error('Failed to get session ID:', e);
+            }
+        }
+    }
+
+    if (!currentSessionId) {
+        alert('No session ID available. Partial output may not exist for this session.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/session/${currentSessionId}/partial`);
+        const data = await safeReadJson(response);
+
+        if (!data.success) {
+            alert('Failed to fetch partial output: ' + (data.error || 'Unknown error'));
+            return;
+        }
+
+        // Display partial output information
+        const artifacts = data.artifacts || {};
+        let message = 'Partial Output Available:\n\n';
+
+        if (artifacts.chunks) {
+            message += `Chunks: ${artifacts.chunks.count} chunks (${artifacts.chunks.totalWords} words)\n`;
+        }
+
+        if (artifacts.state) {
+            message += `State: Session state saved\n`;
+        }
+
+        if (artifacts.logSummary) {
+            message += `Logs: ${artifacts.logSummary.totalEntries} log entries\n`;
+            if (artifacts.logSummary.errors && artifacts.logSummary.errors.length > 0) {
+                message += `Errors: ${artifacts.logSummary.errors.length} errors recorded\n`;
+            }
+        }
+
+        if (data.errorReport) {
+            message += `\nError Report: ${data.errorReport.message || 'Available'}\n`;
+        }
+
+        message += '\nAvailable downloads:';
+        message += '\n- Debug Logs: /api/session/' + currentSessionId + '/debug-logs';
+        message += '\n- Raw Chunks: /api/session/' + currentSessionId + '/raw-chunks';
+
+        if (data.recovery && data.recovery.suggestions) {
+            message += '\n\nRecovery Suggestions:';
+            for (const suggestion of data.recovery.suggestions) {
+                message += '\n- ' + suggestion;
+            }
+        }
+
+        alert(message);
+
+        // Offer to download the ZIP package if it exists
+        if (confirm('Would you like to attempt to download the partial package?')) {
+            window.location.href = data.downloads.fullPackage;
+        }
+
+    } catch (error) {
+        console.error('Error fetching partial output:', error);
+        alert('Failed to fetch partial output: ' + error.message);
+    }
 }
 
 /**

@@ -7,8 +7,11 @@ require('dotenv').config({ path: './config/.env' });
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs').promises;
 const basicAuth = require('express-basic-auth');
 const Orchestrator = require('./src/backend/services/orchestrator');
+const DebugLogger = require('./src/utils/debugLogger');
+const ChunkPersistence = require('./src/generators/chunkPersistence');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -305,6 +308,293 @@ app.get('/api/download/:id', (req, res) => {
 });
 
 /**
+ * GET /api/session/:sessionId/debug-logs
+ * Returns JSON with download URLs for debug logs and related files
+ * Works even if generation is incomplete/failed
+ */
+app.get('/api/session/:sessionId/debug-logs', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const sessionDir = path.join(__dirname, 'generated', sessionId);
+
+    // Check if session directory exists
+    try {
+      await fs.access(sessionDir);
+    } catch {
+      return res.status(404).json({
+        success: false,
+        error: 'Session not found'
+      });
+    }
+
+    const files = {};
+    const downloads = [];
+
+    // Check for debug log files
+    const debugJsonlPath = path.join(sessionDir, 'debug_log.jsonl');
+    const debugTxtPath = path.join(sessionDir, 'debug_log.txt');
+    const stateFilePath = path.join(sessionDir, 'session_state.json');
+    const manifestPath = path.join(sessionDir, 'chunk_manifest.json');
+    const chunksDir = path.join(sessionDir, 'chunks');
+
+    // Check each file
+    try {
+      await fs.access(debugJsonlPath);
+      files.debugLogJsonl = `/api/session/${sessionId}/file/debug_log.jsonl`;
+      downloads.push({ name: 'debug_log.jsonl', type: 'jsonl', url: files.debugLogJsonl });
+    } catch { /* File doesn't exist */ }
+
+    try {
+      await fs.access(debugTxtPath);
+      files.debugLogTxt = `/api/session/${sessionId}/file/debug_log.txt`;
+      downloads.push({ name: 'debug_log.txt', type: 'text', url: files.debugLogTxt });
+    } catch { /* File doesn't exist */ }
+
+    try {
+      await fs.access(stateFilePath);
+      files.sessionState = `/api/session/${sessionId}/file/session_state.json`;
+      downloads.push({ name: 'session_state.json', type: 'json', url: files.sessionState });
+    } catch { /* File doesn't exist */ }
+
+    try {
+      await fs.access(manifestPath);
+      files.chunkManifest = `/api/session/${sessionId}/file/chunk_manifest.json`;
+      downloads.push({ name: 'chunk_manifest.json', type: 'json', url: files.chunkManifest });
+    } catch { /* File doesn't exist */ }
+
+    // List chunk files
+    try {
+      const chunkFiles = await fs.readdir(chunksDir);
+      const chunks = chunkFiles
+        .filter(f => f.startsWith('chunk_') && f.endsWith('.txt'))
+        .sort()
+        .map(f => ({
+          name: f,
+          type: 'chunk',
+          url: `/api/session/${sessionId}/file/chunks/${f}`
+        }));
+
+      files.chunks = chunks.map(c => c.url);
+      downloads.push(...chunks);
+    } catch { /* Chunks directory doesn't exist */ }
+
+    // Try to get log summary if debug logger was used
+    let summary = null;
+    try {
+      const debugLogger = new DebugLogger(sessionId);
+      summary = await debugLogger.getSummary();
+    } catch { /* No summary available */ }
+
+    res.json({
+      success: true,
+      sessionId,
+      files,
+      downloads,
+      summary,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error fetching debug logs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/session/:sessionId/file/*
+ * Download individual files from a session
+ */
+app.get('/api/session/:sessionId/file/*', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const filePath = req.params[0]; // Everything after /file/
+
+    // Security: Prevent directory traversal
+    if (filePath.includes('..') || filePath.startsWith('/')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid file path'
+      });
+    }
+
+    const fullPath = path.join(__dirname, 'generated', sessionId, filePath);
+
+    // Verify the file is within the session directory
+    const sessionDir = path.join(__dirname, 'generated', sessionId);
+    if (!fullPath.startsWith(sessionDir)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+
+    // Check if file exists
+    try {
+      await fs.access(fullPath);
+    } catch {
+      return res.status(404).json({
+        success: false,
+        error: 'File not found'
+      });
+    }
+
+    // Determine content type
+    const ext = path.extname(filePath).toLowerCase();
+    const contentTypes = {
+      '.json': 'application/json',
+      '.jsonl': 'application/jsonl',
+      '.txt': 'text/plain',
+      '.md': 'text/markdown'
+    };
+
+    res.setHeader('Content-Type', contentTypes[ext] || 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${path.basename(filePath)}"`);
+
+    const content = await fs.readFile(fullPath);
+    res.send(content);
+
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/session/:sessionId/raw-chunks
+ * Returns array of chunk files for inspection before assembly
+ */
+app.get('/api/session/:sessionId/raw-chunks', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const chunkPersistence = new ChunkPersistence();
+
+    const result = await chunkPersistence.loadAllChunks(sessionId);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        error: result.error || 'Failed to load chunks'
+      });
+    }
+
+    res.json({
+      success: true,
+      sessionId,
+      totalChunks: result.totalChunks,
+      totalWords: result.totalWords,
+      chunks: result.chunks.map(c => ({
+        filename: c.filename,
+        wordCount: c.wordCount,
+        metadata: c.metadata,
+        url: `/api/session/${sessionId}/file/chunks/${c.filename}`,
+        preview: c.text.substring(0, 200) + '...'
+      }))
+    });
+
+  } catch (error) {
+    console.error('Error fetching raw chunks:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/session/:sessionId/partial
+ * Returns partial output for failed/incomplete generations
+ */
+app.get('/api/session/:sessionId/partial', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const sessionDir = path.join(__dirname, 'generated', sessionId);
+
+    // Check if session directory exists
+    try {
+      await fs.access(sessionDir);
+    } catch {
+      return res.status(404).json({
+        success: false,
+        error: 'Session not found'
+      });
+    }
+
+    const partialOutput = {
+      sessionId,
+      status: 'partial',
+      timestamp: new Date().toISOString(),
+      artifacts: {}
+    };
+
+    // Load chunks if available
+    const chunkPersistence = new ChunkPersistence();
+    const chunksResult = await chunkPersistence.loadAllChunks(sessionId);
+    if (chunksResult.success && chunksResult.chunks.length > 0) {
+      partialOutput.artifacts.chunks = {
+        count: chunksResult.totalChunks,
+        totalWords: chunksResult.totalWords,
+        files: chunksResult.chunks.map(c => c.filename)
+      };
+    }
+
+    // Load state if available
+    const stateFilePath = path.join(sessionDir, 'session_state.json');
+    try {
+      const stateContent = await fs.readFile(stateFilePath, 'utf-8');
+      partialOutput.artifacts.state = JSON.parse(stateContent);
+    } catch { /* State file doesn't exist */ }
+
+    // Load debug logs summary if available
+    try {
+      const debugLogger = new DebugLogger(sessionId);
+      partialOutput.artifacts.logSummary = await debugLogger.getSummary();
+    } catch { /* No logs */ }
+
+    // Load error report if exists
+    const errorReportPath = path.join(sessionDir, 'error_report.json');
+    try {
+      const errorContent = await fs.readFile(errorReportPath, 'utf-8');
+      partialOutput.errorReport = JSON.parse(errorContent);
+    } catch { /* No error report */ }
+
+    // Provide download URLs
+    partialOutput.downloads = {
+      debugLogs: `/api/session/${sessionId}/debug-logs`,
+      rawChunks: `/api/session/${sessionId}/raw-chunks`,
+      fullPackage: `/api/download/${sessionId}`
+    };
+
+    // Suggest recovery steps
+    partialOutput.recovery = {
+      message: 'Partial generation output available',
+      suggestions: [
+        'Download debug logs to identify failure point',
+        'Check raw chunks for successfully generated content',
+        'Review session state for tracking information'
+      ]
+    };
+
+    res.json({
+      success: true,
+      ...partialOutput
+    });
+
+  } catch (error) {
+    console.error('Error fetching partial output:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
  * GET /api/health
  * Health check endpoint
  */
@@ -312,7 +602,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.1.0'
   });
 });
 

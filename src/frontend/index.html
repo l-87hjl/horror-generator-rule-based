@@ -192,9 +192,12 @@
                     <p class="progress-note">This may take 5-10 minutes. Please do not close this window.</p>
                     <div class="progress-actions">
                         <button id="view-logs-btn" class="btn btn-secondary" style="margin-top: 15px;">
-                            📋 View Debug Logs
+                            📋 View Render Dashboard Logs
                         </button>
-                        <p class="debug-note">If generation stalls, view logs for diagnostics</p>
+                        <button id="progress-debug-btn" class="btn btn-secondary" style="margin-top: 15px;">
+                            📥 Download Debug Logs
+                        </button>
+                        <p class="debug-note">If generation stalls, download debug logs or view Render dashboard for diagnostics</p>
                     </div>
                 </div>
             </section>
@@ -234,6 +237,9 @@
                     <button id="download-btn" class="btn btn-primary">
                         Download Story Package (ZIP)
                     </button>
+                    <button id="download-debug-btn" class="btn btn-secondary">
+                        Download Debug Logs
+                    </button>
                     <button id="new-story-btn" class="btn btn-secondary">
                         Generate Another Story
                     </button>
@@ -246,9 +252,20 @@
                 <div class="error-message">
                     <p id="error-text"></p>
                 </div>
-                <button id="retry-btn" class="btn btn-secondary">
-                    Try Again
-                </button>
+                <div class="error-actions">
+                    <button id="retry-btn" class="btn btn-secondary">
+                        Try Again
+                    </button>
+                    <button id="error-debug-btn" class="btn btn-secondary">
+                        📥 Download Debug Logs
+                    </button>
+                    <button id="error-partial-btn" class="btn btn-secondary">
+                        📦 Download Partial Output
+                    </button>
+                </div>
+                <p class="error-note" style="margin-top: 10px; color: #888;">
+                    Debug logs can help diagnose the issue. Partial output may include chunks generated before failure.
+                </p>
             </section>
         </main>
 
