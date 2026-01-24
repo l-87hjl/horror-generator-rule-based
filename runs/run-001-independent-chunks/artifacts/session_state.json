@@ -1,0 +1,256 @@
+{
+  "session_id": "session-2026-01-24T04-25-51-5cbd3267",
+  "canonical_state": {
+    "rules": [
+      {
+        "rule_id": "rule_1",
+        "text": null,
+        "type": "boundary",
+        "active": false,
+        "violated": false,
+        "violation_count": 0,
+        "established_at_scene": null,
+        "notes": "",
+        "violation_threshold": 1,
+        "consequences": {
+          "immediate": [
+            "protection_void"
+          ],
+          "delayed": [],
+          "permanent": [
+            "boundary_breached"
+          ]
+        },
+        "reversibility": {
+          "reversible": false,
+          "reversal_conditions": null
+        },
+        "dependencies": {
+          "requires_rules": [],
+          "enables_rules": [],
+          "conflicts_with": []
+        }
+      },
+      {
+        "rule_id": "rule_2",
+        "text": null,
+        "type": "boundary",
+        "active": false,
+        "violated": false,
+        "violation_count": 0,
+        "established_at_scene": null,
+        "notes": "",
+        "violation_threshold": 1,
+        "consequences": {
+          "immediate": [
+            "protection_void"
+          ],
+          "delayed": [],
+          "permanent": [
+            "boundary_breached"
+          ]
+        },
+        "reversibility": {
+          "reversible": false,
+          "reversal_conditions": null
+        },
+        "dependencies": {
+          "requires_rules": [],
+          "enables_rules": [],
+          "conflicts_with": []
+        }
+      },
+      {
+        "rule_id": "rule_3",
+        "text": null,
+        "type": "temporal",
+        "active": false,
+        "violated": false,
+        "violation_count": 0,
+        "established_at_scene": null,
+        "notes": "",
+        "violation_threshold": 3,
+        "consequences": {
+          "immediate": [
+            "temporal_slip"
+          ],
+          "delayed": [
+            "reality_degradation"
+          ],
+          "permanent": []
+        },
+        "reversibility": {
+          "reversible": true,
+          "reversal_conditions": null
+        },
+        "dependencies": {
+          "requires_rules": [],
+          "enables_rules": [],
+          "conflicts_with": []
+        }
+      },
+      {
+        "rule_id": "rule_4",
+        "text": null,
+        "type": "behavioral",
+        "active": false,
+        "violated": false,
+        "violation_count": 0,
+        "established_at_scene": null,
+        "notes": "",
+        "violation_threshold": 2,
+        "consequences": {
+          "immediate": [
+            "attention_drawn"
+          ],
+          "delayed": [
+            "marked_for_observation"
+          ],
+          "permanent": []
+        },
+        "reversibility": {
+          "reversible": false,
+          "reversal_conditions": null
+        },
+        "dependencies": {
+          "requires_rules": [],
+          "enables_rules": [],
+          "conflicts_with": []
+        }
+      },
+      {
+        "rule_id": "rule_5",
+        "text": null,
+        "type": "behavioral",
+        "active": false,
+        "violated": false,
+        "violation_count": 0,
+        "established_at_scene": null,
+        "notes": "",
+        "violation_threshold": 2,
+        "consequences": {
+          "immediate": [
+            "attention_drawn"
+          ],
+          "delayed": [
+            "marked_for_observation"
+          ],
+          "permanent": []
+        },
+        "reversibility": {
+          "reversible": false,
+          "reversal_conditions": null
+        },
+        "dependencies": {
+          "requires_rules": [],
+          "enables_rules": [],
+          "conflicts_with": []
+        }
+      },
+      {
+        "rule_id": "rule_6",
+        "text": null,
+        "type": "object_interaction",
+        "active": false,
+        "violated": false,
+        "violation_count": 0,
+        "established_at_scene": null,
+        "notes": "",
+        "violation_threshold": 1,
+        "consequences": {
+          "immediate": [
+            "object_state_changed"
+          ],
+          "delayed": [],
+          "permanent": [
+            "interaction_irreversible"
+          ]
+        },
+        "reversibility": {
+          "reversible": false,
+          "reversal_conditions": null
+        },
+        "dependencies": {
+          "requires_rules": [],
+          "enables_rules": [],
+          "conflicts_with": []
+        }
+      },
+      {
+        "rule_id": "rule_7",
+        "text": null,
+        "type": "procedural",
+        "active": false,
+        "violated": false,
+        "violation_count": 0,
+        "established_at_scene": null,
+        "notes": "",
+        "violation_threshold": 1,
+        "consequences": {
+          "immediate": [
+            "procedure_disrupted"
+          ],
+          "delayed": [
+            "system_instability"
+          ],
+          "permanent": [
+            "system_instability",
+            "boundary_breached"
+          ]
+        },
+        "reversibility": {
+          "reversible": true,
+          "reversal_conditions": null
+        },
+        "dependencies": {
+          "requires_rules": [],
+          "enables_rules": [],
+          "conflicts_with": []
+        }
+      }
+    ],
+    "entity_capabilities": {},
+    "world_facts": {
+      "location": "roadside_motel",
+      "custom_location": null,
+      "time_anchor": null,
+      "timeline_commitments": []
+    },
+    "irreversible_flags": {
+      "bound_to_system": false,
+      "contamination_level": 0,
+      "violations": []
+    },
+    "thematic_focus": "complicity_and_participation",
+    "entry_condition": "proxy",
+    "discovery_method": "oral_tradition"
+  },
+  "narrative_delta_log": [
+    {
+      "scene": 0,
+      "timestamp": "2026-01-24T04:25:51.737Z",
+      "changes": [
+        "State tracking initialized",
+        "Rule slots created: 7"
+      ]
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-01-24T04:25:51.737Z",
+    "updated_at": "2026-01-24T04:25:51.738Z",
+    "user_parameters": {
+      "wordCount": 10000,
+      "ruleCount": 7,
+      "location": "roadside_motel",
+      "customLocation": "",
+      "entryCondition": "proxy",
+      "discoveryMethod": "oral_tradition",
+      "completenessPattern": "complete_but_seemingly_arbitrary",
+      "violationResponse": "reclassification",
+      "endingType": "conditional_exit",
+      "thematicFocus": "complicity_and_participation",
+      "escalationStyle": "psychological",
+      "ambiguityLevel": "moderate"
+    }
+  }
+}
