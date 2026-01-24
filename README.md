@@ -1,8 +1,45 @@
 # Rule-Based Horror Story Generator
 
-**Status:** 🔒 Production Stable with Authentication | **Version:** 1.1.0 | **Live:** [l-horror.onrender.com](https://l-horror.onrender.com)
+**Status:** ⚠️ Partial Production (see below) | **Version:** 2.0.0 | **Live:** [l-horror.onrender.com](https://l-horror.onrender.com)
 
 A web-based procedural horror story generator that creates, refines, and validates rule-based horror stories following established structural principles. The system maintains strict rule integrity, performs post-generation revision audits, and outputs comprehensive documentation of the entire process.
+
+## 📊 Current Status (Run 001)
+
+### ✅ Working
+- **Single-call generation**: Stories ≤12,000 words work reliably
+- **Small chunked generation**: Stories ~6,000 words work (slower but functional)
+- **Independent chunk files**: Chunks saved immediately to disk (v2.0 architecture)
+- **Partial recovery**: Artifacts available even on failure
+- **Client-side cost estimation**: Real-time token/cost calculator
+- **Progress tracking**: Session ID, elapsed time, stall warnings
+
+### ⚠️ Partial
+- **Large chunked generation**: Stories >12,000 words may timeout (10min limit)
+- **Refinement step**: Takes 6-8 minutes for complex stories, sometimes exceeds timeout
+
+### ❌ Known Issues
+- Refinement can timeout on stories with many structural issues
+- State extraction sometimes fails (now non-blocking, doesn't stop generation)
+- Render free tier cold starts add 50+ seconds
+
+**Recommendation**: For best results, keep stories ≤10,000 words.
+
+## 🔗 Important Links
+
+### Repository
+- **GitHub**: https://github.com/l-87hjl/rule-based-horror
+- **Branch**: `claude/horror-story-generator-DTAVx`
+- **Raw files**: `https://raw.githubusercontent.com/l-87hjl/rule-based-horror/main/PATH/TO/FILE`
+
+### Production
+- **App URL**: https://l-horror.onrender.com
+- **Render Dashboard**: https://dashboard.render.com
+
+### Documentation
+- **[SESSIONS.md](SESSIONS.md)** - ⭐ **READ THIS FIRST** - Guide for Claude instances
+- **[CHANGELOG.md](CHANGELOG.md)** - Complete history of changes and solutions
+- **[runs/](runs/)** - Session artifacts and debugging materials
 
 ## 🔐 Access Information
 
@@ -20,9 +57,10 @@ When you visit the site, your browser will prompt for credentials. Enter the use
 
 1. Click "Start Generating Stories"
 2. Configure your story parameters
-3. Click "Generate Story"
-4. Wait 3-5 minutes (progress shown)
-5. Download complete documentation package (ZIP)
+3. **Recommended**: Keep word count ≤10,000 for best results
+4. Click "Generate Story"
+5. Wait 5-10 minutes (progress shown, warnings if taking too long)
+6. Download complete documentation package (ZIP)
 
 ## 📖 Documentation
 
