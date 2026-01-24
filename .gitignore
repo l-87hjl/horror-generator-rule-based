@@ -81,6 +81,8 @@ data_private/**/*.txt
 SESSIONS.md
 SESSIONS_INTERNAL.md
 CLAUDE_NOTES.md
+CHATGPT_INTEGRATION.md
+FromClaudeCodeToClaude.md
 
 # Runs folder - Contains user testing data, work product, and sensitive info
 # Block everything in runs/ first

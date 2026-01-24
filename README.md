@@ -1,6 +1,6 @@
 # Rule-Based Horror Story Generator
 
-**Status:** ⚠️ Partial Production (see below) | **Version:** 2.0.0 | **Live:** [l-horror.onrender.com](https://l-horror.onrender.com)
+**Status:** ⚠️ Partial Production (see below) | **Version:** 2.0.0 | **Live:** [rule-based-horror.onrender.com/generator](https://rule-based-horror.onrender.com/generator/)
 
 A web-based procedural horror story generator that creates, refines, and validates rule-based horror stories following established structural principles. The system maintains strict rule integrity, performs post-generation revision audits, and outputs comprehensive documentation of the entire process.
 
@@ -33,7 +33,7 @@ A web-based procedural horror story generator that creates, refines, and validat
 - **Raw files**: `https://raw.githubusercontent.com/l-87hjl/rule-based-horror/main/PATH/TO/FILE`
 
 ### Production
-- **App URL**: https://l-horror.onrender.com
+- **App URL**: https://rule-based-horror.onrender.com/generator/
 - **Render Dashboard**: https://dashboard.render.com
 
 ### Documentation
@@ -48,7 +48,7 @@ A web-based procedural horror story generator that creates, refines, and validat
 
 **The application is password-protected to prevent unauthorized use.**
 
-- **URL:** [https://l-horror.onrender.com](https://l-horror.onrender.com)
+- **URL:** [https://rule-based-horror.onrender.com/generator/](https://rule-based-horror.onrender.com/generator/)
 - **Username:** `admin`
 - **Password:** Contact the administrator for access
 
