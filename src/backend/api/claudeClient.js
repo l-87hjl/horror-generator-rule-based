@@ -13,7 +13,7 @@ class ClaudeClient {
 
     this.client = new Anthropic({
       apiKey: apiKey,
-      timeout: config.timeout || 300000, // 5 minutes default timeout
+      timeout: config.timeout || 600000, // 10 minutes default timeout
       maxRetries: config.maxRetries || 2  // Retry failed requests
     });
 
@@ -21,7 +21,7 @@ class ClaudeClient {
       model: config.model || 'claude-sonnet-4-5-20250929',
       maxTokens: config.maxTokens || 16000,
       temperature: config.temperature || 0.7,
-      timeout: config.timeout || 300000
+      timeout: config.timeout || 600000
     };
 
     console.log(`✅ Claude client initialized with ${this.config.timeout/1000}s timeout, ${this.config.maxTokens} max tokens`);

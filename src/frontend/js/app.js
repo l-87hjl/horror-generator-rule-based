@@ -372,8 +372,8 @@ function startElapsedTimeTracker(startTime) {
 
     if (!elapsedEl) return;
 
-    const STALL_WARNING_TIME = 180000; // 3 minutes
-    const STALL_ERROR_TIME = 300000;   // 5 minutes
+    const STALL_WARNING_TIME = 300000; // 5 minutes
+    const STALL_ERROR_TIME = 600000;   // 10 minutes
 
     // Update elapsed time every second
     const elapsedInterval = setInterval(() => {
@@ -388,7 +388,7 @@ function startElapsedTimeTracker(startTime) {
         const progressStatus = document.getElementById('progress-status');
         if (elapsedMs > STALL_ERROR_TIME) {
             if (progressStatus) {
-                progressStatus.textContent = '⚠️ Generation appears to be stalled (5+ min). See logs or retry.';
+                progressStatus.textContent = '⚠️ Generation appears to be stalled (10+ min). See logs or retry.';
                 progressStatus.style.color = '#ff4444';
             }
         } else if (elapsedMs > STALL_WARNING_TIME) {
