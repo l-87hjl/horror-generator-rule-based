@@ -28,6 +28,20 @@ class ClaudeClient {
   }
 
   /**
+   * Helper: Wrap API call with manual timeout enforcement
+   * Uses Promise.race to ensure timeout is respected even if SDK timeout fails
+   */
+  async withTimeout(promise, operationName) {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`${operationName} exceeded ${this.config.timeout/1000}s timeout`));
+      }, this.config.timeout);
+    });
+
+    return Promise.race([promise, timeoutPromise]);
+  }
+
+  /**
    * Generate story from prompt
    */
   async generateStory(systemPrompt, userPrompt, options = {}) {
@@ -35,11 +49,10 @@ class ClaudeClient {
     console.log('🤖 Calling Claude API for story generation...');
 
     try {
-      const response = await this.client.messages.create({
+      const apiCall = this.client.messages.create({
         model: options.model || this.config.model,
         max_tokens: options.maxTokens || this.config.maxTokens,
         temperature: options.temperature !== undefined ? options.temperature : this.config.temperature,
-        timeout: this.config.timeout, // Explicit per-request timeout
         system: systemPrompt,
         messages: [
           {
@@ -48,6 +61,8 @@ class ClaudeClient {
           }
         ]
       });
+
+      const response = await this.withTimeout(apiCall, 'Story generation');
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`✅ Claude API response received (${duration}s)`);
@@ -90,11 +105,10 @@ class ClaudeClient {
     const userPrompt = this.buildAuditUserPrompt(story);
 
     try {
-      const response = await this.client.messages.create({
+      const apiCall = this.client.messages.create({
         model: options.model || this.config.model,
         max_tokens: options.maxTokens || 8000,
         temperature: 0.3, // Lower temperature for more consistent analysis
-        timeout: this.config.timeout, // Explicit per-request timeout
         system: systemPrompt,
         messages: [
           {
@@ -103,6 +117,8 @@ class ClaudeClient {
           }
         ]
       });
+
+      const response = await this.withTimeout(apiCall, 'Audit');
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`✅ Audit response received (${duration}s)`);
@@ -139,11 +155,10 @@ class ClaudeClient {
     const userPrompt = this.buildRefinementUserPrompt(originalStory, auditReport);
 
     try {
-      const response = await this.client.messages.create({
+      const apiCall = this.client.messages.create({
         model: options.model || this.config.model,
         max_tokens: options.maxTokens || 16000,
         temperature: 0.5, // Moderate temperature for targeted fixes
-        timeout: this.config.timeout, // Explicit per-request timeout
         system: systemPrompt,
         messages: [
           {
@@ -152,6 +167,8 @@ class ClaudeClient {
           }
         ]
       });
+
+      const response = await this.withTimeout(apiCall, 'Refinement');
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`✅ Refinement response received (${duration}s)`);
