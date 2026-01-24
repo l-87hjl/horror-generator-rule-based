@@ -100,6 +100,12 @@ runs/**/*.md
 !runs/*/README.md
 !runs/UPLOAD_GUIDE.md
 
+# Block any other subdirectories in runs/ (like successful_run_x03, etc.)
+runs/*/*/
+runs/**/**/*.json
+runs/**/**/*.txt
+runs/**/**/*.md
+
 # Block all media and documents in runs
 runs/**/*.png
 runs/**/*.jpg
@@ -110,6 +116,7 @@ runs/**/*.doc
 runs/**/*.docx
 runs/**/*.txt
 runs/**/*.zip
+runs/**/*.json
 
 # ============================================================================
 # === END PRIVACY PROTECTION ===
