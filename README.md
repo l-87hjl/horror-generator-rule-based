@@ -39,10 +39,11 @@ A web-based procedural horror story generator that creates, refines, and validat
 ### Documentation
 - **[CHANGELOG.md](CHANGELOG.md)** - Complete history of changes and solutions
 - **[PRIVACY.md](PRIVACY.md)** - ⚠️ **IMPORTANT** - Data protection policy (for contributors)
+- **[SESSIONS_GUIDE.md](SESSIONS_GUIDE.md)** - Claude Code workflow and session management guide
+- **[CHATGPT_GUIDE.md](CHATGPT_GUIDE.md)** - How to handle ChatGPT integration and suggestions
+- **[CLAUDE_API_LINKS.md](CLAUDE_API_LINKS.md)** - Quick reference links for Claude API
 - **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Deployment instructions
 - **[SECURITY_IMPLEMENTATION.md](SECURITY_IMPLEMENTATION.md)** - Password protection details
-
-**Note**: Internal documentation (SESSIONS.md, runs/ contents) is protected and not publicly accessible.
 
 ## 🔐 Access Information
 

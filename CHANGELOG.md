@@ -11,6 +11,49 @@ All notable changes to the Rule-Based Horror Story Generator project.
 
 ---
 
+## [Run 002] - Session Management Documentation - 2026-01-24
+
+### Changes
+1. **Created Public Documentation Guides**
+   - Created `SESSIONS_GUIDE.md` - Claude Code workflow and session management
+   - Created `CHATGPT_GUIDE.md` - How to handle ChatGPT integration and suggestions
+   - Created `CLAUDE_API_LINKS.md` - Quick reference links for Claude API
+   - All three files committed to git (accessible to all Claude instances)
+
+2. **Updated README.md**
+   - Added links to new guide files in Documentation section
+   - Guides are now publicly accessible and version-controlled
+
+### Issues Discovered
+1. **Local-Only Files Not Accessible**: Initial versions (SESSIONS.md, CHATGPT_INTEGRATION.md, FromClaudeCodeToClaude.md) were in .gitignore
+   - Files existed only in session's local filesystem
+   - User could not access or download them
+   - Future Claude Code instances would not have access
+   - Files would disappear when session ended
+
+### Solutions Implemented
+1. **Created Committed Versions**: Created public versions with slightly different names
+   - SESSIONS.md → SESSIONS_GUIDE.md (committed)
+   - CHATGPT_INTEGRATION.md → CHATGPT_GUIDE.md (committed)
+   - FromClaudeCodeToClaude.md → CLAUDE_API_LINKS.md (committed)
+   - All files now in git, accessible to everyone
+   - Future Claude Code instances can read them
+   - User can share with Claude API
+
+### Status
+- ✅ **Working**: All documentation guides now accessible and version-controlled
+
+### Files Created
+- SESSIONS_GUIDE.md
+- CHATGPT_GUIDE.md
+- CLAUDE_API_LINKS.md
+
+### Files Modified
+- README.md
+- CHANGELOG.md (this file)
+
+---
+
 ## [Run 001] - Independent Chunks Architecture - 2026-01-24
 
 ### Changes
