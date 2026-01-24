@@ -1,0 +1,14 @@
+{
+  "wordCount": 13333,
+  "ruleCount": 7,
+  "location": "fire_watch_tower",
+  "customLocation": "",
+  "entryCondition": "new_hire",
+  "discoveryMethod": "explicit_list",
+  "completenessPattern": "complete_but_misunderstood",
+  "violationResponse": "accumulation_threshold",
+  "endingType": "true_exit_with_cost",
+  "thematicFocus": "surveillance_and_visibility",
+  "escalationStyle": "mixed",
+  "ambiguityLevel": "moderate"
+}
