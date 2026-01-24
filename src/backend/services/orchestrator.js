@@ -86,15 +86,18 @@ class Orchestrator {
           this.storyGenerator.getClaudeClient()
         );
 
-        // Generate story in chunks with state tracking
+        // Generate story in chunks with independent file storage
         const chunkedResult = await checkpointManager.generateChunkedStory(
           userInput,
-          userInput.wordCount
+          userInput.wordCount,
+          sessionId  // Pass sessionId for file organization
         );
 
         sessionData.initialStory = chunkedResult.story;
+        sessionData.fullStoryPath = chunkedResult.fullStoryPath;
         sessionData.chunks = chunkedResult.chunks;
-        sessionData.checkpoints = chunkedResult.checkpoints;
+        sessionData.chunksDirectory = chunkedResult.chunksDirectory;
+        sessionData.manifestPath = chunkedResult.manifestPath;
         sessionData.chunkMetadata = chunkedResult.metadata;
 
         // Log API calls for each chunk

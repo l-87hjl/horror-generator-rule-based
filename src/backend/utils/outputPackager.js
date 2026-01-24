@@ -229,6 +229,33 @@ class OutputPackager {
       console.log(`   Added ${sessionData.checkpoints.length} checkpoint files`);
     }
 
+    // 0.6. Chunk Files (MD) - Phase 2 Independent Files Architecture
+    if (sessionData.chunks && sessionData.chunks.length > 0) {
+      console.log(`   Processing ${sessionData.chunks.length} chunk files...`);
+
+      for (const chunk of sessionData.chunks) {
+        if (chunk.filePath) {
+          // Chunk file already exists, add to files list
+          files.push({
+            name: `chunks/${chunk.filename}`,
+            path: chunk.filePath
+          });
+        }
+      }
+
+      console.log(`   Added ${sessionData.chunks.length} chunk files`);
+    }
+
+    // 0.7. Chunk Manifest (JSON) - Phase 2
+    if (sessionData.manifestPath) {
+      console.log(`   Adding chunk manifest...`);
+      files.push({
+        name: 'chunk_manifest.json',
+        path: sessionData.manifestPath
+      });
+      console.log(`   Added chunk manifest`);
+    }
+
     // 1. User Input Log (JSON)
     const userInputPath = path.join(sessionDir, '00_user_input_log.json');
     await fs.writeFile(userInputPath, JSON.stringify(userInput, null, 2));

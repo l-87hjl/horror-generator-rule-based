@@ -1,8 +1,11 @@
 /**
  * Checkpoint Manager Service
- * Manages chunked story generation with state delta extraction
+ * Manages chunked story generation with independent file storage
  * Enables unlimited story length by breaking generation into ~1500 word chunks
  */
+
+const fs = require('fs').promises;
+const path = require('path');
 
 class CheckpointManager {
   constructor(storyGenerator, stateManager, claudeClient) {
@@ -13,30 +16,38 @@ class CheckpointManager {
     // Checkpoint configuration
     this.CHUNK_SIZE = 1500; // Target words per chunk
     this.MAX_RETRIES = 3;
-    this.CHECKPOINT_VERSION = '1.0.0';
+    this.CHECKPOINT_VERSION = '2.0.0'; // Updated to reflect new architecture
   }
 
   /**
-   * Generate a complete story in chunks with state tracking
+   * Generate a complete story in chunks with independent file storage
    *
    * @param {object} userParams - User story parameters
    * @param {number} targetWordCount - Total desired story length
-   * @returns {object} Complete story data with checkpoints
+   * @param {string} sessionId - Session ID for file organization
+   * @returns {object} Complete story data with chunk metadata
    */
-  async generateChunkedStory(userParams, targetWordCount) {
+  async generateChunkedStory(userParams, targetWordCount, sessionId) {
+    console.log(`\n[CHECKPOINT] ============================================`);
+    console.log(`[CHECKPOINT] Starting Chunked Generation (Independent Files)`);
+    console.log(`[CHECKPOINT] ============================================`);
+    console.log(`[CHECKPOINT] Session ID: ${sessionId}`);
+    console.log(`[CHECKPOINT] Target word count: ${targetWordCount}`);
+    console.log(`[CHECKPOINT] Chunk size: ${this.CHUNK_SIZE} words`);
+    console.log(`[CHECKPOINT] Architecture: Independent chunk files (v2.0)`);
+    console.log(`[CHECKPOINT] User params:`, JSON.stringify(userParams, null, 2));
+    console.log(`[CHECKPOINT] ============================================\n`);
+
+    // Create chunks directory
+    const chunksDir = path.join(process.cwd(), 'generated', sessionId, 'chunks');
+    console.log(`[CHECKPOINT] Creating chunks directory: ${chunksDir}`);
+    await fs.mkdir(chunksDir, { recursive: true });
+    console.log(`[CHECKPOINT] ✅ Chunks directory created\n`);
+
     const chunks = [];
-    const checkpoints = [];
     let currentWordCount = 0;
     let sceneNumber = 1;
     let previousProse = '';
-
-    console.log(`\n[CHECKPOINT] ============================================`);
-    console.log(`[CHECKPOINT] Starting Chunked Generation`);
-    console.log(`[CHECKPOINT] ============================================`);
-    console.log(`[CHECKPOINT] Target word count: ${targetWordCount}`);
-    console.log(`[CHECKPOINT] Chunk size: ${this.CHUNK_SIZE} words`);
-    console.log(`[CHECKPOINT] User params:`, JSON.stringify(userParams, null, 2));
-    console.log(`[CHECKPOINT] ============================================\n`);
 
     while (currentWordCount < targetWordCount) {
       const remainingWords = targetWordCount - currentWordCount;
@@ -52,7 +63,7 @@ class CheckpointManager {
       console.log(`[CHECKPOINT] Is final chunk: ${remainingWords <= this.CHUNK_SIZE}`);
 
       try {
-        // Step 1: Generate chunk
+        // STEP 1: Generate chunk
         console.log(`\n[CHECKPOINT] STEP 1: Generating chunk ${sceneNumber}...`);
         const chunkStartTime = Date.now();
 
@@ -70,49 +81,47 @@ class CheckpointManager {
         console.log(`[CHECKPOINT]    Word count: ${chunk.wordCount} words`);
         console.log(`[CHECKPOINT]    Prose preview: "${chunk.prose.substring(0, 100)}..."`);
 
-        chunks.push(chunk);
+        // STEP 2: Save chunk immediately to file (CRITICAL - don't block on state)
+        console.log(`\n[CHECKPOINT] STEP 2: Saving chunk ${sceneNumber} to file...`);
+        const chunkFilename = `chunk_${sceneNumber.toString().padStart(2, '0')}.md`;
+        const chunkPath = path.join(chunksDir, chunkFilename);
+
+        await fs.writeFile(chunkPath, chunk.prose, 'utf-8');
+        console.log(`[CHECKPOINT] ✅ Chunk ${sceneNumber} saved to: ${chunkPath}`);
+
+        // Store chunk metadata
+        const chunkMetadata = {
+          sceneNumber: sceneNumber,
+          prose: chunk.prose,
+          filePath: chunkPath,
+          filename: chunkFilename,
+          wordCount: chunk.wordCount,
+          timestamp: new Date().toISOString()
+        };
+
+        chunks.push(chunkMetadata);
         currentWordCount += chunk.wordCount;
         previousProse = chunk.prose;
 
-        // Step 2: Extract state delta
-        console.log(`\n[CHECKPOINT] STEP 2: Extracting state delta for scene ${sceneNumber}...`);
-        const deltaStartTime = Date.now();
+        console.log(`[CHECKPOINT]    Chunks saved so far: ${chunks.length}`);
+        console.log(`[CHECKPOINT]    Total words so far: ${currentWordCount}`);
 
-        const deltaText = await this.extractStateDelta(chunk.prose, sceneNumber);
+        // STEP 3: Optional state extraction (non-blocking on failure)
+        console.log(`\n[CHECKPOINT] STEP 3: Optional state extraction...`);
+        try {
+          const deltaStartTime = Date.now();
+          const deltaText = await this.extractStateDelta(chunk.prose, sceneNumber);
+          const deltaDuration = ((Date.now() - deltaStartTime) / 1000).toFixed(1);
 
-        const deltaDuration = ((Date.now() - deltaStartTime) / 1000).toFixed(1);
-        console.log(`[CHECKPOINT] ✅ Delta extracted in ${deltaDuration}s`);
-        console.log(`[CHECKPOINT]    Raw delta text length: ${deltaText.length} chars`);
-        console.log(`[CHECKPOINT]    Delta preview: "${deltaText.substring(0, 150)}..."`);
+          const delta = this.parseDelta(deltaText, sceneNumber);
+          this.stateManager.applyDelta(sceneNumber, delta);
 
-        // Step 3: Parse and apply delta
-        console.log(`\n[CHECKPOINT] STEP 3: Parsing delta...`);
-        const delta = this.parseDelta(deltaText, sceneNumber);
-        console.log(`[CHECKPOINT] ✅ Parsed delta: ${delta.changes.length} changes`);
-        console.log(`[CHECKPOINT]    Changes:`, JSON.stringify(delta.changes, null, 2));
-
-        console.log(`\n[CHECKPOINT] STEP 4: Applying delta to state manager...`);
-        const stateBeforeApply = JSON.stringify(this.stateManager.getState());
-        this.stateManager.applyDelta(sceneNumber, delta);
-        const stateAfterApply = JSON.stringify(this.stateManager.getState());
-        console.log(`[CHECKPOINT] ✅ State updated`);
-        console.log(`[CHECKPOINT]    State changed: ${stateBeforeApply !== stateAfterApply}`);
-
-        // Step 4: Save checkpoint
-        console.log(`\n[CHECKPOINT] STEP 5: Creating checkpoint ${sceneNumber}...`);
-        const checkpoint = {
-          scene_number: sceneNumber,
-          chunk_word_count: chunk.wordCount,
-          total_word_count: currentWordCount,
-          state_delta: delta,
-          state_snapshot: this.stateManager.getState().canonical_state,
-          timestamp: new Date().toISOString(),
-          version: this.CHECKPOINT_VERSION
-        };
-
-        checkpoints.push(checkpoint);
-        console.log(`[CHECKPOINT] ✅ Checkpoint ${sceneNumber} saved to memory`);
-        console.log(`[CHECKPOINT]    Total checkpoints: ${checkpoints.length}`);
+          console.log(`[CHECKPOINT] ✅ State extracted and applied (${deltaDuration}s)`);
+          console.log(`[CHECKPOINT]    Changes: ${delta.changes.length}`);
+        } catch (stateError) {
+          console.warn(`[CHECKPOINT] ⚠️  State extraction failed (non-critical):`, stateError.message);
+          console.warn(`[CHECKPOINT]    Continuing without state tracking for this chunk`);
+        }
 
         sceneNumber++;
 
@@ -135,17 +144,20 @@ class CheckpointManager {
         console.error(`[CHECKPOINT] Error message: ${error.message}`);
         console.error(`[CHECKPOINT] Error type: ${error.constructor.name}`);
         console.error(`[CHECKPOINT] Current progress: ${currentWordCount}/${targetWordCount} words`);
-        console.error(`[CHECKPOINT] Chunks completed: ${chunks.length}`);
+        console.error(`[CHECKPOINT] Chunks saved: ${chunks.length}`);
+        console.error(`[CHECKPOINT] Chunks directory: ${chunksDir}`);
         console.error(`[CHECKPOINT] Full error stack:`);
         console.error(error.stack);
         console.error(`[CHECKPOINT] ============================================`);
+
+        // Still throw error, but chunks are already saved
         throw error;
       }
     }
 
     // Combine all chunks into final story
     console.log(`\n[CHECKPOINT] ============================================`);
-    console.log(`[CHECKPOINT] Combining chunks into final story...`);
+    console.log(`[CHECKPOINT] Combining chunks into full story...`);
     console.log(`[CHECKPOINT]    Total chunks: ${chunks.length}`);
 
     const fullStory = chunks.map(c => c.prose).join('\n\n---\n\n');
@@ -153,20 +165,53 @@ class CheckpointManager {
     console.log(`[CHECKPOINT]    Full story length: ${fullStory.length} chars`);
     console.log(`[CHECKPOINT]    Full story word count: ${this.countWords(fullStory)}`);
 
+    // Save combined story
+    const fullStoryPath = path.join(process.cwd(), 'generated', sessionId, 'full_story.md');
+    console.log(`[CHECKPOINT] Saving combined story to: ${fullStoryPath}`);
+    await fs.writeFile(fullStoryPath, fullStory, 'utf-8');
+    console.log(`[CHECKPOINT] ✅ Full story saved`);
+
+    // Create chunk manifest
+    const manifest = {
+      version: this.CHECKPOINT_VERSION,
+      session_id: sessionId,
+      total_chunks: chunks.length,
+      total_words: currentWordCount,
+      target_words: targetWordCount,
+      timestamp: new Date().toISOString(),
+      chunks: chunks.map(c => ({
+        scene: c.sceneNumber,
+        filename: c.filename,
+        word_count: c.wordCount,
+        timestamp: c.timestamp
+      }))
+    };
+
+    const manifestPath = path.join(process.cwd(), 'generated', sessionId, 'chunk_manifest.json');
+    console.log(`[CHECKPOINT] Saving chunk manifest to: ${manifestPath}`);
+    await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+    console.log(`[CHECKPOINT] ✅ Chunk manifest saved`);
+
     console.log(`\n[CHECKPOINT] ============================================`);
     console.log(`[CHECKPOINT] ✅✅✅ Chunked Generation Complete ✅✅✅`);
     console.log(`[CHECKPOINT] ============================================`);
+    console.log(`[CHECKPOINT] Session ID: ${sessionId}`);
     console.log(`[CHECKPOINT] Total chunks generated: ${chunks.length}`);
     console.log(`[CHECKPOINT] Total words: ${currentWordCount}`);
     console.log(`[CHECKPOINT] Target words: ${targetWordCount}`);
-    console.log(`[CHECKPOINT] Checkpoints created: ${checkpoints.length}`);
-    console.log(`[CHECKPOINT] Checkpoint version: ${this.CHECKPOINT_VERSION}`);
+    console.log(`[CHECKPOINT] Chunks directory: ${chunksDir}`);
+    console.log(`[CHECKPOINT] Full story: ${fullStoryPath}`);
+    console.log(`[CHECKPOINT] Manifest: ${manifestPath}`);
+    console.log(`[CHECKPOINT] Architecture version: ${this.CHECKPOINT_VERSION}`);
     console.log(`[CHECKPOINT] ============================================\n`);
 
     return {
       story: fullStory,
-      chunks,
-      checkpoints,
+      fullStoryPath: fullStoryPath,
+      chunks: chunks,
+      chunksDirectory: chunksDir,
+      manifestPath: manifestPath,
+      sessionId: sessionId,
       metadata: {
         total_chunks: chunks.length,
         total_words: currentWordCount,
