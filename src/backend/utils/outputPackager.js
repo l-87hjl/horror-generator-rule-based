@@ -257,14 +257,20 @@ class OutputPackager {
     }
 
     // 1. User Input Log (JSON)
-    const userInputPath = path.join(sessionDir, '00_user_input_log.json');
-    await fs.writeFile(userInputPath, JSON.stringify(userInput, null, 2));
-    files.push({ name: '00_user_input_log.json', path: userInputPath });
+    if (userInput) {
+      const userInputPath = path.join(sessionDir, '00_user_input_log.json');
+      await fs.writeFile(userInputPath, JSON.stringify(userInput, null, 2));
+      files.push({ name: '00_user_input_log.json', path: userInputPath });
+    }
 
     // 2. Initial Generation (TXT)
-    const initialStoryPath = path.join(sessionDir, '01_initial_generation.txt');
-    await fs.writeFile(initialStoryPath, initialStory);
-    files.push({ name: '01_initial_generation.txt', path: initialStoryPath });
+    if (initialStory) {
+      const initialStoryPath = path.join(sessionDir, '01_initial_generation.txt');
+      await fs.writeFile(initialStoryPath, initialStory);
+      files.push({ name: '01_initial_generation.txt', path: initialStoryPath });
+    } else {
+      console.warn('⚠️  No initial story available to save');
+    }
 
     // 3. Revision Audit Report (MD)
     if (auditReport) {
@@ -274,10 +280,14 @@ class OutputPackager {
     }
 
     // 4. Revised Story (TXT)
-    const revisedStoryPath = path.join(sessionDir, '03_revised_story.txt');
     const finalStory = revisedStory || initialStory;
-    await fs.writeFile(revisedStoryPath, finalStory);
-    files.push({ name: '03_revised_story.txt', path: revisedStoryPath });
+    if (finalStory) {
+      const revisedStoryPath = path.join(sessionDir, '03_revised_story.txt');
+      await fs.writeFile(revisedStoryPath, finalStory);
+      files.push({ name: '03_revised_story.txt', path: revisedStoryPath });
+    } else {
+      console.warn('⚠️  No revised/final story available to save');
+    }
 
     // 5. Change Implementation Log (MD)
     if (changeLog && changeLog.length > 0) {
@@ -535,16 +545,16 @@ class OutputPackager {
       completion_stage: currentStage || 'unknown',
       generation_date: new Date().toISOString(),
       word_count: (revisedStory || initialStory) ? (revisedStory || initialStory).split(/\s+/).length : 0,
-      parameters_used: userInput,
-      inflection_points_selected: {
+      parameters_used: userInput || {},
+      inflection_points_selected: userInput ? {
         entry_condition: userInput.entryCondition,
         discovery_method: userInput.discoveryMethod,
         completeness_pattern: userInput.completenessPattern,
         violation_response: userInput.violationResponse,
         exit_condition: userInput.endingType,
         thematic_focus: userInput.thematicFocus
-      },
-      rule_count: userInput.ruleCount || 7,
+      } : {},
+      rule_count: userInput?.ruleCount || 7,
       revision_rounds: changeLog ? changeLog.length : 0,
       overall_quality_score: auditReport ? auditReport.scores.overallScore : null,
       quality_grade: auditReport ? auditReport.scores.grade : null,
