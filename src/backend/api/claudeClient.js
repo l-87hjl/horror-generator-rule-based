@@ -13,7 +13,7 @@ class ClaudeClient {
 
     this.client = new Anthropic({
       apiKey: apiKey,
-      timeout: config.timeout || 300000, // 5 minutes default timeout
+      timeout: config.timeout || 120000, // 2 minutes default timeout (reduced from 5)
       maxRetries: config.maxRetries || 2  // Retry failed requests
     });
 
@@ -21,7 +21,7 @@ class ClaudeClient {
       model: config.model || 'claude-sonnet-4-5-20250929',
       maxTokens: config.maxTokens || 16000,
       temperature: config.temperature || 0.7,
-      timeout: config.timeout || 300000
+      timeout: config.timeout || 120000
     };
 
     console.log(`✅ Claude client initialized with ${this.config.timeout/1000}s timeout, ${this.config.maxTokens} max tokens`);
@@ -82,6 +82,9 @@ class ClaudeClient {
    * Perform revision audit on generated story
    */
   async auditStory(story, revisionChecklist, options = {}) {
+    const startTime = Date.now();
+    console.log('🔍 Calling Claude API for audit...');
+
     const systemPrompt = this.buildAuditSystemPrompt(revisionChecklist);
     const userPrompt = this.buildAuditUserPrompt(story);
 
@@ -99,6 +102,10 @@ class ClaudeClient {
         ]
       });
 
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`✅ Audit response received (${duration}s)`);
+      console.log(`   Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`);
+
       return {
         content: response.content[0].text,
         usage: {
@@ -108,6 +115,13 @@ class ClaudeClient {
         model: response.model
       };
     } catch (error) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.error(`❌ Audit API error after ${duration}s: ${error.message}`);
+
+      if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
+        throw new Error(`Audit timeout after ${duration}s - API call stalled`);
+      }
+
       throw new Error(`Claude API error during story audit: ${error.message}`);
     }
   }
@@ -116,6 +130,9 @@ class ClaudeClient {
    * Refine story based on audit findings
    */
   async refineStory(originalStory, auditReport, options = {}) {
+    const startTime = Date.now();
+    console.log('🔧 Calling Claude API for refinement...');
+
     const systemPrompt = this.buildRefinementSystemPrompt();
     const userPrompt = this.buildRefinementUserPrompt(originalStory, auditReport);
 
@@ -133,6 +150,10 @@ class ClaudeClient {
         ]
       });
 
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`✅ Refinement response received (${duration}s)`);
+      console.log(`   Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`);
+
       return {
         content: response.content[0].text,
         usage: {
@@ -142,6 +163,13 @@ class ClaudeClient {
         model: response.model
       };
     } catch (error) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.error(`❌ Refinement API error after ${duration}s: ${error.message}`);
+
+      if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
+        throw new Error(`Refinement timeout after ${duration}s - API call stalled`);
+      }
+
       throw new Error(`Claude API error during story refinement: ${error.message}`);
     }
   }

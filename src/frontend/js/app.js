@@ -128,6 +128,11 @@ function setupEventListeners() {
 
     const retryBtn = document.getElementById('retry-btn');
     retryBtn.addEventListener('click', handleRetry);
+
+    const viewLogsBtn = document.getElementById('view-logs-btn');
+    if (viewLogsBtn) {
+        viewLogsBtn.addEventListener('click', handleViewLogs);
+    }
 }
 
 /**
@@ -367,6 +372,9 @@ function startElapsedTimeTracker(startTime) {
 
     if (!elapsedEl) return;
 
+    const STALL_WARNING_TIME = 180000; // 3 minutes
+    const STALL_ERROR_TIME = 300000;   // 5 minutes
+
     // Update elapsed time every second
     const elapsedInterval = setInterval(() => {
         const now = new Date();
@@ -375,6 +383,21 @@ function startElapsedTimeTracker(startTime) {
         const seconds = Math.floor((elapsedMs % 60000) / 1000);
 
         elapsedEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        // Detect stalls
+        const progressStatus = document.getElementById('progress-status');
+        if (elapsedMs > STALL_ERROR_TIME) {
+            if (progressStatus) {
+                progressStatus.textContent = '⚠️ Generation appears to be stalled (5+ min). See logs or retry.';
+                progressStatus.style.color = '#ff4444';
+            }
+        } else if (elapsedMs > STALL_WARNING_TIME) {
+            if (progressStatus && !progressStatus.textContent.includes('⚠️')) {
+                const currentText = progressStatus.textContent;
+                progressStatus.textContent = `⚠️ ${currentText} (taking longer than expected)`;
+                progressStatus.style.color = '#ffaa00';
+            }
+        }
     }, 1000);
 
     // Store interval ID for cleanup
@@ -492,6 +515,29 @@ function handleNewStory() {
  */
 function handleRetry() {
     showSection('form-section');
+}
+
+/**
+ * Handle view logs button - opens logs in new window
+ */
+function handleViewLogs() {
+    // Open Render logs in new window
+    const renderUrl = 'https://dashboard.render.com';
+    window.open(renderUrl, '_blank', 'noopener,noreferrer');
+
+    // Show instructions
+    alert(
+        '📋 Debug Logs Access:\n\n' +
+        '1. The Render dashboard will open in a new tab\n' +
+        '2. Navigate to: My project → Production → rule-based-horror\n' +
+        '3. Click "Logs" in the left sidebar\n' +
+        '4. Look for the most recent API call logs\n' +
+        '5. Screenshot any errors for diagnosis\n\n' +
+        'Look for lines containing:\n' +
+        '- "Calling Claude API..." (shows request start)\n' +
+        '- "API error after Xs" (shows timeout/errors)\n' +
+        '- "Refinement round X" (shows current stage)'
+    );
 }
 
 /**
