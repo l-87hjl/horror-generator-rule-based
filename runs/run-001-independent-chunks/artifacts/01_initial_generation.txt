@@ -1,0 +1,897 @@
+# The Starlight Motor Lodge
+
+My sister Claire was supposed to work the night desk at the Starlight Motor Lodge for three months. She'd made it through two weeks before the panic attacks started. When she called me, sobbing, begging me to cover just one shift—just tonight, just so she could sleep—I said yes. I always said yes to Claire.
+
+"It's easy," she said, her voice thin and desperate over the phone. "Easier than the diner. You just check people in, hand them keys, answer the phone. That's it."
+
+"Then why can't you do it?"
+
+Silence. Then: "Mr. Bhatt will explain everything. Just—just follow what he says exactly. Don't improvise. Don't try to be helpful in your own way. Promise me."
+
+I promised.
+
+The Starlight Motor Lodge sat forty miles from anything resembling civilization, a horseshoe of twelve rooms facing a parking lot of cracked asphalt. Behind it, scrubland stretched to distant hills. The office was a small building attached to Room 1, with a desk, a computer from 1997, a wall of key hooks, and a coffee maker that looked like a fire hazard.
+
+Mr. Bhatt was waiting when I arrived at 10 PM. He was perhaps seventy, with careful movements and eyes that assessed me with uncomfortable precision.
+
+"You are Claire's sister. Mara."
+
+"Yes. She's sick. I'm covering tonight."
+
+"I see." He gestured to the desk. "Sit. I will explain the procedures."
+
+I sat. He remained standing, hands clasped behind his back.
+
+"The night shift runs from 11 PM to 7 AM. During these hours, you are responsible for guest services and property security. We have seven standing policies. They are not negotiable. They are not suggestions. Do you understand?"
+
+"Sure. Policies."
+
+"Rules," he corrected. "Policy suggests flexibility. These are rules."
+
+He produced a laminated card from his pocket and placed it on the desk. The text was printed in a font that suggested it had been typed on a typewriter and photocopied multiple times.
+
+**STARLIGHT MOTOR LODGE - NIGHT DESK RULES**
+
+1. IF a guest requests a room after 2 AM, assign only even-numbered rooms (2, 4, 6, 8, 10, 12).
+
+2. NEVER provide Room 7's key to anyone who arrives in a vehicle with out-of-state plates.
+
+3. ALWAYS verify that the guest register matches the room key before handing over the key. Name on register must match name on ID.
+
+4. IF a guest reports unusual sounds from an adjacent room, log the complaint but DO NOT investigate personally. Note the time and room number only.
+
+5. DO NOT leave the office between 2 AM and 4 AM for any reason.
+
+6. ALWAYS collect payment before providing room keys. No exceptions for late arrivals.
+
+7. IF a guest requests a room change after check-in, they must return the original key before receiving a new one. DO NOT issue a second key while the first is outstanding.
+
+I read through them twice. "These seem pretty random."
+
+"They are specific," Mr. Bhatt said. "Not random. Specific."
+
+"Why can't people with out-of-state plates have Room 7?"
+
+"That is not your concern. Your concern is following the rule."
+
+"And why can't I leave the office between 2 and 4?"
+
+"The rule exists for your protection."
+
+"Protection from what?"
+
+Mr. Bhatt's expression didn't change. "From the consequences of leaving the office between 2 and 4 AM. The rule is self-explanatory in that regard."
+
+I looked at the list again. Even-numbered rooms after 2 AM. No Room 7 for out-of-state plates. Don't leave during the dead hours. It read like bureaucratic nonsense, the kind of arbitrary policies that accumulate in any business run by someone's eccentric uncle.
+
+"What happens if I break one of these?"
+
+"That would be unfortunate," Mr. Bhatt said. "For you especially. Claire understood this. That's why she called you."
+
+Something in his tone made my skin prickle. "What's that supposed to mean?"
+
+"It means the rules exist whether you follow them or not. Following them simply determines which side of them you occupy." He moved toward the door. "I will be in Room 1 if you have questions. Do not knock unless there is an emergency. The phone system is straightforward. The coffee is terrible but functional. Your shift ends at 7 AM."
+
+"Wait—what if someone breaks in? What if there's a fire?"
+
+"Those would constitute emergencies," he said. "Use your judgment."
+
+"But not for the rules."
+
+"The rules do not require judgment. They require compliance."
+
+He left. I heard the door to Room 1 open and close. Then silence, except for the hum of the ancient computer and the tick of a clock on the wall.
+
+I spent the first hour familiarizing myself with the system. The computer ran a DOS-based reservation program that looked like it had been coded by someone's nephew in 1989. Currently, we had guests in Rooms 3, 5, 8, and 11. The register showed names, license plates, check-in times, and payment status. Everyone had paid. Everyone was quiet.
+
+At 11:47 PM, a car pulled into the lot. A sedan, dusty, with California plates. A woman got out—thirties, business casual, exhausted. She entered the office with the practiced weariness of someone who'd done this too many times.
+
+"Do you have availability?"
+
+"Yes. How many nights?"
+
+"Just one. I'm driving through to Denver."
+
+I checked the computer. Rooms 2, 4, 6, 7, 9, 10, and 12 were open. I pulled up the registration form.
+
+"I'll need your ID and a credit card."
+
+She handed them over. Sarah Brennan, California driver's license. I typed her information into the system, ran the card, printed the receipt.
+
+"You're in Room 9," I said, pulling the key from the wall.
+
+She glanced at the key. "Is that a smoking room?"
+
+"They're all non-smoking."
+
+"Good." She took the key and left.
+
+Simple. Easy. Just like Claire said.
+
+At 12:30 AM, the phone rang. I picked up.
+
+"Front desk."
+
+"Yeah, hi." Male voice, groggy. "I'm in Room 8. There's some kind of noise from the room next door. Like... scratching? It's been going on for twenty minutes."
+
+I pulled up the register. Room 8: David Chen, checked in at 6 PM. Room 9: Sarah Brennan, just checked in. Room 7: vacant.
+
+"Which side? Left or right?"
+
+"Left. Room 7, I think."
+
+I looked at Rule 4. *IF a guest reports unusual sounds from an adjacent room, log the complaint but DO NOT investigate personally.*
+
+"I'll make a note of it," I said. "If it continues, let me know."
+
+"That's it? You're not going to check it out?"
+
+"The room is vacant. It's probably pipes or the building settling."
+
+"It doesn't sound like pipes."
+
+"I'll log the complaint. If it gets worse, call back."
+
+He hung up, clearly unsatisfied. I wrote in the log: "12:31 AM - Room 8 reports sounds from Room 7. Room 7 vacant. No action taken per Rule 4."
+
+The scratching bothered me less than my own compliance. I'd dismissed his concern without a second thought, hidden behind a rule I didn't understand. But what was I supposed to do? Mr. Bhatt had been clear. The rules weren't suggestions.
+
+At 1:15 AM, another car arrived. Pickup truck, Wyoming plates, two men in their twenties. They looked like they'd been driving for twelve hours straight.
+
+"Need a room," the driver said. "Two beds."
+
+"How many nights?"
+
+"Just tonight. We're heading to Reno."
+
+I started the registration process. ID, credit card, the usual. Then I looked at the available rooms. 2, 4, 6, 7, 10, 12. All even numbers except 7.
+
+"You're in Room 6," I said, pulling the key.
+
+"What about Room 7?" the passenger asked. "I saw it's right in the middle. Easier to park in front of."
+
+I hesitated. Rule 2: *NEVER provide Room 7's key to anyone who arrives in a vehicle with out-of-state plates.*
+
+"Room 7 isn't available."
+
+"The sign says vacancy."
+
+"That room has maintenance issues."
+
+"Looks fine from outside," the driver said. "Lights work. Door looks solid."
+
+"Internal issues," I said. "Room 6 is ready."
+
+They exchanged glances but didn't push it. I completed the registration, took payment, handed over the key. They left.
+
+I stared at the key for Room 7, still hanging on the wall. Why couldn't out-of-state plates have it? What was special about that room? And why did the rule specify out-of-state plates specifically? In-state was fine?
+
+The clock read 1:43 AM.
+
+At 2:07 AM, a motorcycle pulled up. Single rider, no helmet, Nevada plates. He walked in like he owned the place—leather jacket, stubble, the kind of casual confidence that usually meant trouble.
+
+"Room for the night."
+
+"Sure." I started the process, but something nagged at me. The time. I checked the rules again.
+
+Rule 1: *IF a guest requests a room after 2 AM, assign only even-numbered rooms.*
+
+It was 2:07. After 2 AM. Available rooms: 2, 4, 7, 10, 12. Even numbers only meant 2, 4, 10, or 12.
+
+"You're in Room 4," I said.
+
+"What about Room 7? I like lucky numbers."
+
+"Seven's odd," I said. "And it's after 2 AM. I can only assign even-numbered rooms after 2."
+
+He stared at me. "That's the stupidest policy I've ever heard."
+
+"It's the rule."
+
+"Who makes up these rules?"
+
+"Management."
+
+"Let me talk to management."
+
+"He's asleep. Room 4 or nothing."
+
+The biker's jaw tightened. For a moment, I thought he'd leave. Then he threw down his credit card. "Fine. Room 4."
+
+I processed him quickly—Marcus Webb, Las Vegas address, Visa. Handed him the key. He left without another word.
+
+I logged the interaction: "2:07 AM - Guest assigned Room 4 per Rule 1 (after 2 AM, even rooms only). Guest questioned policy but complied."
+
+The office felt smaller now. The darkness outside pressed against the windows. I checked the clock: 2:14 AM. The dead hours. Rule 5: *DO NOT leave the office between 2 AM and 4 AM for any reason.*
+
+I needed to pee. I'd needed to pee for twenty minutes, but I'd been waiting until after 2. Now I was stuck until 4.
+
+I looked at the door to Room 1, where Mr. Bhatt slept. Looked at the bathroom in the back of the office. It was technically still the office, right? The rule said don't leave the office. The bathroom was part of the office structure.
+
+I went to the bathroom. It took two minutes. When I came back, nothing had changed. The clock read 2:18 AM. The parking lot was quiet. The computer hummed.
+
+See? Nothing. Just paranoid nonsense.
+
+At 2:33 AM, the phone rang.
+
+"Front desk."
+
+Breathing. Heavy, wet breathing.
+
+"Hello?"
+
+"Room 7," a voice whispered. Male, but wrong somehow. Like vocal cords that had forgotten how to work properly. "Room 7 is occupied."
+
+"Room 7 is vacant," I said, checking the computer to confirm. "No one's checked in."
+
+"Room 7 is occupied," the voice repeated. "You need to update your records."
+
+"Who is this?"
+
+The line went dead.
+
+I stared at the phone. Checked the caller ID—it showed "Room 7."
+
+That was impossible. The room was empty. I'd verified it twice. No one had the key. The key was still on the wall behind me.
+
+Except when I turned to look, the hook for Room 7 was empty.
+
+My heart kicked. I checked the desk, the floor, the key cabinet. The key wasn't there. I pulled up the register on the computer. Room 7: VACANT. No check-in recorded. No payment. No name.
+
+But the key was gone.
+
+I thought about Rule 4. Don't investigate personally. But that was for noise complaints. This was a missing key. That was different. That was theft, or a mistake, or—
+
+Rule 5. Don't leave the office between 2 and 4 AM.
+
+It was 2:34 AM.
+
+I had an hour and twenty-six minutes until I could check Room 7. Until I could verify it was actually empty. Until I could figure out where the key had gone.
+
+I sat down. Logged the incident: "2:33 AM - Prank call from Room 7 extension. Key for Room 7 missing from hook. Room shows vacant in system. Will investigate after 4 AM per Rule 5."
+
+The scratching started at 2:41 AM.
+
+Soft at first. Like fingernails on wood. Coming from the wall between the office and Room 1. Where Mr. Bhatt was sleeping.
+
+I picked up the phone to call him. Put it down. That would wake him for something that might be nothing. Mice in the walls. Branches on the roof. Normal building sounds.
+
+The scratching got louder. More insistent. A rhythm to it now. Three scratches, pause. Three scratches, pause.
+
+I checked the clock: 2:44 AM. Still in the dead hours. Still trapped in the office.
+
+The scratching moved. Across the wall, toward the door. Then to the front window. I could see nothing outside—just darkness and the distant glow of the room lights. But the scratching continued, right against the glass. Three scratches, pause. Three scratches, pause.
+
+Then it stopped.
+
+The silence was worse.
+
+At 2:58 AM, Sarah Brennan from Room 9 called.
+
+"There's someone in the hallway," she said. "Just standing there. Outside my door."
+
+"Can you describe them?"
+
+"I can't see them clearly through the peephole. They're just... standing. Not moving. They've been there for five minutes."
+
+"I'll check it out," I said automatically.
+
+"Thank you. It's really creeping me out."
+
+I hung up. Looked at the clock: 2:59 AM. Looked at Rule 5.
+
+I couldn't leave. Not for another hour. Not even to check on a guest's safety.
+
+I called her back. "Ma'am? I need you to do me a favor. Don't open your door. Keep it locked. I'll handle this from here, but don't engage with whoever's out there."
+
+"You're not coming?"
+
+"I'm... calling security." A lie. We had no security. "Just stay inside. You're safe as long as you're in your room."
+
+"Okay." She sounded uncertain. "Okay."
+
+I hung up and immediately felt sick. I'd just prioritized a rule over a guest's safety. But what could I do? Mr. Bhatt had been clear. The rules weren't negotiable.
+
+And maybe that was the point. Maybe the rules existed precisely because leaving during the dead hours was dangerous. Maybe I'd be putting myself and Sarah at greater risk by going out there.
+
+That's what I told myself.
+
+At 3:12 AM, David Chen from Room 8 called back.
+
+"The scratching is worse," he said. "And now there's whispering. I can't make out the words, but it sounds like someone's right on the other side of the wall. You need to do something."
+
+"Sir, I've logged your complaint. The room next to you is vacant."
+
+"Then someone broke in! Jesus Christ, do your job!"
+
+"I will investigate after 4 AM. Until then, I recommend—"
+
+He hung up.
+
+I sat there, hands shaking. Two guests frightened. One possibly in danger. And me, paralyzed by rules I didn't understand, rules that seemed designed to prevent me from helping.
+
+Unless they were designed to prevent me from becoming what was out there.
+
+The thought arrived fully formed, and I couldn't unthink it. What if the rules weren't about guest safety? What if they were about my safety? What if leaving the office during the dead hours meant I'd end up like whatever was scratching at walls and standing in hallways?
+
+At 3:27 AM, I saw him.
+
+A man in the parking lot. Standing between Rooms 7 and 8. Just standing, perfectly still, facing the office. I couldn't make out his features—the distance and darkness obscured them—but his posture was wrong. Too rigid. Too still. No shifting weight, no casual movement. Just absolute, inhuman stillness.
+
+I watched him for five minutes. He didn't move. Didn't blink, as far as I could tell. Just stared at the office window.
+
+At me.
+
+At 3:33 AM, he took a step forward. Then another. Walking toward the office with that same rigid posture, arms at his sides, head fixed forward.
+
+I grabbed the phone. Dialed Room 1.
+
+Mr. Bhatt answered on the first ring. "Yes?"
+
+"There's someone in the parking lot. Walking toward the office."
+
+"What time is it?"
+
+"3:33."
+
+"Are you in the office?"
+
+"Yes."
+
+"Then you are safe. Do not leave. Do not open the door. Do you understand?"
+
+"What if he tries to get in?"
+
+"The door is locked. He cannot enter without a key."
+
+"What if he has a key?"
+
+Silence. Then: "Does he have a key?"
+
+I looked at the key wall. Room 7 was still missing. "I don't know. The key for Room 7 is gone."
+
+"I see." Mr. Bhatt's voice remained calm. "Then you have made an error."
+
+"I didn't give anyone the key! It just disappeared!"
+
+"Keys do not disappear. They are taken or misplaced. Either way, you are responsible for their custody."
+
+The man was closer now. Twenty feet from the office door. I could see him more clearly in the parking lot lights. His clothes were wrong—old-fashioned, like something from the 1970s. His skin had a waxy quality.
+
+"Mr. Bhatt, please. What do I do?"
+
+"You remain in the office until 4 AM. You do not open the door. If he enters, you do not acknowledge him. You do not speak to him. You process him according to the rules."
+
+"Process him? Like a guest?"
+
+"If he has a key, he is a guest. You will treat him as such."
+
+"But—"
+
+"Do you want to know what happens if you leave the office during the dead hours, Mara?"
+
+I swallowed. "Yes."
+
+"You become what he is. A guest who checked in but never checked out. Do you understand now?"
+
+I understood. God help me, I understood.
+
+The man reached the door. I heard the handle turn. Locked. He tried again, methodically, without frustration. Then he moved to the window and pressed his face against the glass.
+
+His eyes were gone. Just empty sockets, dark and deep. His mouth moved, forming words I couldn't hear through the glass. The same word, over and over.
+
+Seven. Seven. Seven.
+
+I looked away. Focused on the computer screen. On the clock. 3:41 AM. Nineteen minutes until I could leave. Nineteen minutes until the dead hours ended.
+
+The scratching started again. On the door this time. Methodical. Patient. Three scratches, pause. Three scratches, pause.
+
+At 3:52 AM, the phone rang. I didn't want to answer. I knew who it would be.
+
+"Front desk," I whispered.
+
+"I need to check in." The voice from before, wet and wrong. "I have a reservation."
+
+"What name?"
+
+"Room 7."
+
+"That's not a name."
+
+"Check your records. I'm already in the system."
+
+I pulled up the register. Refreshed it. Room 7 still showed vacant. But as I watched, text began to appear in the fields. Typing itself. A name: PERMANENT GUEST. Check-in date: 04/17/1978. Check-out date: NONE.
+
+Payment status: OVERDUE.
+
+"I see you," I said, my voice shaking. "But you haven't paid."
+
+"I paid. Long ago. In full."
+
+"The system shows your payment is overdue."
+
+"Then update the system."
+
+"I can't. Not without—" I checked Rule 6. *ALWAYS collect payment before providing room keys.*
+
+He already had a key. The missing key. Which meant either he'd paid and the system was wrong, or he'd taken the key without paying, which meant he wasn't a legitimate guest.
+
+But if he wasn't a legitimate guest, why was he in the system at all?
+
+"Sir, I need you to return to your room. I'll sort this out in the morning."
+
+"I am in my room."
+
+"You're at my door."
+
+"I'm in Room 7. I'm always in Room 7. You're the one who's confused."
+
+The scratching stopped. I heard footsteps. Moving away from the door. Across the parking lot. I watched through the window as the man walked back to Room 7, opened the door with the missing key, and went inside.
+
+The light in Room 7 turned on.
+
+At 4:00 AM exactly, the dead hours ended.
+
+I sat there for five minutes, trying to steady my breathing. Then I called Mr. Bhatt.
+
+"The man went into Room 7."
+
+"Yes. He does that."
+
+"Who is he?"
+
+"A guest who violated the rules. He checked in on April 17th, 1978. He was told not to leave his room between 2 and 4 AM. He left. Now he cannot leave at all."
+
+"That's insane."
+
+"That's the consequence. The rules exist to protect you from his fate. You followed them. You are safe."
+
+"Two other guests called. They were scared. I didn't help them."
+
+"You helped them by following the rules. They are alive and unharmed. That is help."
+
+"I need to check on them."
+
+"You may leave the office now. The dead hours have passed."
+
+I hung up. Grabbed the master key. Stepped outside for the first time in hours.
+
+The air was cold and still. The parking lot was empty except for the parked vehicles. Room 7's light was on, curtains drawn. I walked to Room 8 first.
+
+I knocked. "Mr. Chen? It's the front desk."
+
+He opened the door, looking exhausted. "About time."
+
+"I'm sorry about the delay. I've checked, and Room 7 is vacant. Whatever you heard was likely the building's plumbing."
+
+"It wasn't plumbing. Someone was in there."
+
+"The room is empty. I can show you if you'd like."
+
+He looked at Room 7's door. The light was still on inside. "You know what? I don't want to know. I'm checking out at dawn. This place is wrong."
+
+"I understand. I'll have your bill ready."
+
+I went to Room 9 next. Sarah Brennan answered looking pale.
+
+"The person in the hallway—did you find them?"
+
+"There was no one in the hallway when I checked."
+
+"They were there. I saw them through the peephole."
+
+"I believe you. But they're gone now. You're safe."
+
+She didn't look convinced, but she nodded. "I'm leaving first thing."
+
+I returned to the office. Logged the interactions. Stared at the register on the computer screen.
+
+Room 7 still showed: PERMANENT GUEST. Check-out date: NONE.
+
+At 6:47 AM, David Chen checked out. Paid his bill without comment and left immediately. At 7:02 AM, Sarah Brennan checked out. She looked at me with something like pity.
+
+"You should quit," she said. "Whatever they're paying you, it's not worth it."
+
+"I'm just covering for my sister."
+
+"Then tell her to quit too."
+
+Marcus Webb from Room 4 checked out at 7:15, and the Wyoming guys from Room 6 left at 7:30. By 8 AM, only Room 3, Room 5, Room 11, and Room 7 had occupants.
+
+Mr. Bhatt emerged from Room 1 at 8:05 AM.
+
+"How was your shift?"
+
+"Difficult," I said. "I need to understand what's happening here."
+
+"You followed the rules. That's what's happening."
+
+"The man in Room 7—"
+
+"Is not your concern. He is a permanent guest. He does not check out. He does not pay. He exists in a state of administrative limbo. As long as you follow the rules, you will never join him."
+
+"What did he do? What rule did he break?"
+
+Mr. Bhatt considered this. "He was the night desk clerk. April 17th, 1978. A guest in Room 6 reported a medical emergency at 2:30 AM. He left the office to help. When he returned, he had been reclassified."
+
+"Reclassified?"
+
+"He was no longer staff. He was a guest. And guests must check in. Must pay. Must follow guest rules, not staff rules. But he had no money to pay. No ID to register. So he remains in Room 7, in a state of permanent occupancy, unable to check out because he never properly checked in."
+
+I felt sick. "He was trying to help someone."
+
+"He violated Rule 5. Consequences do not consider intent."
+
+"That's monstrous."
+
+"That's the system. You may go now. Your shift is complete."
+
+I stood. "I'm not coming back."
+
+"I understand. Claire will need to find another substitute."
+
+"Tell Claire to quit. Tell her this place isn't worth it."
+
+"I will convey your message."
+
+I left. Drove home in the early morning light. Called Claire when I got there.
+
+"How was it?" she asked.
+
+"Horrible. You need to quit."
+
+"I can't. I need the job."
+
+"Claire, there's something wrong with that place. Seriously wrong. The rules aren't just policies—they're traps. There's a man in Room 7 who's been there since 1978 because he broke a rule trying to help someone."
+
+Silence. Then: "I know about Room 7."
+
+"You know?"
+
+"Mr. Bhatt told me. On my first night. He showed me what happens if you break the rules."
+
+"And you stayed?"
+
+"I need the money, Mara. And as long as I follow the rules, I'm safe. It's not that hard. You just have to do what you're told."
+
+"Even if it means ignoring guests who need help?"
+
+"They're not my responsibility. The rules are my responsibility."
+
+I wanted to scream at her. Tell her she was complicit in something evil. But I'd followed the same rules. I'd made the same choices. When Sarah Brennan called about the person in the hallway, I'd chosen the rule over her safety.
+
+I'd chosen my own safety over hers.
+
+"I can't cover for you again," I said.
+
+"That's okay. I'll manage."
+
+We hung up. I tried to sleep but couldn't. Kept seeing the man's empty eye sockets. Kept hearing Sarah Brennan's voice: *You should quit.*
+
+At 2 PM, I was still awake when my phone rang. Unknown number.
+
+"Hello?"
+
+"Mara. It's Mr. Bhatt."
+
+My stomach dropped. "How did you get my number?"
+
+"From Claire. I'm calling because we have an administrative matter to resolve."
+
+"I don't work for you."
+
+"Nevertheless, there is an issue with your shift last night. Specifically, regarding the custody of the Room 7 key."
+
+"I didn't take it. It disappeared."
+
+"Keys do not disappear. As the night desk clerk, you were responsible for all keys during your shift. The Room 7 key went missing under your watch. This represents a violation of your custodial duties."
+
+"I'm not the night desk clerk. I was covering one shift."
+
+"You occupied the position. You accepted the responsibilities. The system does not distinguish between permanent and temporary staff."
+
+"What are you saying?"
+
+"I'm saying that you have been reclassified. According to our records, you are no longer a substitute clerk. You are a guest who failed to complete check-in procedures."
+
+"That's insane. I never checked in."
+
+"You occupied the office during operational hours. You used the facilities—specifically, the bathroom at 2:16 AM. According to Rule 5, you were not permitted to leave the office during those hours. By using the bathroom, you left the office. This constitutes a violation."
+
+My mouth went dry. "The bathroom is part of the office."
+
+"The bathroom is a separate room. You left the office. You violated Rule 5. As a result, you have been reclassified from staff to guest."
+
+"I don't accept this."
+
+"The system does not require your acceptance. However, there is a remedy. You may complete your check-in procedures and resolve your account status."
+
+"How?"
+
+"Return to the Starlight Motor Lodge. Check in properly. Pay for your stay. Follow all guest rules. After a minimum stay of one night, you may check out, provided your account is settled and you have violated no additional rules."
+
+"And if I don't?"
+
+"Then you remain in administrative limbo. A guest who never checked in. The system will continue to classify you as such. And eventually, you will need to resolve your status."
+
+"By showing up at the motel."
+
+"Yes."
+
+"Like the man in Room 7."
+
+"He waited forty-six years before accepting his status. I do not recommend such delay. The longer you wait, the more difficult resolution becomes."
+
+I hung up. Blocked the number. Tried to convince myself it was nonsense. Legal threats from a roadside motel. Meaningless.
+
+But that night, at 2:16 AM exactly, I woke to scratching sounds. On my bedroom wall. Three scratches, pause. Three scratches, pause.
+
+I turned on the light. The scratching stopped. But I could feel it. The weight of unresolved status. The system's patient, inexorable pull.
+
+I called Claire.
+
+"Did Mr. Bhatt call you?" I asked.
+
+"Yes. He told me about your reclassification."
+
+"It's not real. It's psychological manipulation."
+
+"Is it? Are you sure?"
+
+"Claire, you can't actually believe—"
+
+"I believe the rules work the way Mr. Bhatt says they work. I've seen what happens when people break them. You used the bathroom during the dead hours. That was leaving the office. You violated Rule 5."
+
+"The bathroom is part of the office!"
+
+"The rule says don't leave the office. You left. Now you need to fix it."
+
+"By checking in? By giving them money and submitting to this insane system?"
+
+"By resolving your status. Yes."
+
+I hung up. Spent the next three days trying to ignore the scratching that started every night at 2:16 AM. Tried to ignore the way I'd catch glimpses of a figure in my peripheral vision. Standing in doorways. In mirrors. Always rigid, always still.
+
+On the fourth night, I couldn't take it anymore.
+
+I drove back to the Starlight Motor Lodge.
+
+Mr. Bhatt was at the front desk. He smiled when I entered.
+
+"Welcome back, Ms. Mara. Are you ready to check in?"
+
+"I don't have a choice, do I?"
+
+"We always have choices. You are choosing to resolve your administrative status. That is wise."
+
+He pulled up the registration form. I provided my ID and credit card. He processed everything with meticulous care.
+
+"You'll be in Room 11. One night, paid in full. Check-out is at 11 AM tomorrow."
+
+"What are the guest rules?"
+
+He handed me a different laminated card.
+
+**STARLIGHT MOTOR LODGE - GUEST RULES**
+
+1. DO NOT leave your room between 2 AM and 4 AM.
+
+2. DO NOT open your door for anyone who knocks during these hours.
+
+3. IF you hear sounds from adjacent rooms, do not investigate.
+
+4. ALWAYS keep your room key with you. Do not leave it in the room.
+
+5. DO NOT attempt to enter any room other than your assigned room.
+
+6. IF you need to check out early, you must settle your bill in full before leaving.
+
+7. ALWAYS return your key to the front desk upon checkout.
+
+I read them twice. They were almost identical to the staff rules, just inverted. The system worked the same way from both sides.
+
+"What happens if I break one of these?" I asked.
+
+"That would depend on which rule you break. But generally, it would extend your stay. Guests who violate rules find it difficult to check out."
+
+"Like the man in Room 7."
+
+"Precisely."
+
+He handed me the key to Room 11. I took it.
+
+"Your shift ends at 11 PM," I said. "Who works the night desk?"
+
+"Claire. She'll be here at 10:45."
+
+Of course. My sister would be the one monitoring my compliance. The one logging my violations or confirming my successful checkout.
+
+I went to Room 11. It was clean, sparse, unremarkable. A bed, a TV, a bathroom, a desk. The kind of room you'd find at any roadside motel. Except for the laminated rules card on the desk, identical to the one Mr. Bhatt had given me.
+
+I checked the time: 9:17 PM. I had until 2 AM to stay awake, then two hours of mandatory confinement, then I could sleep until checkout.
+
+I turned on the TV. Flipped through channels. Found nothing but static and infomercials. Turned it off.
+
+At 10:52 PM, I heard a car pull up. Footsteps. The office door opening and closing. Claire had arrived for her shift.
+
+I wanted to go talk to her. Demand to know how she could participate in this. But that would mean leaving my room. And I didn't know if that violated the rules. Better to stay put. Better to comply.
+
+At 11:30 PM, I heard a knock on my door.
+
+I looked through the peephole. Claire stood outside.
+
+"Mara? Can we talk?"
+
+I checked the rules. Nothing prohibited opening the door before 2 AM. I opened it.
+
+Claire looked exhausted. Thinner than when I'd last seen her. Dark circles under her eyes.
+
+"You shouldn't be here," she said.
+
+"I didn't have a choice. Mr. Bhatt said I'd been reclassified."
+
+"I know. I'm sorry. I should have warned you about the bathroom."
+
+"You should have told me not to come at all."
+
+"You're my sister. You always help me. I needed help."
+
+"And now I'm trapped in the same system you're trapped in."
+
+She looked away. "You're not trapped. Just follow the rules. Check out tomorrow. It'll be over."
+
+"Will it? Or will there be some other violation I don't know about? Some other technicality that extends my stay?"
+
+"Not if you're careful. Not if you do exactly what you're supposed to do."
+
+"Like you?"
+
+"Yes. Like me."
+
+I studied her face. Saw the resignation there. The acceptance. She'd stopped fighting. She'd become part of the system.
+
+"What happens if I just leave?" I asked. "Right now. Get in my car and drive away."
+
+"You'd be a guest who checked in but didn't check out. Your status would remain unresolved. Eventually, you'd have to come back. They always come back."
+
+"The man in Room 7 came back."
+
+"After forty-six years. He spent all that time trying to stay away. It didn't work. The system is patient."
+
+"This is insane, Claire."
+
+"No. It's just rules. You follow them or you don't. If you follow them, you're fine."
+
+She left. I closed the door. Locked it.
+
+I sat on the bed and waited for 2 AM.
+
+At 1:47 AM, I heard a car pull into the lot. Voices. Someone checking in. I heard Claire's voice, professional and distant, explaining the rules. A man's voice, tired, agreeing to everything.
+
+At 1:53 AM, I heard footsteps in the hallway. A door opening and closing. Room 10, I thought. Right next to me.
+
+At 2:00 AM exactly, the dead hours began.
+
+I sat on the bed, lights on, door locked, following the rules. I would not leave my room. I would not open my door. I would not investigate sounds.
+
+At 2:08 AM, the scratching started. On the wall between my room and Room 10. Three scratches, pause. Three scratches, pause.
+
+I closed my eyes. Reminded myself: Rule 3. Do not investigate.
+
+At 2:15 AM, someone knocked on my door.
+
+I looked through the peephole. The man from Room 10 stood outside. Middle-aged, ordinary, frightened.
+
+"Please," he said. "There's something in my room. I need help."
+
+I stepped back from the door. Rule 2. Do not open your door for anyone who knocks during these hours.
+
+"Please! It's scratching at the bathroom door. I can hear it breathing."
+
+I wanted to help. God, I wanted to help. But I knew what would happen if I opened that door. I'd be violating Rule 2. My stay would be extended. I'd become more entangled in the system.
+
+"Call the front desk," I said through the door.
+
+"I did! She said she can't leave the office. She said I need to stay in my room."
+
+"Then stay in your room."
+
+"There's something IN my room!"
+
+"Lock yourself in the bathroom. Wait until 4 AM. It'll be over then."
+
+"What if it gets in?"
+
+I didn't answer. Couldn't answer. Because I didn't know. The rules didn't cover what happened if the thing got in.
+
+He knocked again. Pleaded. I turned up the TV to drown him out.
+
+At 2:33 AM, his knocking stopped. I heard his door open and close. Then silence.
+
+At 2:41 AM, the scratching in the wall stopped.
+
+At 3:15 AM, I heard footsteps in the hallway. Slow, methodical. Stopping at each door. I watched through the peephole as a figure moved past. The man from Room 10. But his posture was wrong now. Too rigid. Too still.
+
+He walked to Room 7. Opened the door. Went inside.
+
+The light in Room 7 turned on.
+
+At 4:00 AM, the dead hours ended.
+
+I sat on the bed, shaking. I'd followed the rules. I'd protected myself. And in doing so, I'd condemned a man to the same fate as the 1978 clerk.
+
+I'd become complicit.
+
+At 7 AM, I called the front desk.
+
+"I need to check out early."
+
+Claire's voice: "You're paid through 11 AM."
+
+"I know. But I want to leave now."
+
+"You can check out anytime. Just return your key."
+
+I gathered my things. Walked to the office. The parking lot was quiet. Room 7's light was still on.
+
+Claire was at the desk. She processed my checkout without meeting my eyes.
+
+"You followed the rules," she said. "You're clear."
+
+"What about the man in Room 10?"
+
+"He violated guest protocol. He left his room during the dead hours. He's been reclassified."
+
+"To what?"
+
+"Permanent guest. Room 7 now has two occupants."
+
+I set the key on the desk. "How do you live with this?"
+
+"By following the rules. By keeping my job. By surviving."
+
+"At what cost?"
+
+"At whatever cost is necessary."
+
+I left. Drove away from the Starlight Motor Lodge. Watched it shrink in my rearview mirror until it disappeared.
+
+But I know it's still there. Still operating. Still processing guests and staff according to its inexorable rules.
+
+And I know that somewhere in the system, my name exists. My one-night stay, properly checked in and checked out. My compliance logged and verified.
+
+I followed the rules. I'm safe.
+
+I keep telling myself that.
+
+But every night at 2:16 AM, I wake up. And sometimes I hear scratching. And sometimes I see a figure in the doorway, rigid and still.
+
+And I wonder if I really checked out at all.
+
+Or if I just moved to a different room in the same system.
+
+The Starlight Motor Lodge is still accepting guests. My sister Claire still works the night desk. Mr. Bhatt still explains the rules with meticulous care.
+
+And Room 7's light is always on.
+
+If you ever find yourself on that empty highway, forty miles from anywhere, and you see the vacancy sign glowing in the dark—keep driving.
+
+The rules are clear.
+
+The rules are fair.
+
+The rules will protect you.
+
+As long as you follow them exactly.
+
+As long as you never ask what happens to the ones who don't.
+
+As long as you're willing to become complicit in a system you don't understand, for the sake of your own survival.
+
+I followed the rules.
+
+I'm one of the lucky ones.
+
+I got out.
+
+Didn't I?
