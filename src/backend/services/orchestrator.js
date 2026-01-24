@@ -121,28 +121,7 @@ class Orchestrator {
         console.log(`✅ Chunked story generated:`);
         console.log(`   Total chunks: ${chunkedResult.metadata.total_chunks}`);
         console.log(`   Total words: ${chunkedResult.metadata.total_words}`);
-        console.log(`   Checkpoints: ${chunkedResult.checkpoints.length}\n`);
-
-        // Save checkpoint files
-        console.log('💾 Saving checkpoint files...');
-        const checkpointDir = path.join(
-          this.outputPackager.getOutputDir(),
-          sessionId,
-          'checkpoints'
-        );
-        await fs.mkdir(checkpointDir, { recursive: true });
-
-        for (const checkpoint of chunkedResult.checkpoints) {
-          const checkpointPath = path.join(
-            checkpointDir,
-            `checkpoint_scene_${checkpoint.scene_number}.json`
-          );
-          await fs.writeFile(
-            checkpointPath,
-            JSON.stringify(checkpoint, null, 2)
-          );
-        }
-        console.log(`✅ ${chunkedResult.checkpoints.length} checkpoint files saved\n`);
+        console.log(`   Chunks directory: ${chunkedResult.chunksDirectory}\n`);
 
       } else {
         // Step 1: Generate initial story (single-call)
