@@ -39,6 +39,7 @@ class ClaudeClient {
         model: options.model || this.config.model,
         max_tokens: options.maxTokens || this.config.maxTokens,
         temperature: options.temperature !== undefined ? options.temperature : this.config.temperature,
+        timeout: this.config.timeout, // Explicit per-request timeout
         system: systemPrompt,
         messages: [
           {
@@ -93,6 +94,7 @@ class ClaudeClient {
         model: options.model || this.config.model,
         max_tokens: options.maxTokens || 8000,
         temperature: 0.3, // Lower temperature for more consistent analysis
+        timeout: this.config.timeout, // Explicit per-request timeout
         system: systemPrompt,
         messages: [
           {
@@ -141,6 +143,7 @@ class ClaudeClient {
         model: options.model || this.config.model,
         max_tokens: options.maxTokens || 16000,
         temperature: 0.5, // Moderate temperature for targeted fixes
+        timeout: this.config.timeout, // Explicit per-request timeout
         system: systemPrompt,
         messages: [
           {
