@@ -30,21 +30,31 @@ class CheckpointManager {
     let sceneNumber = 1;
     let previousProse = '';
 
-    console.log(`\n=== Starting Chunked Generation ===`);
-    console.log(`Target: ${targetWordCount} words`);
-    console.log(`Chunk size: ${this.CHUNK_SIZE} words\n`);
+    console.log(`\n[CHECKPOINT] ============================================`);
+    console.log(`[CHECKPOINT] Starting Chunked Generation`);
+    console.log(`[CHECKPOINT] ============================================`);
+    console.log(`[CHECKPOINT] Target word count: ${targetWordCount}`);
+    console.log(`[CHECKPOINT] Chunk size: ${this.CHUNK_SIZE} words`);
+    console.log(`[CHECKPOINT] User params:`, JSON.stringify(userParams, null, 2));
+    console.log(`[CHECKPOINT] ============================================\n`);
 
     while (currentWordCount < targetWordCount) {
       const remainingWords = targetWordCount - currentWordCount;
       const chunkTargetWords = Math.min(this.CHUNK_SIZE, remainingWords);
 
-      console.log(`\n--- Generating Chunk ${sceneNumber} ---`);
-      console.log(`Target: ${chunkTargetWords} words`);
-      console.log(`Progress: ${currentWordCount}/${targetWordCount} words`);
+      console.log(`\n[CHECKPOINT] ============================================`);
+      console.log(`[CHECKPOINT] === Starting Scene ${sceneNumber} ===`);
+      console.log(`[CHECKPOINT] ============================================`);
+      console.log(`[CHECKPOINT] Target words for this chunk: ${chunkTargetWords}`);
+      console.log(`[CHECKPOINT] Progress: ${currentWordCount}/${targetWordCount} words (${((currentWordCount/targetWordCount)*100).toFixed(1)}%)`);
+      console.log(`[CHECKPOINT] Remaining words: ${remainingWords}`);
+      console.log(`[CHECKPOINT] Is first chunk: ${sceneNumber === 1}`);
+      console.log(`[CHECKPOINT] Is final chunk: ${remainingWords <= this.CHUNK_SIZE}`);
 
       try {
         // Step 1: Generate chunk
-        console.log(`   Calling Claude API for chunk ${sceneNumber}...`);
+        console.log(`\n[CHECKPOINT] STEP 1: Generating chunk ${sceneNumber}...`);
+        const chunkStartTime = Date.now();
 
         const chunk = await this.generateChunk({
           userParams,
@@ -55,24 +65,41 @@ class CheckpointManager {
           isFinalChunk: remainingWords <= this.CHUNK_SIZE
         });
 
+        const chunkDuration = ((Date.now() - chunkStartTime) / 1000).toFixed(1);
+        console.log(`[CHECKPOINT] ✅ Chunk ${sceneNumber} generated in ${chunkDuration}s`);
+        console.log(`[CHECKPOINT]    Word count: ${chunk.wordCount} words`);
+        console.log(`[CHECKPOINT]    Prose preview: "${chunk.prose.substring(0, 100)}..."`);
+
         chunks.push(chunk);
         currentWordCount += chunk.wordCount;
         previousProse = chunk.prose;
 
-        console.log(`✅ Chunk ${sceneNumber} generated: ${chunk.wordCount} words`);
-
         // Step 2: Extract state delta
-        console.log(`Extracting state delta...`);
+        console.log(`\n[CHECKPOINT] STEP 2: Extracting state delta for scene ${sceneNumber}...`);
+        const deltaStartTime = Date.now();
+
         const deltaText = await this.extractStateDelta(chunk.prose, sceneNumber);
 
-        // Step 3: Parse and apply delta
-        const delta = this.parseDelta(deltaText, sceneNumber);
-        console.log(`Parsed delta: ${delta.changes.length} changes`);
+        const deltaDuration = ((Date.now() - deltaStartTime) / 1000).toFixed(1);
+        console.log(`[CHECKPOINT] ✅ Delta extracted in ${deltaDuration}s`);
+        console.log(`[CHECKPOINT]    Raw delta text length: ${deltaText.length} chars`);
+        console.log(`[CHECKPOINT]    Delta preview: "${deltaText.substring(0, 150)}..."`);
 
+        // Step 3: Parse and apply delta
+        console.log(`\n[CHECKPOINT] STEP 3: Parsing delta...`);
+        const delta = this.parseDelta(deltaText, sceneNumber);
+        console.log(`[CHECKPOINT] ✅ Parsed delta: ${delta.changes.length} changes`);
+        console.log(`[CHECKPOINT]    Changes:`, JSON.stringify(delta.changes, null, 2));
+
+        console.log(`\n[CHECKPOINT] STEP 4: Applying delta to state manager...`);
+        const stateBeforeApply = JSON.stringify(this.stateManager.getState());
         this.stateManager.applyDelta(sceneNumber, delta);
-        console.log(`✅ State updated`);
+        const stateAfterApply = JSON.stringify(this.stateManager.getState());
+        console.log(`[CHECKPOINT] ✅ State updated`);
+        console.log(`[CHECKPOINT]    State changed: ${stateBeforeApply !== stateAfterApply}`);
 
         // Step 4: Save checkpoint
+        console.log(`\n[CHECKPOINT] STEP 5: Creating checkpoint ${sceneNumber}...`);
         const checkpoint = {
           scene_number: sceneNumber,
           chunk_word_count: chunk.wordCount,
@@ -84,29 +111,57 @@ class CheckpointManager {
         };
 
         checkpoints.push(checkpoint);
-        console.log(`✅ Checkpoint ${sceneNumber} saved`);
+        console.log(`[CHECKPOINT] ✅ Checkpoint ${sceneNumber} saved to memory`);
+        console.log(`[CHECKPOINT]    Total checkpoints: ${checkpoints.length}`);
 
         sceneNumber++;
 
         // Check if we've reached target
         if (currentWordCount >= targetWordCount) {
-          console.log(`\n✅ Target word count reached: ${currentWordCount} words`);
+          console.log(`\n[CHECKPOINT] ============================================`);
+          console.log(`[CHECKPOINT] ✅ Target word count reached!`);
+          console.log(`[CHECKPOINT]    Target: ${targetWordCount} words`);
+          console.log(`[CHECKPOINT]    Actual: ${currentWordCount} words`);
+          console.log(`[CHECKPOINT] ============================================`);
           break;
         }
 
+        console.log(`\n[CHECKPOINT] Scene ${sceneNumber - 1} complete. Continuing to next scene...`);
+
       } catch (error) {
-        console.error(`❌ Error generating chunk ${sceneNumber}:`, error.message);
+        console.error(`\n[CHECKPOINT] ============================================`);
+        console.error(`[CHECKPOINT] ❌❌❌ ERROR in Scene ${sceneNumber} ❌❌❌`);
+        console.error(`[CHECKPOINT] ============================================`);
+        console.error(`[CHECKPOINT] Error message: ${error.message}`);
+        console.error(`[CHECKPOINT] Error type: ${error.constructor.name}`);
+        console.error(`[CHECKPOINT] Current progress: ${currentWordCount}/${targetWordCount} words`);
+        console.error(`[CHECKPOINT] Chunks completed: ${chunks.length}`);
+        console.error(`[CHECKPOINT] Full error stack:`);
+        console.error(error.stack);
+        console.error(`[CHECKPOINT] ============================================`);
         throw error;
       }
     }
 
     // Combine all chunks into final story
+    console.log(`\n[CHECKPOINT] ============================================`);
+    console.log(`[CHECKPOINT] Combining chunks into final story...`);
+    console.log(`[CHECKPOINT]    Total chunks: ${chunks.length}`);
+
     const fullStory = chunks.map(c => c.prose).join('\n\n---\n\n');
 
-    console.log(`\n=== Chunked Generation Complete ===`);
-    console.log(`Total chunks: ${chunks.length}`);
-    console.log(`Total words: ${currentWordCount}`);
-    console.log(`Checkpoints: ${checkpoints.length}\n`);
+    console.log(`[CHECKPOINT]    Full story length: ${fullStory.length} chars`);
+    console.log(`[CHECKPOINT]    Full story word count: ${this.countWords(fullStory)}`);
+
+    console.log(`\n[CHECKPOINT] ============================================`);
+    console.log(`[CHECKPOINT] ✅✅✅ Chunked Generation Complete ✅✅✅`);
+    console.log(`[CHECKPOINT] ============================================`);
+    console.log(`[CHECKPOINT] Total chunks generated: ${chunks.length}`);
+    console.log(`[CHECKPOINT] Total words: ${currentWordCount}`);
+    console.log(`[CHECKPOINT] Target words: ${targetWordCount}`);
+    console.log(`[CHECKPOINT] Checkpoints created: ${checkpoints.length}`);
+    console.log(`[CHECKPOINT] Checkpoint version: ${this.CHECKPOINT_VERSION}`);
+    console.log(`[CHECKPOINT] ============================================\n`);
 
     return {
       story: fullStory,
@@ -137,6 +192,11 @@ class CheckpointManager {
       isFinalChunk
     } = params;
 
+    console.log(`[CHECKPOINT]    → Building chunk prompt for scene ${sceneNumber}...`);
+    console.log(`[CHECKPOINT]       Target words: ${targetWords}`);
+    console.log(`[CHECKPOINT]       Is first: ${isFirstChunk}, Is final: ${isFinalChunk}`);
+    console.log(`[CHECKPOINT]       Previous prose length: ${previousProse ? previousProse.length : 0} chars`);
+
     // Build chunk-specific prompt
     const chunkPrompt = this.buildChunkPrompt({
       userParams,
@@ -147,8 +207,14 @@ class CheckpointManager {
       isFinalChunk
     });
 
+    console.log(`[CHECKPOINT]    → Getting current state from state manager...`);
     // Get current state for injection
     const currentState = this.stateManager.getState();
+    console.log(`[CHECKPOINT]       State has canonical_state: ${!!currentState.canonical_state}`);
+    console.log(`[CHECKPOINT]       State keys:`, Object.keys(currentState));
+
+    console.log(`[CHECKPOINT]    → Calling storyGenerator.generateStoryChunk()...`);
+    const genStartTime = Date.now();
 
     // Generate chunk using story generator
     const result = await this.storyGenerator.generateStoryChunk(
@@ -157,10 +223,18 @@ class CheckpointManager {
       sceneNumber
     );
 
+    const genDuration = ((Date.now() - genStartTime) / 1000).toFixed(1);
+    console.log(`[CHECKPOINT]    → Story chunk generated in ${genDuration}s`);
+    console.log(`[CHECKPOINT]       Result has prose: ${!!result.prose}`);
+    console.log(`[CHECKPOINT]       Prose length: ${result.prose ? result.prose.length : 0} chars`);
+
+    const wordCount = this.countWords(result.prose);
+    console.log(`[CHECKPOINT]       Counted words: ${wordCount}`);
+
     return {
       scene_number: sceneNumber,
       prose: result.prose,
-      wordCount: this.countWords(result.prose),
+      wordCount: wordCount,
       isFirstChunk,
       isFinalChunk
     };
@@ -235,6 +309,10 @@ the CANONICAL truth. You MUST respect all state constraints.
    * @returns {string} Raw delta text from Claude
    */
   async extractStateDelta(prose, sceneNumber) {
+    console.log(`[CHECKPOINT]    → Building state delta extraction prompt...`);
+    console.log(`[CHECKPOINT]       Prose length: ${prose.length} chars`);
+    console.log(`[CHECKPOINT]       Prose word count: ${this.countWords(prose)}`);
+
     const extractionPrompt = `
 You are analyzing a chunk of a rule-based horror story to extract state changes.
 
@@ -276,7 +354,16 @@ ${prose}
 EXTRACTED STATE CHANGES:
     `.trim();
 
+    console.log(`[CHECKPOINT]       Extraction prompt length: ${extractionPrompt.length} chars`);
+
     try {
+      console.log(`[CHECKPOINT]    → Calling Claude API for delta extraction...`);
+      console.log(`[CHECKPOINT]       Model: claude-sonnet-4-20250514`);
+      console.log(`[CHECKPOINT]       Max tokens: 2000`);
+      console.log(`[CHECKPOINT]       Temperature: 0.0`);
+
+      const apiStartTime = Date.now();
+
       const response = await this.claudeClient.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2000,
@@ -287,11 +374,30 @@ EXTRACTED STATE CHANGES:
         }]
       });
 
+      const apiDuration = ((Date.now() - apiStartTime) / 1000).toFixed(1);
+      console.log(`[CHECKPOINT]    → Delta extraction API call completed in ${apiDuration}s`);
+      console.log(`[CHECKPOINT]       Response status: ${response.stop_reason}`);
+      console.log(`[CHECKPOINT]       Input tokens: ${response.usage.input_tokens}`);
+      console.log(`[CHECKPOINT]       Output tokens: ${response.usage.output_tokens}`);
+
       const deltaText = response.content[0].text;
+      console.log(`[CHECKPOINT]       Delta text length: ${deltaText.length} chars`);
+      console.log(`[CHECKPOINT]       Delta text preview (first 200 chars):`);
+      console.log(`[CHECKPOINT]       "${deltaText.substring(0, 200)}..."`);
+
       return deltaText;
 
     } catch (error) {
-      console.error('❌ Error extracting state delta:', error.message);
+      console.error(`[CHECKPOINT] ❌❌❌ Error extracting state delta ❌❌❌`);
+      console.error(`[CHECKPOINT] Error message: ${error.message}`);
+      console.error(`[CHECKPOINT] Error type: ${error.constructor.name}`);
+      console.error(`[CHECKPOINT] Error code: ${error.code}`);
+      if (error.response) {
+        console.error(`[CHECKPOINT] API response status: ${error.response.status}`);
+        console.error(`[CHECKPOINT] API response data:`, error.response.data);
+      }
+      console.error(`[CHECKPOINT] Full error stack:`);
+      console.error(error.stack);
       throw error;
     }
   }
