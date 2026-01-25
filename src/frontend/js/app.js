@@ -8,6 +8,8 @@ let currentSessionId = null;
 let downloadUrl = null;
 let currentJobId = null;
 let statusPollInterval = null;
+let sseAbortController = null;
+let useSSE = true; // Feature flag for SSE streaming
 
 /**
  * Safely parse a fetch Response as JSON.
@@ -251,32 +253,14 @@ async function handleFormSubmit(event) {
     initializeProgressDisplay();
 
     try {
-        // Kick off an async generation job
-        const response = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userInput)
-        });
-
-        const startData = await safeReadJson(response);
-
-        if (!startData.success) {
-            throw new Error(startData.error || 'Generation failed to start');
-        }
-
-        // New backend returns 202 + jobId/statusUrl (async)
-        if (startData.jobId && startData.statusUrl) {
-            currentJobId = startData.jobId;
-            currentSessionId = startData.sessionId || null;
-            downloadUrl = null;
-
-            // Poll until the job is complete
-            await pollJobUntilComplete(startData.statusUrl);
+        // Try SSE streaming first for real-time progress
+        if (useSSE) {
+            await generateWithSSE(userInput);
             return;
         }
 
-        // Backward-compat: if backend returns a completed payload immediately
-        finalizeSuccessfulGeneration(startData);
+        // Fallback to polling method
+        await generateWithPolling(userInput);
 
     } catch (error) {
         console.error('Generation error:', error);
@@ -284,8 +268,232 @@ async function handleFormSubmit(event) {
             clearInterval(window.progressInterval);
         }
         stopStatusPolling();
+        stopSSE();
         showError(error.message);
     }
+}
+
+/**
+ * Generate story using Server-Sent Events (SSE) for real-time progress
+ */
+async function generateWithSSE(userInput) {
+    console.log('Using SSE streaming for generation');
+
+    // Create abort controller for cancellation
+    sseAbortController = new AbortController();
+
+    const progressStatus = document.getElementById('progress-status');
+    const progressFill = document.getElementById('progress-fill');
+
+    try {
+        const response = await fetch('/api/generate-stream', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userInput),
+            signal: sseAbortController.signal
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        // Read SSE stream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+                console.log('SSE stream ended');
+                break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            // Process complete SSE events (separated by \n\n)
+            const events = buffer.split('\n\n');
+            buffer = events.pop(); // Keep incomplete event in buffer
+
+            for (const eventStr of events) {
+                if (!eventStr.trim()) continue;
+
+                // Parse SSE data line
+                const dataMatch = eventStr.match(/^data:\s*(.+)$/m);
+                if (!dataMatch) continue;
+
+                try {
+                    const event = JSON.parse(dataMatch[1]);
+                    handleSSEEvent(event);
+                } catch (parseError) {
+                    console.warn('Failed to parse SSE event:', parseError);
+                }
+            }
+        }
+
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log('SSE stream aborted');
+            return;
+        }
+
+        // If SSE fails, fall back to polling
+        console.warn('SSE failed, falling back to polling:', error.message);
+        useSSE = false;
+        await generateWithPolling(userInput);
+    }
+}
+
+/**
+ * Handle individual SSE event
+ */
+function handleSSEEvent(event) {
+    const progressStatus = document.getElementById('progress-status');
+    const progressFill = document.getElementById('progress-fill');
+
+    console.log('SSE event:', event.type, event);
+
+    switch (event.type) {
+        case 'connected':
+            if (progressStatus) progressStatus.textContent = 'Connected to server...';
+            break;
+
+        case 'job_created':
+            currentJobId = event.jobId;
+            if (progressStatus) progressStatus.textContent = 'Job created, starting generation...';
+            break;
+
+        case 'generation_start':
+            currentSessionId = event.sessionId;
+            if (progressStatus) {
+                progressStatus.textContent = `Starting generation (${event.estimatedChunks} chunks)...`;
+            }
+            break;
+
+        case 'stage_start':
+            if (progressStatus) {
+                progressStatus.textContent = event.message || `Stage: ${event.stage}`;
+            }
+            break;
+
+        case 'chunk_start':
+            if (progressStatus) {
+                progressStatus.textContent = `Generating chunk ${event.chunkNumber}... (${event.percentComplete}%)`;
+            }
+            if (progressFill) {
+                progressFill.style.width = `${Math.min(event.percentComplete * 0.7, 70)}%`;
+            }
+            break;
+
+        case 'chunk_complete':
+            if (progressStatus) {
+                progressStatus.textContent = `Chunk ${event.chunkNumber} complete (${event.totalWords} words, ${event.percentComplete}%)`;
+            }
+            if (progressFill) {
+                progressFill.style.width = `${Math.min(event.percentComplete * 0.7, 70)}%`;
+            }
+            break;
+
+        case 'stage_complete':
+            if (progressStatus) {
+                progressStatus.textContent = `Stage ${event.stage} complete`;
+            }
+            // Progress stages after generation
+            if (event.stage === 'draft_generation' && progressFill) {
+                progressFill.style.width = '70%';
+            } else if (event.stage === 'assembly' && progressFill) {
+                progressFill.style.width = '80%';
+            } else if (event.stage === 'audit' && progressFill) {
+                progressFill.style.width = '85%';
+            } else if (event.stage === 'refinement' && progressFill) {
+                progressFill.style.width = '90%';
+            } else if (event.stage === 'packaging' && progressFill) {
+                progressFill.style.width = '95%';
+            }
+            break;
+
+        case 'heartbeat':
+            // Update heartbeat indicator
+            updateHeartbeat(event);
+            break;
+
+        case 'complete':
+            downloadUrl = event.downloadUrl;
+            currentSessionId = event.sessionId;
+            finalizeSuccessfulGeneration({
+                sessionId: event.sessionId,
+                summary: event.summary,
+                downloadUrl: event.downloadUrl
+            });
+            break;
+
+        case 'error':
+            console.error('SSE error event:', event);
+            showError(event.error || 'Generation failed');
+            break;
+
+        case 'stream_end':
+            console.log('SSE stream ended');
+            break;
+    }
+}
+
+/**
+ * Update heartbeat indicator
+ */
+function updateHeartbeat(event) {
+    const progressStatus = document.getElementById('progress-status');
+    if (progressStatus && event.alive) {
+        // Add a subtle indicator that we're still connected
+        const currentText = progressStatus.textContent;
+        if (!currentText.includes('...')) {
+            progressStatus.textContent = currentText + '...';
+        }
+    }
+}
+
+/**
+ * Stop SSE stream
+ */
+function stopSSE() {
+    if (sseAbortController) {
+        sseAbortController.abort();
+        sseAbortController = null;
+    }
+}
+
+/**
+ * Generate story using polling method (fallback)
+ */
+async function generateWithPolling(userInput) {
+    console.log('Using polling method for generation');
+
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userInput)
+    });
+
+    const startData = await safeReadJson(response);
+
+    if (!startData.success) {
+        throw new Error(startData.error || 'Generation failed to start');
+    }
+
+    // New backend returns 202 + jobId/statusUrl (async)
+    if (startData.jobId && startData.statusUrl) {
+        currentJobId = startData.jobId;
+        currentSessionId = startData.sessionId || null;
+        downloadUrl = null;
+
+        // Poll until the job is complete
+        await pollJobUntilComplete(startData.statusUrl);
+        return;
+    }
+
+    // Backward-compat: if backend returns a completed payload immediately
+    finalizeSuccessfulGeneration(startData);
 }
 
 async function pollJobUntilComplete(statusUrl) {

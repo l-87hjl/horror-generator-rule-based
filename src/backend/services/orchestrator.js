@@ -24,6 +24,15 @@ class Orchestrator {
     this.storyRefiner = new StoryRefiner(this.storyGenerator.getClaudeClient());
     this.outputPackager = new OutputPackager(config.outputDir);
 
+    // Expose Claude client for external use (e.g., StageOrchestrator)
+    this.claudeClient = this.storyGenerator.getClaudeClient();
+
+    // State manager placeholder (created per-workflow, but exposed for SSE streaming)
+    this.stateManager = new StateManager();
+
+    // Constraint enforcer placeholder
+    this.constraintEnforcer = null;
+
     this.config = {
       autoRefine: config.autoRefine !== false,
       maxRevisionRounds: config.maxRevisionRounds || 3,

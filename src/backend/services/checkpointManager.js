@@ -20,9 +20,9 @@ class CheckpointManager {
     this.claudeClient = claudeClient;
 
     // Checkpoint configuration
-    this.CHUNK_SIZE = 1500; // Target words per chunk
+    this.CHUNK_SIZE = 2000; // Safe chunk size (based on 6666 word success test)
     this.MAX_RETRIES = 3;
-    this.CHECKPOINT_VERSION = '2.1.0'; // Updated for new debugging modules
+    this.CHECKPOINT_VERSION = '2.2.0'; // Updated with safe chunk size
 
     // Initialize new modules (will be set per-session)
     this.chunkPersistence = null;

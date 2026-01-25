@@ -12,6 +12,7 @@ const basicAuth = require('express-basic-auth');
 const Orchestrator = require('./src/backend/services/orchestrator');
 const DebugLogger = require('./src/utils/debugLogger');
 const ChunkPersistence = require('./src/generators/chunkPersistence');
+const StageOrchestrator = require('./src/generators/stageOrchestrator');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -204,6 +205,160 @@ app.post('/api/generate', async (req, res) => {
       success: false,
       error: error.message || 'An unexpected error occurred'
     });
+  }
+});
+
+/**
+ * POST /api/generate-stream
+ * Generate a story with Server-Sent Events (SSE) for real-time progress
+ *
+ * This endpoint streams progress events during generation, solving the timeout issue
+ * by maintaining an active connection with heartbeats.
+ */
+app.post('/api/generate-stream', async (req, res) => {
+  // Set SSE headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+
+  // Helper to send SSE event
+  function sendEvent(type, data) {
+    const event = {
+      type,
+      timestamp: Date.now(),
+      ...data
+    };
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  }
+
+  // Send initial connection event
+  sendEvent('connected', { message: 'SSE connection established' });
+
+  try {
+    const userInput = req.body;
+
+    // Validate input
+    const validation = orchestrator.validateInput(userInput);
+    if (!validation.valid) {
+      sendEvent('error', { errors: validation.errors });
+      res.end();
+      return;
+    }
+
+    console.log('\n--- New SSE Generation Request ---');
+    console.log('User Input:', JSON.stringify(userInput, null, 2));
+
+    // Create job for tracking
+    const jobId = createJobId();
+    const createdAt = new Date().toISOString();
+
+    jobs.set(jobId, {
+      status: 'running',
+      createdAt,
+      updatedAt: createdAt,
+      userInput
+    });
+
+    sendEvent('job_created', { jobId, statusUrl: `/api/status/${jobId}` });
+
+    // Create stage orchestrator with progress callback
+    const stageOrchestrator = new StageOrchestrator({
+      storyGenerator: orchestrator.storyGenerator,
+      stateManager: orchestrator.stateManager,
+      claudeClient: orchestrator.claudeClient,
+      revisionAuditor: orchestrator.revisionAuditor,
+      storyRefiner: orchestrator.storyRefiner,
+      constraintEnforcer: orchestrator.constraintEnforcer,
+      outputPackager: orchestrator.outputPackager,
+      chunkSize: 2000, // Safe chunk size
+      heartbeatInterval: 10000, // 10 second heartbeats
+      onProgress: (event) => {
+        // Stream progress to client
+        sendEvent(event.type, event);
+      }
+    });
+
+    // Generate session ID
+    const sessionId = orchestrator.generateSessionId();
+
+    // Initialize state manager for this session
+    orchestrator.stateManager.initializeState(sessionId, userInput);
+
+    sendEvent('generation_start', {
+      sessionId,
+      targetWords: userInput.wordCount,
+      estimatedChunks: Math.ceil(userInput.wordCount / 2000)
+    });
+
+    // Run staged generation
+    const result = await stageOrchestrator.generateInStages(sessionId, {
+      wordCount: userInput.wordCount,
+      userParams: userInput,
+      runAudit: true,
+      runRefinement: true
+    });
+
+    // Update job status
+    const updatedAt = new Date().toISOString();
+    if (result.success) {
+      jobs.set(jobId, {
+        status: 'complete',
+        createdAt,
+        updatedAt,
+        userInput,
+        result: {
+          sessionId,
+          success: true,
+          summary: {
+            wordCount: result.totalWords,
+            qualityScore: result.stages.audit?.score || 0,
+            grade: result.stages.audit?.grade || 'unknown',
+            revisionsApplied: result.stages.refinement?.rounds || 0,
+            duration: `${Math.round((Date.now() - new Date(createdAt).getTime()) / 1000)}s`
+          },
+          downloadUrl: result.downloadUrl
+        }
+      });
+
+      sendEvent('complete', {
+        sessionId,
+        jobId,
+        totalWords: result.totalWords,
+        totalChunks: result.totalChunks,
+        downloadUrl: result.downloadUrl,
+        summary: jobs.get(jobId).result.summary
+      });
+    } else {
+      jobs.set(jobId, {
+        status: 'failed',
+        createdAt,
+        updatedAt,
+        userInput,
+        error: result.errors?.[0]?.message || 'Generation failed'
+      });
+
+      sendEvent('error', {
+        sessionId,
+        jobId,
+        error: result.errors?.[0]?.message || 'Generation failed',
+        partialResult: {
+          chunksCompleted: result.totalChunks,
+          wordsGenerated: result.totalWords
+        }
+      });
+    }
+
+  } catch (error) {
+    console.error('SSE generation error:', error);
+    sendEvent('error', {
+      error: error.message || 'An unexpected error occurred',
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  } finally {
+    // End the SSE stream
+    sendEvent('stream_end', { message: 'Stream closing' });
+    res.end();
   }
 });
 
