@@ -317,14 +317,25 @@ class StageOrchestrator {
       // Generate chunk
       const chunkStartTime = Date.now();
 
-      const chunk = await this.storyGenerator.generateChunk({
-        userParams: config.userParams || config,
-        sceneNumber,
+      // Build chunk prompt in the format expected by storyGenerator.generateStoryChunk
+      const chunkPrompt = {
+        ...config.userParams,  // Include user parameters (location, theme, etc.)
+        isFirstChunk: sceneNumber === 1,
+        isFinalChunk: remainingWords <= this.safeChunkSize,
         targetWords: chunkTargetWords,
         previousProse,
-        isFirstChunk: sceneNumber === 1,
-        isFinalChunk: remainingWords <= this.safeChunkSize
-      });
+        continuationInstructions: sceneNumber > 1 ? 'Continue the story naturally from where you left off.' : null,
+        finalChunkInstructions: remainingWords <= this.safeChunkSize ? 'Bring the story to a satisfying conclusion.' : null
+      };
+
+      // Get current state for context
+      const currentState = this.stateManager?.getState?.() || null;
+
+      const chunk = await this.storyGenerator.generateStoryChunk(
+        chunkPrompt,
+        currentState,
+        sceneNumber
+      );
 
       const chunkDuration = Date.now() - chunkStartTime;
 
