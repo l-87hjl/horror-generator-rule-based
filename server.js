@@ -236,7 +236,7 @@ app.post('/api/generate-stream', async (req, res) => {
   sendEvent('connected', { message: 'SSE connection established' });
 
   try {
-    const userInput = req.body;
+    let userInput = req.body;
 
     // Validate input
     const validation = orchestrator.validateInput(userInput);
@@ -245,6 +245,9 @@ app.post('/api/generate-stream', async (req, res) => {
       res.end();
       return;
     }
+
+    // Fill in random defaults for any null fields
+    userInput = await orchestrator.fillDefaults(userInput);
 
     console.log('\n--- New SSE Generation Request ---');
     console.log('User Input:', JSON.stringify(userInput, null, 2));

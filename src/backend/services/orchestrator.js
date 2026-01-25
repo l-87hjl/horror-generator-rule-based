@@ -49,6 +49,11 @@ class Orchestrator {
     console.log(`\n=== Starting Story Generation Workflow ===`);
     console.log(`Session ID: ${sessionId}`);
     console.log(`Target Word Count: ${userInput.wordCount}`);
+
+    // Fill in random defaults for any null fields
+    console.log('🎲 Filling defaults for unspecified options...');
+    userInput = await this.fillDefaults(userInput);
+
     console.log(`Location: ${userInput.location}`);
     console.log(`Theme: ${userInput.thematicFocus}\n`);
 
@@ -446,6 +451,7 @@ class Orchestrator {
 
   /**
    * Validate user input before workflow
+   * Only wordCount is required - other fields can be null (engine picks defaults)
    */
   validateInput(userInput) {
     const errors = [];
@@ -455,38 +461,79 @@ class Orchestrator {
       errors.push('Word count must be between 5,000 and 50,000');
     }
 
-    if (!userInput.location) {
-      errors.push('Location is required');
-    }
-
-    if (!userInput.entryCondition) {
-      errors.push('Entry condition is required');
-    }
-
-    if (!userInput.discoveryMethod) {
-      errors.push('Discovery method is required');
-    }
-
-    if (!userInput.completenessPattern) {
-      errors.push('Completeness pattern is required');
-    }
-
-    if (!userInput.violationResponse) {
-      errors.push('Violation response is required');
-    }
-
-    if (!userInput.endingType) {
-      errors.push('Ending type is required');
-    }
-
-    if (!userInput.thematicFocus) {
-      errors.push('Thematic focus is required');
-    }
+    // All other fields are optional - engine will pick random defaults if null
 
     return {
       valid: errors.length === 0,
       errors
     };
+  }
+
+  /**
+   * Fill in random defaults for any null/undefined fields
+   * Called after validation, before workflow execution
+   */
+  async fillDefaults(userInput) {
+    const options = await this.getAvailableOptions();
+    const filled = { ...userInput };
+
+    // Helper to pick random element from array
+    const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    // Fill each null field with a random option
+    if (!filled.location && options.locations?.length) {
+      filled.location = pickRandom(options.locations);
+      console.log(`   🎲 Random location: ${filled.location}`);
+    }
+
+    if (!filled.entryCondition && options.entryConditions?.length) {
+      filled.entryCondition = pickRandom(options.entryConditions);
+      console.log(`   🎲 Random entry condition: ${filled.entryCondition}`);
+    }
+
+    if (!filled.discoveryMethod && options.discoveryMethods?.length) {
+      filled.discoveryMethod = pickRandom(options.discoveryMethods);
+      console.log(`   🎲 Random discovery method: ${filled.discoveryMethod}`);
+    }
+
+    if (!filled.completenessPattern && options.completenessPatterns?.length) {
+      filled.completenessPattern = pickRandom(options.completenessPatterns);
+      console.log(`   🎲 Random completeness pattern: ${filled.completenessPattern}`);
+    }
+
+    if (!filled.violationResponse && options.violationResponses?.length) {
+      filled.violationResponse = pickRandom(options.violationResponses);
+      console.log(`   🎲 Random violation response: ${filled.violationResponse}`);
+    }
+
+    if (!filled.endingType && options.exitConditions?.length) {
+      filled.endingType = pickRandom(options.exitConditions);
+      console.log(`   🎲 Random ending type: ${filled.endingType}`);
+    }
+
+    if (!filled.thematicFocus && options.themes?.length) {
+      filled.thematicFocus = pickRandom(options.themes);
+      console.log(`   🎲 Random thematic focus: ${filled.thematicFocus}`);
+    }
+
+    // Default escalation and ambiguity if not set
+    if (!filled.escalationStyle) {
+      filled.escalationStyle = pickRandom(['gradual', 'sudden', 'oscillating', 'relentless']);
+      console.log(`   🎲 Random escalation style: ${filled.escalationStyle}`);
+    }
+
+    if (!filled.ambiguityLevel) {
+      filled.ambiguityLevel = pickRandom(['low', 'medium', 'high', 'very-high']);
+      console.log(`   🎲 Random ambiguity level: ${filled.ambiguityLevel}`);
+    }
+
+    // Default rule count if not set
+    if (!filled.ruleCount || filled.ruleCount < 1) {
+      filled.ruleCount = Math.floor(Math.random() * 5) + 3; // 3-7 rules
+      console.log(`   🎲 Random rule count: ${filled.ruleCount}`);
+    }
+
+    return filled;
   }
 }
 
