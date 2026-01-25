@@ -171,6 +171,67 @@ class Orchestrator {
         };
       }
 
+      // CRITICAL: Save and package files IMMEDIATELY after generation
+      // This ensures files are downloadable even if audit/refinement fails
+      sessionData.currentStage = 'immediate_packaging';
+      console.log('📦 Step 1.75: Creating IMMEDIATE output package (before audit)...');
+
+      // Save state file first
+      const stateFilePath = path.join(
+        this.outputPackager.getOutputDir(),
+        sessionId,
+        'session_state.json'
+      );
+      await sessionData.stateManager.saveState(stateFilePath);
+      sessionData.stateFilePath = stateFilePath;
+
+      // Create initial package (generation-only, no audit/refinement)
+      const immediatePackageData = {
+        ...sessionData,
+        status: 'generation_complete',
+        auditReport: null,
+        revisedStory: null,
+        changeLog: []
+      };
+      const immediatePackage = await this.outputPackager.createPackage(immediatePackageData);
+      console.log(`✅ Immediate package created: ${immediatePackage.zipPath}`);
+      console.log(`   Download available at: /api/download/${sessionId}\n`);
+
+      // Store immediate package info for potential early return
+      sessionData.immediatePackage = immediatePackage;
+
+      // Check if user wants to skip audit/refinement (for faster delivery)
+      const skipAudit = userInput.skipAudit === true;
+      const skipRefinement = userInput.skipRefinement === true || skipAudit;
+
+      if (skipAudit) {
+        console.log('⏭️  Skipping audit and refinement (user requested)...\n');
+        sessionData.status = 'completed';
+        sessionData.currentStage = 'complete';
+        sessionData.metadata.endTime = new Date().toISOString();
+        sessionData.metadata.duration = this.calculateDuration(
+          sessionData.metadata.startTime,
+          sessionData.metadata.endTime
+        );
+
+        return {
+          success: true,
+          sessionId,
+          outputPackage: immediatePackage,
+          downloadUrl: `/api/download/${sessionId}`,
+          summary: {
+            wordCount: sessionData.initialStory.split(/\s+/).length,
+            qualityScore: null,
+            grade: 'not_audited',
+            revisionsApplied: 0,
+            duration: sessionData.metadata.duration
+          },
+          files: immediatePackage.files,
+          stage: 'generation_complete',
+          nextStage: '/api/refine' // Inform client about next optional stage
+        };
+      }
+
       // Step 2: Perform revision audit
       sessionData.currentStage = 'revision_audit';
       console.log('🔍 Step 2: Performing revision audit...');
@@ -191,8 +252,8 @@ class Orchestrator {
       console.log(`   Critical Failures: ${auditResult.scores.criticalFailures}`);
       console.log(`   Major Failures: ${auditResult.scores.majorFailures}\n`);
 
-      // Step 3: Refine if needed
-      if (this.config.autoRefine && this.revisionAuditor.needsRefinement(auditResult.scores)) {
+      // Step 3: Refine if needed (and not skipped)
+      if (!skipRefinement && this.config.autoRefine && this.revisionAuditor.needsRefinement(auditResult.scores)) {
         sessionData.currentStage = 'refinement';
         console.log('🔧 Step 3: Refinement needed - applying fixes...');
 
@@ -223,21 +284,15 @@ class Orchestrator {
         sessionData.changeLog = [];
       }
 
-      // Step 4: Save state file
+      // Step 4: Save updated state file
       sessionData.currentStage = 'state_saving';
-      console.log('💾 Step 4: Saving state file...');
-      const stateFilePath = path.join(
-        this.outputPackager.getOutputDir(),
-        sessionId,
-        'session_state.json'
-      );
+      console.log('💾 Step 4: Saving updated state file...');
       await sessionData.stateManager.saveState(stateFilePath);
-      sessionData.stateFilePath = stateFilePath;
       console.log(`✅ State saved\n`);
 
-      // Step 5: Package output
+      // Step 5: Package final output (with audit/refinement)
       sessionData.currentStage = 'packaging';
-      console.log('📦 Step 5: Creating output package...');
+      console.log('📦 Step 5: Creating final output package...');
       const packageResult = await this.outputPackager.createPackage(sessionData);
 
       sessionData.status = 'completed';

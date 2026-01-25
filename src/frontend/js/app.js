@@ -93,10 +93,10 @@ function populateSelect(elementId, options, formatter) {
     const select = document.getElementById(elementId);
     if (!select) return;
 
-    // Clear existing options
-    select.innerHTML = '<option value="">Select an option...</option>';
+    // Clear existing options and add Default first
+    select.innerHTML = '<option value="_default" selected>Default (Engine selects)</option>';
 
-    // Add new options
+    // Add all specific options
     for (const option of options) {
         const optionElement = document.createElement('option');
         optionElement.value = option;
@@ -155,6 +155,17 @@ function setupEventListeners() {
     const errorPartialBtn = document.getElementById('error-partial-btn');
     if (errorPartialBtn) {
         errorPartialBtn.addEventListener('click', handleDownloadPartial);
+    }
+
+    // Multi-stage workflow buttons
+    const refineBtn = document.getElementById('refine-btn');
+    if (refineBtn) {
+        refineBtn.addEventListener('click', handleRefineStory);
+    }
+
+    const polishBtn = document.getElementById('polish-btn');
+    if (polishBtn) {
+        polishBtn.addEventListener('click', handlePolishStory);
     }
 }
 
@@ -229,19 +240,29 @@ async function handleFormSubmit(event) {
     event.preventDefault();
 
     const formData = new FormData(event.target);
+
+    // Helper to get value or null if default
+    const getValue = (name) => {
+        const val = formData.get(name);
+        return (val === '_default' || val === '') ? null : val;
+    };
+
     const userInput = {
         wordCount: parseInt(formData.get('wordCount')),
         ruleCount: parseInt(formData.get('ruleCount')),
-        location: formData.get('location'),
-        customLocation: formData.get('customLocation'),
-        entryCondition: formData.get('entryCondition'),
-        discoveryMethod: formData.get('discoveryMethod'),
-        completenessPattern: formData.get('completenessPattern'),
-        violationResponse: formData.get('violationResponse'),
-        endingType: formData.get('endingType'),
-        thematicFocus: formData.get('thematicFocus'),
-        escalationStyle: formData.get('escalationStyle'),
-        ambiguityLevel: formData.get('ambiguityLevel')
+        location: getValue('location'),
+        customLocation: formData.get('customLocation') || null,
+        entryCondition: getValue('entryCondition'),
+        discoveryMethod: getValue('discoveryMethod'),
+        completenessPattern: getValue('completenessPattern'),
+        violationResponse: getValue('violationResponse'),
+        endingType: getValue('endingType'),
+        thematicFocus: getValue('thematicFocus'),
+        escalationStyle: getValue('escalationStyle'),
+        ambiguityLevel: getValue('ambiguityLevel'),
+        // Generation options
+        skipAudit: formData.get('skipAudit') === 'on',
+        skipRefinement: formData.get('skipAudit') === 'on' // Skip refinement if skipping audit
     };
 
     console.log('Submitting generation request:', userInput);
@@ -945,6 +966,119 @@ async function handleDownloadPartial() {
     } catch (error) {
         console.error('Error fetching partial output:', error);
         alert('Failed to fetch partial output: ' + error.message);
+    }
+}
+
+/**
+ * Handle refine story button click
+ */
+async function handleRefineStory() {
+    if (!currentSessionId) {
+        alert('No session ID available. Generate a story first.');
+        return;
+    }
+
+    const refineBtn = document.getElementById('refine-btn');
+    const workflowStatus = document.getElementById('workflow-status');
+
+    try {
+        refineBtn.disabled = true;
+        refineBtn.textContent = 'Refining...';
+        if (workflowStatus) workflowStatus.textContent = 'Running refinement pass...';
+
+        const response = await fetch('/api/refine', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: currentSessionId })
+        });
+
+        const data = await safeReadJson(response);
+
+        if (!data.success) {
+            throw new Error(data.error || 'Refinement failed');
+        }
+
+        if (workflowStatus) {
+            if (data.refinementRounds) {
+                workflowStatus.textContent = `Refinement complete! ${data.refinementRounds} rounds applied. Score: ${data.auditScore}/100`;
+                workflowStatus.innerHTML += `<br><a href="${data.downloadUrl}" target="_blank">Download refined story</a>`;
+            } else {
+                workflowStatus.textContent = `No refinement needed. Score: ${data.auditScore}/100 (${data.grade})`;
+            }
+        }
+
+        // Update session ID to refined version
+        if (data.sessionId && data.sessionId !== currentSessionId) {
+            currentSessionId = data.sessionId;
+        }
+
+    } catch (error) {
+        console.error('Refinement error:', error);
+        if (workflowStatus) workflowStatus.textContent = 'Refinement failed: ' + error.message;
+        alert('Refinement failed: ' + error.message);
+    } finally {
+        refineBtn.disabled = false;
+        refineBtn.innerHTML = '🔧 Refine Story<small style="display: block; font-size: 0.75em; opacity: 0.8;">Fix structural issues based on audit</small>';
+    }
+}
+
+/**
+ * Handle polish story button click
+ */
+async function handlePolishStory() {
+    if (!currentSessionId) {
+        alert('No session ID available. Generate a story first.');
+        return;
+    }
+
+    const polishBtn = document.getElementById('polish-btn');
+    const workflowStatus = document.getElementById('workflow-status');
+
+    // Get polish options (could expand this to a modal in the future)
+    const polishOptions = {
+        sensoryDetail: true,
+        dialoguePolish: true,
+        emotionalInteriority: true,
+        atmosphericDread: true
+    };
+
+    try {
+        polishBtn.disabled = true;
+        polishBtn.textContent = 'Polishing...';
+        if (workflowStatus) workflowStatus.textContent = 'Running polish pass (this may take a few minutes)...';
+
+        const response = await fetch('/api/polish', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: currentSessionId,
+                polishOptions
+            })
+        });
+
+        const data = await safeReadJson(response);
+
+        if (!data.success) {
+            throw new Error(data.error || 'Polish failed');
+        }
+
+        if (workflowStatus) {
+            workflowStatus.textContent = `Polish complete! ${data.inputWords} → ${data.outputWords} words`;
+            workflowStatus.innerHTML += `<br><a href="${data.downloadUrl}" target="_blank">Download polished story</a>`;
+        }
+
+        // Update session ID to polished version
+        if (data.sessionId && data.sessionId !== currentSessionId) {
+            currentSessionId = data.sessionId;
+        }
+
+    } catch (error) {
+        console.error('Polish error:', error);
+        if (workflowStatus) workflowStatus.textContent = 'Polish failed: ' + error.message;
+        alert('Polish failed: ' + error.message);
+    } finally {
+        polishBtn.disabled = false;
+        polishBtn.innerHTML = '✨ Polish Story<small style="display: block; font-size: 0.75em; opacity: 0.8;">Add sensory detail, improve dialogue</small>';
     }
 }
 

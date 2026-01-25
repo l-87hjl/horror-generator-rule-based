@@ -158,6 +158,20 @@
                         </p>
                     </div>
 
+                    <!-- Generation Options -->
+                    <div class="form-section">
+                        <h3>Generation Options</h3>
+                        <p class="section-note">Get your draft faster by skipping optional post-processing</p>
+
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="skipAudit" name="skipAudit">
+                                <span>Skip Audit & Refinement (fastest - download immediately after generation)</span>
+                            </label>
+                            <small>You can refine later using the Refine button</small>
+                        </div>
+                    </div>
+
                     <!-- Submit -->
                     <div class="form-actions">
                         <button type="submit" id="generate-btn" class="btn btn-primary">
@@ -243,6 +257,24 @@
                     <button id="new-story-btn" class="btn btn-secondary">
                         Generate Another Story
                     </button>
+                </div>
+
+                <!-- Multi-Stage Workflow -->
+                <div class="workflow-section" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
+                    <h3>Optional Processing Stages</h3>
+                    <p class="section-note">Apply additional processing to your generated story</p>
+
+                    <div class="workflow-actions" style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+                        <button id="refine-btn" class="btn btn-secondary">
+                            🔧 Refine Story
+                            <small style="display: block; font-size: 0.75em; opacity: 0.8;">Fix structural issues based on audit</small>
+                        </button>
+                        <button id="polish-btn" class="btn btn-secondary">
+                            ✨ Polish Story
+                            <small style="display: block; font-size: 0.75em; opacity: 0.8;">Add sensory detail, improve dialogue</small>
+                        </button>
+                    </div>
+                    <p id="workflow-status" class="workflow-note" style="margin-top: 10px; color: #888;"></p>
                 </div>
             </section>
 

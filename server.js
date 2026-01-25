@@ -750,6 +750,257 @@ app.get('/api/session/:sessionId/partial', async (req, res) => {
 });
 
 /**
+ * POST /api/refine
+ * Refine an existing generated story (separate from initial generation)
+ *
+ * This allows users to download after generation, then optionally refine later.
+ */
+app.post('/api/refine', async (req, res) => {
+  try {
+    const { sessionId, story } = req.body;
+
+    if (!sessionId && !story) {
+      return res.status(400).json({
+        success: false,
+        error: 'Either sessionId or story text is required'
+      });
+    }
+
+    console.log(`\n--- Refinement Request ---`);
+    console.log(`Session ID: ${sessionId || 'none (using provided story)'}`);
+
+    // Load story from session or use provided story
+    let storyText = story;
+    let sourceSessionId = sessionId;
+
+    if (!storyText && sessionId) {
+      // Load story from session directory
+      const storyPath = path.join(__dirname, 'generated', sessionId, 'full_story.md');
+      try {
+        storyText = await fs.readFile(storyPath, 'utf-8');
+      } catch (e) {
+        // Try alternative filenames
+        const altPath = path.join(__dirname, 'generated', sessionId, 'final_story.txt');
+        try {
+          storyText = await fs.readFile(altPath, 'utf-8');
+        } catch (e2) {
+          return res.status(404).json({
+            success: false,
+            error: 'Could not find story file for session'
+          });
+        }
+      }
+    }
+
+    // Create new session for refined version
+    const refinedSessionId = sourceSessionId
+      ? `${sourceSessionId}-refined`
+      : orchestrator.generateSessionId() + '-refined';
+
+    console.log(`Refined Session ID: ${refinedSessionId}`);
+
+    // Perform audit first
+    console.log('🔍 Running audit...');
+    const auditResult = await orchestrator.revisionAuditor.auditStory(storyText, {});
+
+    console.log(`   Audit Score: ${auditResult.scores.overallScore}/100`);
+    console.log(`   Grade: ${auditResult.scores.grade}`);
+
+    // Refine based on audit
+    if (orchestrator.revisionAuditor.needsRefinement(auditResult.scores)) {
+      console.log('🔧 Applying refinement...');
+
+      const refinementResult = await orchestrator.storyRefiner.refineStory(
+        storyText,
+        auditResult.rawReport,
+        { maxRounds: 2 }
+      );
+
+      // Save refined story
+      const refinedDir = path.join(__dirname, 'generated', refinedSessionId);
+      await fs.mkdir(refinedDir, { recursive: true });
+      await fs.writeFile(
+        path.join(refinedDir, 'refined_story.txt'),
+        refinementResult.refinedStory,
+        'utf-8'
+      );
+      await fs.writeFile(
+        path.join(refinedDir, 'refinement_changelog.json'),
+        JSON.stringify(refinementResult.changeLog, null, 2),
+        'utf-8'
+      );
+
+      console.log(`✅ Refinement complete - ${refinementResult.rounds} rounds`);
+
+      res.json({
+        success: true,
+        sessionId: refinedSessionId,
+        originalSessionId: sourceSessionId,
+        downloadUrl: `/api/session/${refinedSessionId}/file/refined_story.txt`,
+        auditScore: auditResult.scores.overallScore,
+        refinementRounds: refinementResult.rounds,
+        changeCount: refinementResult.metadata?.totalChanges || refinementResult.changeLog.length
+      });
+    } else {
+      console.log('✅ No refinement needed');
+      res.json({
+        success: true,
+        sessionId: sourceSessionId,
+        message: 'Story passed audit, no refinement needed',
+        auditScore: auditResult.scores.overallScore,
+        grade: auditResult.scores.grade
+      });
+    }
+
+  } catch (error) {
+    console.error('Refinement error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/polish
+ * Polish story for sensory detail, dialogue, and prose quality
+ *
+ * This is a separate pass focused on literary quality rather than structural fixes.
+ */
+app.post('/api/polish', async (req, res) => {
+  try {
+    const { sessionId, story, polishOptions = {} } = req.body;
+
+    if (!sessionId && !story) {
+      return res.status(400).json({
+        success: false,
+        error: 'Either sessionId or story text is required'
+      });
+    }
+
+    console.log(`\n--- Polish Request ---`);
+    console.log(`Session ID: ${sessionId || 'none (using provided story)'}`);
+    console.log(`Options:`, polishOptions);
+
+    // Load story from session or use provided story
+    let storyText = story;
+    let sourceSessionId = sessionId;
+
+    if (!storyText && sessionId) {
+      const storyPath = path.join(__dirname, 'generated', sessionId, 'full_story.md');
+      try {
+        storyText = await fs.readFile(storyPath, 'utf-8');
+      } catch (e) {
+        const altPath = path.join(__dirname, 'generated', sessionId, 'refined_story.txt');
+        try {
+          storyText = await fs.readFile(altPath, 'utf-8');
+        } catch (e2) {
+          const altPath2 = path.join(__dirname, 'generated', sessionId, 'final_story.txt');
+          try {
+            storyText = await fs.readFile(altPath2, 'utf-8');
+          } catch (e3) {
+            return res.status(404).json({
+              success: false,
+              error: 'Could not find story file for session'
+            });
+          }
+        }
+      }
+    }
+
+    // Create new session for polished version
+    const polishedSessionId = sourceSessionId
+      ? `${sourceSessionId}-polished`
+      : orchestrator.generateSessionId() + '-polished';
+
+    console.log(`Polished Session ID: ${polishedSessionId}`);
+
+    // Build polish prompt based on options
+    const polishFocus = [];
+    if (polishOptions.sensoryDetail !== false) {
+      polishFocus.push('SENSORY DETAIL: Add specific sounds, textures, temperatures, smells. Use physical sensations (breath, heartbeat, skin crawling). Include onomatopoeia sparingly but effectively.');
+    }
+    if (polishOptions.dialoguePolish !== false) {
+      polishFocus.push('DIALOGUE: Make dialogue feel natural and character-specific. Use minimal tags. Ensure voices are distinct.');
+    }
+    if (polishOptions.emotionalInteriority !== false) {
+      polishFocus.push('EMOTIONAL INTERIORITY: Deepen the narrator\'s fear responses, doubt, mounting dread. Show physical manifestations of emotion.');
+    }
+    if (polishOptions.atmosphericDread !== false) {
+      polishFocus.push('ATMOSPHERE: Build dread through accumulation of detail. Use subtle foreshadowing. Maintain tension through pacing.');
+    }
+
+    const polishPrompt = `You are a prose polish pass for a horror story. Enhance the literary quality while preserving ALL events, plot points, and structural elements exactly.
+
+POLISH FOCUS:
+${polishFocus.join('\n\n')}
+
+CRITICAL RULES:
+1. DO NOT change any events, actions, or plot points
+2. DO NOT add new information or lore
+3. DO NOT change POV or tense
+4. DO NOT use meta-language (avoid: threshold, mechanism, system, protocol)
+5. Preserve the exact sequence of events
+6. Only enhance the prose quality within each scene
+
+Return ONLY the polished story, no commentary.
+
+STORY TO POLISH:
+${storyText}`;
+
+    console.log('✨ Running polish pass...');
+
+    const claudeClient = orchestrator.claudeClient;
+    const response = await claudeClient.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: Math.min(storyText.length * 2, 64000),
+      temperature: 0.4,
+      messages: [{
+        role: 'user',
+        content: polishPrompt
+      }]
+    });
+
+    const polishedStory = response.content[0].text;
+
+    // Save polished story
+    const polishedDir = path.join(__dirname, 'generated', polishedSessionId);
+    await fs.mkdir(polishedDir, { recursive: true });
+    await fs.writeFile(
+      path.join(polishedDir, 'polished_story.txt'),
+      polishedStory,
+      'utf-8'
+    );
+    await fs.writeFile(
+      path.join(polishedDir, 'polish_options.json'),
+      JSON.stringify(polishOptions, null, 2),
+      'utf-8'
+    );
+
+    console.log(`✅ Polish complete`);
+    console.log(`   Input words: ${storyText.split(/\s+/).length}`);
+    console.log(`   Output words: ${polishedStory.split(/\s+/).length}`);
+
+    res.json({
+      success: true,
+      sessionId: polishedSessionId,
+      originalSessionId: sourceSessionId,
+      downloadUrl: `/api/session/${polishedSessionId}/file/polished_story.txt`,
+      inputWords: storyText.split(/\s+/).length,
+      outputWords: polishedStory.split(/\s+/).length,
+      polishOptions
+    });
+
+  } catch (error) {
+    console.error('Polish error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
  * GET /api/health
  * Health check endpoint
  */
