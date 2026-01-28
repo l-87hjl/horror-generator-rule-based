@@ -130,7 +130,7 @@ class StageOrchestrator {
         duration: Date.now() - this.stageStartTime
       });
 
-      // ===== STAGE 2: Assembly =====
+      // ===== STAGE 2: Assembly (with partial recovery) =====
       this.currentStage = STAGES.ASSEMBLY;
       result.currentStage = STAGES.ASSEMBLY;
       this.stageStartTime = Date.now();
@@ -140,17 +140,42 @@ class StageOrchestrator {
         message: 'Assembling chunks into full story...'
       });
 
-      result.stages.assembly = await this.stage2_Assembly();
+      try {
+        result.stages.assembly = await this.stage2_Assembly();
 
-      if (!result.stages.assembly.success) {
-        throw new Error(`Assembly failed: ${result.stages.assembly.error}`);
+        if (!result.stages.assembly.success) {
+          console.warn('⚠️ Assembly failed, attempting partial recovery...');
+          // Try to get raw chunks even if assembly failed
+          result.stages.assembly = await this.stage2_PartialRecovery();
+        }
+      } catch (assemblyError) {
+        console.error('Assembly error:', assemblyError.message);
+        // Attempt partial recovery on error
+        try {
+          result.stages.assembly = await this.stage2_PartialRecovery();
+          console.log('✅ Partial recovery successful');
+        } catch (recoveryError) {
+          console.error('Partial recovery also failed:', recoveryError.message);
+          result.stages.assembly = {
+            success: false,
+            error: assemblyError.message,
+            partialRecovery: false
+          };
+        }
       }
 
-      result.story = result.stages.assembly.story;
+      // Even if assembly partially failed, try to continue with what we have
+      if (result.stages.assembly.success || result.stages.assembly.partialRecovery) {
+        result.story = result.stages.assembly.story || '';
+      } else {
+        // Last resort: concatenate any chunks we saved
+        result.story = result.stages.assembly.rawChunks?.join('\n\n---\n\n') || '';
+      }
 
       this.emitProgress('stage_complete', {
         stage: STAGES.ASSEMBLY,
-        wordCount: result.stages.assembly.wordCount,
+        wordCount: result.stages.assembly.wordCount || this.countWords(result.story),
+        partial: !result.stages.assembly.success,
         duration: Date.now() - this.stageStartTime
       });
 
@@ -291,6 +316,7 @@ class StageOrchestrator {
     let currentWordCount = 0;
     let sceneNumber = 1;
     let previousProse = '';
+    let storyContext = null; // Extracted from chunk 1, injected into chunks 2+
 
     // Initialize delta extractor and state updater
     const deltaExtractor = new CanonDeltaExtractor(this.claudeClient);
@@ -325,7 +351,9 @@ class StageOrchestrator {
         targetWords: chunkTargetWords,
         previousProse,
         continuationInstructions: sceneNumber > 1 ? 'Continue the story naturally from where you left off.' : null,
-        finalChunkInstructions: remainingWords <= this.safeChunkSize ? 'Bring the story to a satisfying conclusion.' : null
+        finalChunkInstructions: remainingWords <= this.safeChunkSize ? 'Bring the story to a satisfying conclusion.' : null,
+        // Inject extracted story context for chunks 2+
+        storyContext: sceneNumber > 1 ? storyContext : null
       };
 
       // Get current state for context
@@ -349,6 +377,18 @@ class StageOrchestrator {
 
       if (!saveResult.success) {
         throw new Error(`Failed to save chunk ${sceneNumber}: ${saveResult.error}`);
+      }
+
+      // After chunk 1: Extract story context for subsequent chunks
+      if (sceneNumber === 1) {
+        try {
+          console.log('📝 Extracting story context from chunk 1...');
+          storyContext = await this.extractStoryContext(chunk.prose);
+          console.log(`✅ Story context extracted: ${storyContext.rules?.length || 0} rules, protagonist: ${storyContext.protagonist?.name || 'unnamed'}`);
+        } catch (contextError) {
+          console.warn('⚠️ Story context extraction failed:', contextError.message);
+          // Continue without context - not critical
+        }
       }
 
       // Minimal delta extraction (non-blocking on failure)
@@ -430,6 +470,142 @@ class StageOrchestrator {
       wordCount: result.totalWords,
       filepath: result.filepath
     };
+  }
+
+  /**
+   * Stage 2 Partial Recovery: Load raw chunks and concatenate
+   * Used when normal assembly fails
+   */
+  async stage2_PartialRecovery() {
+    console.log('🔄 Attempting partial recovery from raw chunks...');
+
+    try {
+      const chunksResult = await this.chunkPersistence.loadAllChunks(this.sessionId);
+
+      if (!chunksResult.success || !chunksResult.chunks || chunksResult.chunks.length === 0) {
+        return {
+          success: false,
+          partialRecovery: false,
+          error: 'No chunks found for recovery'
+        };
+      }
+
+      // Sort chunks by scene number
+      const sortedChunks = chunksResult.chunks.sort((a, b) => {
+        const numA = parseInt(a.filename?.match(/chunk_(\d+)/)?.[1] || '0');
+        const numB = parseInt(b.filename?.match(/chunk_(\d+)/)?.[1] || '0');
+        return numA - numB;
+      });
+
+      // Concatenate chunks with separators
+      const rawChunks = sortedChunks.map(c => c.text || '');
+      const story = rawChunks.join('\n\n');
+      const wordCount = this.countWords(story);
+
+      console.log(`✅ Partial recovery: ${sortedChunks.length} chunks, ${wordCount} words`);
+
+      return {
+        success: true,
+        partialRecovery: true,
+        story,
+        wordCount,
+        rawChunks,
+        chunksRecovered: sortedChunks.length
+      };
+    } catch (error) {
+      console.error('Partial recovery failed:', error.message);
+      return {
+        success: false,
+        partialRecovery: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Count words in text
+   */
+  countWords(text) {
+    if (!text) return 0;
+    return text.trim().split(/\s+/).length;
+  }
+
+  /**
+   * Extract story context from chunk 1 for injection into subsequent chunks
+   * Uses Claude to extract setting, protagonist, and rules established
+   */
+  async extractStoryContext(chunkProse) {
+    const extractionPrompt = `Analyze this horror story opening and extract the key elements that MUST remain consistent throughout the story.
+
+STORY OPENING:
+${chunkProse}
+
+Extract and return as JSON:
+{
+  "setting": {
+    "location": "specific place name/description",
+    "timeOfDay": "when the story takes place",
+    "atmosphere": "brief description of mood/tone"
+  },
+  "protagonist": {
+    "name": "character name if given, or 'unnamed narrator'",
+    "role": "their job/relationship to the setting",
+    "knowledge": "what they know about the rules so far"
+  },
+  "rules": [
+    {
+      "number": 1,
+      "text": "exact rule text as stated in story",
+      "consequence": "stated or implied consequence"
+    }
+  ],
+  "entities": [
+    {
+      "name": "entity name",
+      "capabilities": ["what it can do"],
+      "triggers": ["what activates it"]
+    }
+  ],
+  "stateFlags": {
+    "rulesDiscovered": true/false,
+    "firstViolation": true/false,
+    "entityEncountered": true/false
+  }
+}
+
+Return ONLY valid JSON, no commentary.`;
+
+    const response = await this.claudeClient.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      temperature: 0.1,
+      messages: [{
+        role: 'user',
+        content: extractionPrompt
+      }]
+    });
+
+    const responseText = response.content[0].text;
+
+    // Parse JSON from response
+    try {
+      // Try to find JSON in the response
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('No JSON found in response');
+    } catch (parseError) {
+      console.warn('Failed to parse story context JSON:', parseError.message);
+      // Return minimal context
+      return {
+        setting: { location: 'unknown', atmosphere: 'horror' },
+        protagonist: { name: 'narrator', role: 'unknown' },
+        rules: [],
+        entities: [],
+        stateFlags: {}
+      };
+    }
   }
 
   /**

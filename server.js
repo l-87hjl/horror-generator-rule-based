@@ -294,12 +294,12 @@ app.post('/api/generate-stream', async (req, res) => {
       estimatedChunks: Math.ceil(userInput.wordCount / 2000)
     });
 
-    // Run staged generation
+    // Run staged generation (respect user's skip flags)
     const result = await stageOrchestrator.generateInStages(sessionId, {
       wordCount: userInput.wordCount,
       userParams: userInput,
-      runAudit: true,
-      runRefinement: true
+      runAudit: !userInput.skipAudit,
+      runRefinement: !userInput.skipRefinement && !userInput.skipAudit
     });
 
     // Update job status
