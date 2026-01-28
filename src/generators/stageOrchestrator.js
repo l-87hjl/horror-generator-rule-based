@@ -316,6 +316,7 @@ class StageOrchestrator {
     let currentWordCount = 0;
     let sceneNumber = 1;
     let previousProse = '';
+    let storyContext = null; // Extracted from chunk 1, injected into chunks 2+
 
     // Initialize delta extractor and state updater
     const deltaExtractor = new CanonDeltaExtractor(this.claudeClient);
@@ -350,7 +351,9 @@ class StageOrchestrator {
         targetWords: chunkTargetWords,
         previousProse,
         continuationInstructions: sceneNumber > 1 ? 'Continue the story naturally from where you left off.' : null,
-        finalChunkInstructions: remainingWords <= this.safeChunkSize ? 'Bring the story to a satisfying conclusion.' : null
+        finalChunkInstructions: remainingWords <= this.safeChunkSize ? 'Bring the story to a satisfying conclusion.' : null,
+        // Inject extracted story context for chunks 2+
+        storyContext: sceneNumber > 1 ? storyContext : null
       };
 
       // Get current state for context
@@ -374,6 +377,18 @@ class StageOrchestrator {
 
       if (!saveResult.success) {
         throw new Error(`Failed to save chunk ${sceneNumber}: ${saveResult.error}`);
+      }
+
+      // After chunk 1: Extract story context for subsequent chunks
+      if (sceneNumber === 1) {
+        try {
+          console.log('📝 Extracting story context from chunk 1...');
+          storyContext = await this.extractStoryContext(chunk.prose);
+          console.log(`✅ Story context extracted: ${storyContext.rules?.length || 0} rules, protagonist: ${storyContext.protagonist?.name || 'unnamed'}`);
+        } catch (contextError) {
+          console.warn('⚠️ Story context extraction failed:', contextError.message);
+          // Continue without context - not critical
+        }
       }
 
       // Minimal delta extraction (non-blocking on failure)
@@ -513,6 +528,84 @@ class StageOrchestrator {
   countWords(text) {
     if (!text) return 0;
     return text.trim().split(/\s+/).length;
+  }
+
+  /**
+   * Extract story context from chunk 1 for injection into subsequent chunks
+   * Uses Claude to extract setting, protagonist, and rules established
+   */
+  async extractStoryContext(chunkProse) {
+    const extractionPrompt = `Analyze this horror story opening and extract the key elements that MUST remain consistent throughout the story.
+
+STORY OPENING:
+${chunkProse}
+
+Extract and return as JSON:
+{
+  "setting": {
+    "location": "specific place name/description",
+    "timeOfDay": "when the story takes place",
+    "atmosphere": "brief description of mood/tone"
+  },
+  "protagonist": {
+    "name": "character name if given, or 'unnamed narrator'",
+    "role": "their job/relationship to the setting",
+    "knowledge": "what they know about the rules so far"
+  },
+  "rules": [
+    {
+      "number": 1,
+      "text": "exact rule text as stated in story",
+      "consequence": "stated or implied consequence"
+    }
+  ],
+  "entities": [
+    {
+      "name": "entity name",
+      "capabilities": ["what it can do"],
+      "triggers": ["what activates it"]
+    }
+  ],
+  "stateFlags": {
+    "rulesDiscovered": true/false,
+    "firstViolation": true/false,
+    "entityEncountered": true/false
+  }
+}
+
+Return ONLY valid JSON, no commentary.`;
+
+    const response = await this.claudeClient.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      temperature: 0.1,
+      messages: [{
+        role: 'user',
+        content: extractionPrompt
+      }]
+    });
+
+    const responseText = response.content[0].text;
+
+    // Parse JSON from response
+    try {
+      // Try to find JSON in the response
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('No JSON found in response');
+    } catch (parseError) {
+      console.warn('Failed to parse story context JSON:', parseError.message);
+      // Return minimal context
+      return {
+        setting: { location: 'unknown', atmosphere: 'horror' },
+        protagonist: { name: 'narrator', role: 'unknown' },
+        rules: [],
+        entities: [],
+        stateFlags: {}
+      };
+    }
   }
 
   /**

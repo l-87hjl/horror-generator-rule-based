@@ -716,6 +716,43 @@ Generate exactly ${targetWords} words of the story opening now.`;
       return basePrompt + chunkInstructions;
     }
 
+    // Extract story context if available
+    const storyContext = chunkPrompt.storyContext;
+
+    // Build story context constraints section
+    let contextConstraints = '';
+    if (storyContext) {
+      contextConstraints = `
+# HARD CONSTRAINTS FROM PREVIOUS CHUNKS (DO NOT VIOLATE)
+
+## Setting (IMMUTABLE)
+- Location: ${storyContext.setting?.location || 'as established'}
+- Time: ${storyContext.setting?.timeOfDay || 'as established'}
+- Atmosphere: ${storyContext.setting?.atmosphere || 'horror'}
+
+## Protagonist (IMMUTABLE)
+- Name: ${storyContext.protagonist?.name || 'as established'}
+- Role: ${storyContext.protagonist?.role || 'as established'}
+- Current knowledge: ${storyContext.protagonist?.knowledge || 'as established'}
+
+## Rules Established (MUST REMAIN INVARIANT)
+${storyContext.rules?.length > 0
+  ? storyContext.rules.map((r, i) => `${i + 1}. ${r.text}${r.consequence ? ` → Consequence: ${r.consequence}` : ''}`).join('\n')
+  : '(Use rules from previous prose)'}
+
+## Entities Introduced (CAPABILITIES ARE FIXED)
+${storyContext.entities?.length > 0
+  ? storyContext.entities.map(e => `- ${e.name}: Can ${e.capabilities?.join(', ') || 'as established'}`).join('\n')
+  : '(Use entities from previous prose)'}
+
+## Current State Flags
+${storyContext.stateFlags ? Object.entries(storyContext.stateFlags).filter(([k, v]) => v).map(([k, v]) => `- ${k}: YES`).join('\n') : '(Continue from established state)'}
+
+**CRITICAL: You MUST NOT contradict any of the above. These are HARD CONSTRAINTS.**
+
+`;
+    }
+
     // Continuation chunk prompt with strong word count enforcement
     let prompt = `Continue the rule-based horror story.
 
@@ -724,7 +761,7 @@ Generate exactly ${targetWords} words of the story opening now.`;
 **YOU MUST WRITE EXACTLY ${targetWords} WORDS** (±5% tolerance: ${Math.floor(targetWords * 0.95)}-${Math.ceil(targetWords * 1.05)} words)
 
 This is NON-NEGOTIABLE. Generate the full ${targetWords} words before stopping.
-
+${contextConstraints}
 # CHUNK PARAMETERS
 
 **Scene Number**: ${sceneNumber}
@@ -746,6 +783,7 @@ ${this.getLastParagraphs(previousProse, 3)}
 - Do NOT restart the narrative
 - Maintain seamless flow and continuity
 - Continue developing tension and escalation
+- RESPECT ALL HARD CONSTRAINTS from previous chunks
 ${isFinalChunk ? '' : '- DO NOT conclude the story - more chunks will follow'}
 
 ${isFinalChunk ? `\n# FINAL CHUNK INSTRUCTIONS\n${finalChunkInstructions}\nBring the story to a satisfying conclusion within this chunk.\n` : ''}
