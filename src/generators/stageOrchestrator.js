@@ -130,7 +130,7 @@ class StageOrchestrator {
         duration: Date.now() - this.stageStartTime
       });
 
-      // ===== STAGE 2: Assembly =====
+      // ===== STAGE 2: Assembly (with partial recovery) =====
       this.currentStage = STAGES.ASSEMBLY;
       result.currentStage = STAGES.ASSEMBLY;
       this.stageStartTime = Date.now();
@@ -140,17 +140,42 @@ class StageOrchestrator {
         message: 'Assembling chunks into full story...'
       });
 
-      result.stages.assembly = await this.stage2_Assembly();
+      try {
+        result.stages.assembly = await this.stage2_Assembly();
 
-      if (!result.stages.assembly.success) {
-        throw new Error(`Assembly failed: ${result.stages.assembly.error}`);
+        if (!result.stages.assembly.success) {
+          console.warn('⚠️ Assembly failed, attempting partial recovery...');
+          // Try to get raw chunks even if assembly failed
+          result.stages.assembly = await this.stage2_PartialRecovery();
+        }
+      } catch (assemblyError) {
+        console.error('Assembly error:', assemblyError.message);
+        // Attempt partial recovery on error
+        try {
+          result.stages.assembly = await this.stage2_PartialRecovery();
+          console.log('✅ Partial recovery successful');
+        } catch (recoveryError) {
+          console.error('Partial recovery also failed:', recoveryError.message);
+          result.stages.assembly = {
+            success: false,
+            error: assemblyError.message,
+            partialRecovery: false
+          };
+        }
       }
 
-      result.story = result.stages.assembly.story;
+      // Even if assembly partially failed, try to continue with what we have
+      if (result.stages.assembly.success || result.stages.assembly.partialRecovery) {
+        result.story = result.stages.assembly.story || '';
+      } else {
+        // Last resort: concatenate any chunks we saved
+        result.story = result.stages.assembly.rawChunks?.join('\n\n---\n\n') || '';
+      }
 
       this.emitProgress('stage_complete', {
         stage: STAGES.ASSEMBLY,
-        wordCount: result.stages.assembly.wordCount,
+        wordCount: result.stages.assembly.wordCount || this.countWords(result.story),
+        partial: !result.stages.assembly.success,
         duration: Date.now() - this.stageStartTime
       });
 
@@ -430,6 +455,64 @@ class StageOrchestrator {
       wordCount: result.totalWords,
       filepath: result.filepath
     };
+  }
+
+  /**
+   * Stage 2 Partial Recovery: Load raw chunks and concatenate
+   * Used when normal assembly fails
+   */
+  async stage2_PartialRecovery() {
+    console.log('🔄 Attempting partial recovery from raw chunks...');
+
+    try {
+      const chunksResult = await this.chunkPersistence.loadAllChunks(this.sessionId);
+
+      if (!chunksResult.success || !chunksResult.chunks || chunksResult.chunks.length === 0) {
+        return {
+          success: false,
+          partialRecovery: false,
+          error: 'No chunks found for recovery'
+        };
+      }
+
+      // Sort chunks by scene number
+      const sortedChunks = chunksResult.chunks.sort((a, b) => {
+        const numA = parseInt(a.filename?.match(/chunk_(\d+)/)?.[1] || '0');
+        const numB = parseInt(b.filename?.match(/chunk_(\d+)/)?.[1] || '0');
+        return numA - numB;
+      });
+
+      // Concatenate chunks with separators
+      const rawChunks = sortedChunks.map(c => c.text || '');
+      const story = rawChunks.join('\n\n');
+      const wordCount = this.countWords(story);
+
+      console.log(`✅ Partial recovery: ${sortedChunks.length} chunks, ${wordCount} words`);
+
+      return {
+        success: true,
+        partialRecovery: true,
+        story,
+        wordCount,
+        rawChunks,
+        chunksRecovered: sortedChunks.length
+      };
+    } catch (error) {
+      console.error('Partial recovery failed:', error.message);
+      return {
+        success: false,
+        partialRecovery: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Count words in text
+   */
+  countWords(text) {
+    if (!text) return 0;
+    return text.trim().split(/\s+/).length;
   }
 
   /**

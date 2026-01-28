@@ -580,8 +580,15 @@ Begin the story now.`;
       finalChunkInstructions
     );
 
-    // Generate chunk
-    const generationResult = await this.claudeClient.generateStory(systemPrompt, userPrompt);
+    // Calculate max_tokens based on target word count
+    // Formula: targetWords * 1.3 (tokens per word) * 1.2 (buffer) = ~1.56x
+    const maxTokens = Math.ceil(targetWords * 1.6);
+    console.log(`   Max tokens: ${maxTokens}`);
+
+    // Generate chunk with calculated max_tokens
+    const generationResult = await this.claudeClient.generateStory(systemPrompt, userPrompt, {
+      maxTokens
+    });
 
     return {
       prose: generationResult.content,
@@ -678,18 +685,50 @@ This is the FINAL chunk of the story. You must:
    */
   buildChunkUserPrompt(chunkPrompt, templates, targetWords, sceneNumber, isFirstChunk, isFinalChunk, previousProse, finalChunkInstructions) {
     if (isFirstChunk) {
-      // Use full user prompt for first chunk
-      return this.buildUserPrompt(chunkPrompt, templates);
+      // Build first chunk prompt with chunk-specific word count
+      // Override wordCount with targetWords for chunked generation
+      const firstChunkParams = {
+        ...chunkPrompt,
+        wordCount: targetWords  // Use chunk target, not full story target
+      };
+
+      // Get base prompt and add chunk-specific instructions
+      let basePrompt = this.buildUserPrompt(firstChunkParams, templates);
+
+      // Add strong word count enforcement and chunked generation instructions
+      const chunkInstructions = `
+# CRITICAL: CHUNK GENERATION MODE
+
+**THIS IS CHUNK 1 of a MULTI-CHUNK STORY**
+
+## MANDATORY WORD COUNT
+**YOU MUST WRITE EXACTLY ${targetWords} WORDS** (±5% tolerance: ${Math.floor(targetWords * 0.95)}-${Math.ceil(targetWords * 1.05)} words)
+
+## CHUNKED GENERATION RULES
+- Write ONLY ${targetWords} words in this chunk
+- DO NOT conclude the story - more chunks will follow
+- Stop at a natural narrative break point (scene change, tension peak, chapter end)
+- Leave narrative threads open for continuation
+- Establish rules and setting, but DO NOT resolve the main conflict yet
+
+Generate exactly ${targetWords} words of the story opening now.`;
+
+      return basePrompt + chunkInstructions;
     }
 
-    // Continuation chunk prompt
+    // Continuation chunk prompt with strong word count enforcement
     let prompt = `Continue the rule-based horror story.
+
+# MANDATORY WORD COUNT
+
+**YOU MUST WRITE EXACTLY ${targetWords} WORDS** (±5% tolerance: ${Math.floor(targetWords * 0.95)}-${Math.ceil(targetWords * 1.05)} words)
+
+This is NON-NEGOTIABLE. Generate the full ${targetWords} words before stopping.
 
 # CHUNK PARAMETERS
 
 **Scene Number**: ${sceneNumber}
-**Target Length**: ${targetWords} words
-**Chunk Type**: ${isFinalChunk ? 'FINAL CHUNK' : 'CONTINUATION'}
+**Chunk Type**: ${isFinalChunk ? 'FINAL CHUNK - bring story to conclusion' : 'CONTINUATION - story continues after this chunk'}
 
 # PREVIOUS PROSE ENDING
 
@@ -702,17 +741,19 @@ ${this.getLastParagraphs(previousProse, 3)}
 # CONTINUATION INSTRUCTIONS
 
 - Pick up EXACTLY where the previous chunk left off
+- Write ${targetWords} words of new prose
 - Do NOT recap or summarize what happened before
 - Do NOT restart the narrative
 - Maintain seamless flow and continuity
 - Continue developing tension and escalation
-- Respect all state constraints (see system prompt)
+${isFinalChunk ? '' : '- DO NOT conclude the story - more chunks will follow'}
 
-${isFinalChunk ? `\n${finalChunkInstructions}\n` : ''}
+${isFinalChunk ? `\n# FINAL CHUNK INSTRUCTIONS\n${finalChunkInstructions}\nBring the story to a satisfying conclusion within this chunk.\n` : ''}
 
 # OUTPUT FORMAT
 
-Provide ONLY the continuation prose. No preamble, no meta-commentary.
+Write EXACTLY ${targetWords} words of continuation prose.
+No preamble, no meta-commentary, no word count verification.
 Start writing the continuation now.`;
 
     return prompt;
