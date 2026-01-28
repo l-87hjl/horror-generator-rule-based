@@ -256,14 +256,18 @@ app.post('/api/generate-stream', async (req, res) => {
     const jobId = createJobId();
     const createdAt = new Date().toISOString();
 
+    // Generate session ID BEFORE creating job so it's available during generation
+    const sessionId = orchestrator.generateSessionId();
+
     jobs.set(jobId, {
       status: 'running',
       createdAt,
       updatedAt: createdAt,
-      userInput
+      userInput,
+      sessionId  // Store sessionId immediately so debug logs work during generation
     });
 
-    sendEvent('job_created', { jobId, statusUrl: `/api/status/${jobId}` });
+    sendEvent('job_created', { jobId, sessionId, statusUrl: `/api/status/${jobId}` });
 
     // Create stage orchestrator with progress callback
     const stageOrchestrator = new StageOrchestrator({
@@ -281,9 +285,6 @@ app.post('/api/generate-stream', async (req, res) => {
         sendEvent(event.type, event);
       }
     });
-
-    // Generate session ID
-    const sessionId = orchestrator.generateSessionId();
 
     // Initialize state manager for this session
     orchestrator.stateManager.initializeState(sessionId, userInput);
@@ -400,17 +401,19 @@ app.get('/api/status/:jobId', (req, res) => {
         success: false,
         status: job.status,
         jobId,
+        sessionId: job.sessionId,  // Available for debug logs on failure
         error: job.error,
         createdAt: job.createdAt,
         updatedAt: job.updatedAt
       });
     }
 
-    // running
+    // running - include sessionId so debug logs work during generation
     return res.json({
       success: true,
       status: job.status,
       jobId,
+      sessionId: job.sessionId,  // Available immediately for debug logs
       createdAt: job.createdAt,
       updatedAt: job.updatedAt
     });
