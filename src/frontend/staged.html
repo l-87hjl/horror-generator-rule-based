@@ -324,6 +324,127 @@
       border: 1px dashed #333;
       border-radius: 8px;
     }
+
+    /* Landing Page Styles */
+    .landing-intro {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      line-height: 1.7;
+      color: #bbb;
+    }
+
+    .stage-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .stage-card {
+      background: rgba(26, 26, 26, 0.8);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .stage-card:hover {
+      border-color: #8b0000;
+      background: rgba(139, 0, 0, 0.12);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(139, 0, 0, 0.25);
+    }
+
+    .stage-card-number {
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      width: 28px;
+      height: 28px;
+      background: #8b0000;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .stage-card h3 {
+      color: #a52a2a;
+      margin: 0.5rem 0 0.75rem 0;
+      font-size: 1.2rem;
+    }
+
+    .stage-card-desc {
+      color: #999;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .stage-card-outputs {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1rem 0;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    .stage-card-outputs li {
+      padding: 0.25rem 0;
+    }
+
+    .stage-card-outputs strong {
+      color: #888;
+    }
+
+    .stage-card-cta {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #8b0000, #a52a2a);
+      color: white;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .stage-card:hover .stage-card-cta {
+      background: linear-gradient(135deg, #a52a2a, #c13030);
+    }
+
+    .stage-card-assembly {
+      border-style: dashed;
+      opacity: 0.8;
+    }
+
+    .stage-card-assembly .stage-card-number {
+      background: #2d5a2d;
+    }
+
+    .landing-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #333;
+    }
+
+    .landing-link {
+      color: #a52a2a;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .landing-link:hover {
+      color: #c13030;
+    }
   </style>
 </head>
 <body>
@@ -332,6 +453,67 @@
       <h1>Staged Horror Generator</h1>
       <p class="subtitle">3-Stage Workflow with Gate Audits</p>
     </header>
+
+    <!-- Landing Page -->
+    <section id="page-landing" class="page active">
+      <div class="landing-intro">
+        <p>The staged workflow gives you fine-grained control over story generation. Work through each stage at your own pace, with the ability to pause, download your progress, and resume later.</p>
+      </div>
+
+      <div class="stage-cards">
+        <div class="stage-card" onclick="startAtStage(1)">
+          <div class="stage-card-number">1</div>
+          <h3>Story Contract</h3>
+          <p class="stage-card-desc">Define the story's identity, rules, and constraints. The contract locks in your setting, rule system, thematic focus, and structural parameters before any generation begins.</p>
+          <ul class="stage-card-outputs">
+            <li><strong>Output:</strong> Contract JSON + Rule definitions</li>
+            <li><strong>Download:</strong> Contract Pack ZIP</li>
+          </ul>
+          <span class="stage-card-cta">Start Here &rarr;</span>
+        </div>
+
+        <div class="stage-card" onclick="startAtStage(2)">
+          <div class="stage-card-number">2</div>
+          <h3>Story Outline</h3>
+          <p class="stage-card-desc">Generate a detailed outline with act structure, chunk breakdown, and narrative beats. Upload a contract pack to continue from a previous session.</p>
+          <ul class="stage-card-outputs">
+            <li><strong>Input:</strong> Contract Pack ZIP</li>
+            <li><strong>Output:</strong> Outline + Chunk plan</li>
+            <li><strong>Download:</strong> Planning Pack ZIP</li>
+          </ul>
+          <span class="stage-card-cta">Continue Planning &rarr;</span>
+        </div>
+
+        <div class="stage-card" onclick="startAtStage(3)">
+          <div class="stage-card-number">3</div>
+          <h3>Chunk Generator</h3>
+          <p class="stage-card-desc">Generate story chunks one at a time with per-chunk audits. Each chunk passes through a quality gate before continuing. Pause anytime and resume with a resume pack.</p>
+          <ul class="stage-card-outputs">
+            <li><strong>Input:</strong> Planning Pack or Resume Pack</li>
+            <li><strong>Output:</strong> Story chunks + State</li>
+            <li><strong>Download:</strong> Resume Pack (anytime)</li>
+          </ul>
+          <span class="stage-card-cta">Generate Chunks &rarr;</span>
+        </div>
+
+        <div class="stage-card stage-card-assembly" onclick="startAtStage(4)">
+          <div class="stage-card-number">✓</div>
+          <h3>Assembly & Export</h3>
+          <p class="stage-card-desc">Combine all generated chunks into the final story. Run final quality checks and export in multiple formats.</p>
+          <ul class="stage-card-outputs">
+            <li><strong>Input:</strong> Completed chunk set</li>
+            <li><strong>Output:</strong> Final assembled story</li>
+            <li><strong>Download:</strong> Story + Full archive</li>
+          </ul>
+          <span class="stage-card-cta">Assemble Story &rarr;</span>
+        </div>
+      </div>
+
+      <div class="landing-links">
+        <a href="/generator" class="landing-link">&larr; Back to Quick Generator</a>
+        <a href="/" class="landing-link">Home</a>
+      </div>
+    </section>
 
     <!-- Stage Indicator -->
     <div class="stage-indicator">
@@ -352,7 +534,7 @@
     </div>
 
     <!-- Page 1: Contract -->
-    <section id="page-contract" class="page active">
+    <section id="page-contract" class="page">
       <h2>Stage 1: Story Contract</h2>
       <p>Define the constraints that will lock your story's identity, scope, and rules.</p>
 
@@ -624,13 +806,17 @@
     </section>
 
     <footer>
-      <p><a href="/generator">Switch to Single-Page Mode</a></p>
+      <p>
+        <a href="#" onclick="switchToStage(0); return false;">Stage Overview</a> |
+        <a href="/generator">Quick Generator</a> |
+        <a href="/">Home</a>
+      </p>
     </footer>
   </div>
 
   <script>
     // State
-    let currentStage = 1;
+    let currentStage = 0; // 0 = landing page
     let contract = null;
     let state = null;
     let chunkPlan = null;
@@ -645,7 +831,25 @@
       await loadOptions();
       setupEventListeners();
       updateStageIndicator();
+      // Hide stage indicator on landing
+      document.querySelector('.stage-indicator').style.display = 'none';
     });
+
+    // Start at specific stage from landing
+    function startAtStage(stage) {
+      if (stage === 4) {
+        // Assembly - need to go to stage 3 with assembly section visible
+        switchToStage(3);
+        // If we have state, show assembly section
+        if (state && state.narrative_state?.chunks?.length > 0) {
+          handleAssemble();
+        } else {
+          alert('To assemble a story, first upload a resume pack with generated chunks.');
+        }
+        return;
+      }
+      switchToStage(stage);
+    }
 
     // Load dropdown options
     async function loadOptions() {
@@ -749,7 +953,16 @@
       currentStage = stage;
       updateStageIndicator();
 
+      // Show/hide stage indicator based on whether we're on landing
+      const stageIndicator = document.querySelector('.stage-indicator');
+      if (stage === 0) {
+        stageIndicator.style.display = 'none';
+      } else {
+        stageIndicator.style.display = 'flex';
+      }
+
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      if (stage === 0) document.getElementById('page-landing').classList.add('active');
       if (stage === 1) document.getElementById('page-contract').classList.add('active');
       if (stage === 2) document.getElementById('page-planning').classList.add('active');
       if (stage === 3) document.getElementById('page-generate').classList.add('active');

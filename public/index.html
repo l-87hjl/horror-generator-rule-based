@@ -114,6 +114,102 @@
             color: #999;
         }
 
+        .generator-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .generator-card {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .generator-card:hover {
+            border-color: #8b0000;
+            background: rgba(139, 0, 0, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(139, 0, 0, 0.3);
+        }
+
+        .generator-card.featured {
+            border-color: #8b0000;
+            background: rgba(139, 0, 0, 0.08);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #8b0000;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .generator-card h3 {
+            font-size: 1.4rem;
+            color: #a52a2a;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: #bbb;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .card-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+            flex-grow: 1;
+        }
+
+        .card-features li {
+            padding: 0.35rem 0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .card-features li::before {
+            content: "✓ ";
+            color: #5a8a5a;
+        }
+
+        .card-cta {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #8b0000 0%, #a52a2a 100%);
+            color: white;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .generator-card:hover .card-cta {
+            background: linear-gradient(135deg, #a52a2a 0%, #c13030 100%);
+        }
+
         .cta-section {
             margin-bottom: 2rem;
         }
@@ -243,13 +339,37 @@
             </div>
         </div>
 
-        <div class="cta-section">
-            <a href="/generator" class="btn">Start Generating Stories</a>
+        <div class="generator-cards">
+            <a href="/generator" class="generator-card">
+                <div class="card-icon">⚡</div>
+                <h3>Quick Generator</h3>
+                <p class="card-desc">Single-page workflow. Configure settings and generate a complete story in one session. Best for stories under 12K words.</p>
+                <ul class="card-features">
+                    <li>All-in-one interface</li>
+                    <li>Auto-audit & refinement</li>
+                    <li>Downloadable ZIP package</li>
+                </ul>
+                <span class="card-cta">Start Generating &rarr;</span>
+            </a>
+
+            <a href="/staged" class="generator-card featured">
+                <div class="card-badge">Recommended</div>
+                <div class="card-icon">🔧</div>
+                <h3>Staged Workflow</h3>
+                <p class="card-desc">Multi-stage process with gate audits. Contract &rarr; Plan &rarr; Generate chunks. Pause and resume anytime.</p>
+                <ul class="card-features">
+                    <li>Step-by-step control</li>
+                    <li>Per-chunk quality gates</li>
+                    <li>Resume from any stage</li>
+                    <li>Best for longer works</li>
+                </ul>
+                <span class="card-cta">Open Staged Workflow &rarr;</span>
+            </a>
         </div>
 
         <div class="secondary-links">
-            <a href="https://github.com/anthropics/claude-code" class="secondary-link" target="_blank">
-                📖 Documentation
+            <a href="https://github.com/l-87hjl/rule-based-horror" class="secondary-link" target="_blank">
+                📖 GitHub Repository
             </a>
             <a href="/api/health" class="secondary-link" target="_blank">
                 💚 System Status
@@ -258,7 +378,7 @@
 
         <div class="footer">
             <p>Built with structural discipline. Powered by Claude Sonnet 4.5.</p>
-            <p class="version">v1.0.0 | Template Version: v1</p>
+            <p class="version">v2.1.0 | Staged Workflow</p>
         </div>
     </div>
 </body>
