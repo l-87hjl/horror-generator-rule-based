@@ -382,6 +382,7 @@ function handleSSEEvent(event) {
 
         case 'job_created':
             currentJobId = event.jobId;
+            currentSessionId = event.sessionId || currentSessionId;  // Capture sessionId early for debug logs
             if (progressStatus) progressStatus.textContent = 'Job created, starting generation...';
             break;
 

@@ -1,0 +1,368 @@
+# State Schema v1.0
+# Defines the compact canonical state tracked between chunks
+# Updated after each chunk, carried forward as input to the next
+
+version: "1.0"
+last_updated: "2026-01-29"
+
+description: |
+  The State tracks everything that changes during generation.
+  It is updated after each chunk and used as context for the next chunk.
+
+  Key principle: State is COMPACT. We track facts and counters, not prose.
+  The state file should be small enough to include in every chunk prompt.
+
+  Three categories of state:
+  1. IMMUTABLE FACTS - Set at start, never change (from contract)
+  2. EVOLVING FACTS - Change as story progresses
+  3. COUNTERS - Numerical tracking of escalation/progression
+
+state_sections:
+
+  # ============================================================
+  # SECTION 1: IMMUTABLE FACTS (Reference from Contract)
+  # ============================================================
+  immutable_facts:
+    description: "Facts that cannot change (copied from contract for easy reference)"
+    mutability: "immutable"
+    source: "story_contract.json"
+
+    fields:
+      setting_location: "string"
+      protagonist_name: "string (or null)"
+      protagonist_role: "string"
+      pov_type: "string"
+      tense: "string"
+      total_rule_count: "integer"
+      ending_type: "string"
+      primary_theme: "string"
+
+  # ============================================================
+  # SECTION 2: RULE STATE (Critical for consistency)
+  # ============================================================
+  rule_state:
+    description: "Current status of each rule in the story"
+    mutability: "evolving"
+
+    fields:
+      rules:
+        type: "array"
+        item_schema:
+          rule_number: "integer"
+          rule_text: "string (the rule as stated)"
+          status: "enum: unknown|discovered|active|violated|resolved"
+          discovered_in_chunk: "integer (null if not yet discovered)"
+          violated_in_chunk: "integer (null if not violated)"
+          violation_count: "integer (0 if never violated)"
+          consequence_applied: "boolean"
+          consequence_description: "string (null if no consequence yet)"
+
+      rules_discovered: "integer (count)"
+      rules_violated: "integer (count)"
+      rules_remaining_unknown: "integer (count)"
+
+  # ============================================================
+  # SECTION 3: PROTAGONIST STATE
+  # ============================================================
+  protagonist_state:
+    description: "Current physical, mental, and knowledge state of protagonist"
+    mutability: "evolving"
+
+    fields:
+      physical_condition:
+        type: "object"
+        schema:
+          health: "enum: healthy|injured|severely_injured|dying|transformed"
+          injuries: "array[string] (specific injuries sustained)"
+          location_in_setting: "string (where in the location they are now)"
+          possessions: "array[string] (items they have)"
+          lost_possessions: "array[string] (items lost/destroyed)"
+
+      mental_condition:
+        type: "object"
+        schema:
+          awareness: "enum: unaware|suspicious|aware|terrified|resigned|compliant"
+          sanity: "enum: stable|shaken|disturbed|breaking|broken"
+          primary_emotion: "string"
+          motivations: "array[string] (current goals)"
+
+      knowledge:
+        type: "object"
+        schema:
+          knows_rules: "array[integer] (rule numbers they know)"
+          knows_entities: "array[string] (entity names they're aware of)"
+          knows_escape_method: "boolean"
+          false_beliefs: "array[string] (things they believe that are wrong)"
+          recent_discoveries: "array[string] (from latest chunk)"
+
+  # ============================================================
+  # SECTION 4: ENTITY STATE
+  # ============================================================
+  entity_state:
+    description: "Status of supernatural/horror entities"
+    mutability: "evolving"
+
+    fields:
+      entities:
+        type: "array"
+        item_schema:
+          entity_name: "string"
+          entity_type: "string (creature, force, presence, system)"
+          first_appeared_chunk: "integer"
+          current_status: "enum: dormant|observing|active|pursuing|manifesting|sated"
+          threat_level: "enum: ambient|present|immediate|imminent|engaged"
+          last_action: "string (what it did most recently)"
+          triggered_by: "array[string] (what activates it)"
+          capabilities_revealed: "array[string] (powers the protagonist knows about)"
+
+      active_entity_count: "integer"
+      total_entity_appearances: "integer"
+
+  # ============================================================
+  # SECTION 5: ESCALATION STATE
+  # ============================================================
+  escalation_state:
+    description: "Tracking horror escalation (never decreases)"
+    mutability: "evolving (monotonic increase only)"
+
+    fields:
+      escalation_tier:
+        type: "integer"
+        range: [1, 5]
+        description: |
+          1 = Observation (something is off)
+          2 = Pressure (active threat acknowledged)
+          3 = Threshold (point of no return)
+          4 = Crisis (immediate danger)
+          5 = Resolution (transformation/escape/death)
+
+      escalation_events:
+        type: "array"
+        item_schema:
+          chunk: "integer"
+          event: "string"
+          tier_before: "integer"
+          tier_after: "integer"
+
+      contamination_level:
+        type: "integer"
+        range: [0, 100]
+        description: "Percentage of protagonist's 'contamination' by the horror"
+
+      point_of_no_return_reached:
+        type: "boolean"
+        default: false
+
+      can_still_escape_cleanly:
+        type: "boolean"
+        default: true
+
+  # ============================================================
+  # SECTION 6: NARRATIVE STATE
+  # ============================================================
+  narrative_state:
+    description: "Story structure tracking"
+    mutability: "evolving"
+
+    fields:
+      current_chunk: "integer"
+      total_words_generated: "integer"
+      target_words_remaining: "integer"
+
+      act_structure:
+        type: "object"
+        schema:
+          current_act: "enum: setup|confrontation|crisis|resolution"
+          act_started_chunk: "integer"
+          beats_completed: "array[string]"
+          beats_remaining: "array[string]"
+
+      scene_state:
+        type: "object"
+        schema:
+          current_scene_number: "integer"
+          current_scene_goal: "string"
+          scene_tension_level: "enum: low|building|high|peak|aftermath"
+
+      timeline:
+        type: "object"
+        schema:
+          story_start_time: "string (in-story time, e.g., '10:00 PM')"
+          current_time: "string"
+          elapsed_in_story: "string (e.g., '3 hours')"
+
+  # ============================================================
+  # SECTION 7: CONTINUITY TRACKING
+  # ============================================================
+  continuity:
+    description: "Facts that must remain consistent"
+    mutability: "append_only"
+
+    fields:
+      established_facts:
+        description: "Canon facts established in prose that cannot be contradicted"
+        type: "array"
+        item_schema:
+          fact: "string"
+          established_chunk: "integer"
+          category: "enum: setting|character|rule|entity|timeline|object"
+
+      named_elements:
+        description: "Names used in the story"
+        type: "object"
+        schema:
+          character_names: "array[string]"
+          location_names: "array[string]"
+          object_names: "array[string]"
+          entity_names: "array[string]"
+
+      promises:
+        description: "Setup that requires payoff"
+        type: "array"
+        item_schema:
+          setup: "string (what was promised)"
+          established_chunk: "integer"
+          requires_payoff_by: "integer (chunk number, or null for 'eventually')"
+          paid_off: "boolean"
+          payoff_chunk: "integer (null if not yet paid off)"
+
+# ============================================================
+# STATE UPDATE RULES
+# ============================================================
+update_rules:
+  after_each_chunk:
+    required_updates:
+      - "current_chunk (increment)"
+      - "total_words_generated (add chunk word count)"
+      - "target_words_remaining (subtract chunk word count)"
+      - "rule_state (if any rules discovered/violated)"
+      - "protagonist_state (if condition changed)"
+      - "escalation_state (if tier increased)"
+
+    conditional_updates:
+      - condition: "new entity appeared"
+        update: "entity_state.entities (append)"
+
+      - condition: "fact established"
+        update: "continuity.established_facts (append)"
+
+      - condition: "setup introduced"
+        update: "continuity.promises (append)"
+
+      - condition: "setup paid off"
+        update: "continuity.promises[n].paid_off = true"
+
+  monotonic_constraints:
+    description: "Values that can only increase, never decrease"
+    fields:
+      - "escalation_state.escalation_tier"
+      - "escalation_state.contamination_level"
+      - "rule_state.rules_violated"
+      - "continuity.established_facts.length"
+
+  forbidden_changes:
+    description: "Changes that indicate a consistency error"
+    checks:
+      - "immutable_facts cannot change"
+      - "dead characters cannot act"
+      - "destroyed objects cannot be used"
+      - "discovered rules cannot be un-discovered"
+      - "escalation cannot decrease"
+
+# ============================================================
+# OUTPUT FORMAT
+# ============================================================
+output_format:
+  filename: "state.json"
+  filename_with_chunk: "state_after_chunk_{N}.json"
+
+  structure:
+    version: "1.0"
+    session_id: "string"
+    last_updated: "ISO timestamp"
+    chunk_number: "integer"
+
+    immutable_facts: {}
+    rule_state: {}
+    protagonist_state: {}
+    entity_state: {}
+    escalation_state: {}
+    narrative_state: {}
+    continuity: {}
+
+    state_delta:
+      description: "What changed in this update (for debugging)"
+      changes: []
+
+# ============================================================
+# INITIAL STATE TEMPLATE
+# ============================================================
+initial_state_template:
+  description: "Default state before any chunks are generated"
+
+  immutable_facts:
+    # Copied from contract
+
+  rule_state:
+    rules: []  # Populated from contract
+    rules_discovered: 0
+    rules_violated: 0
+    rules_remaining_unknown: "total_rule_count"
+
+  protagonist_state:
+    physical_condition:
+      health: "healthy"
+      injuries: []
+      location_in_setting: "entry_point"
+      possessions: []
+      lost_possessions: []
+    mental_condition:
+      awareness: "unaware"
+      sanity: "stable"
+      primary_emotion: "neutral"
+      motivations: []
+    knowledge:
+      knows_rules: []
+      knows_entities: []
+      knows_escape_method: false
+      false_beliefs: []
+      recent_discoveries: []
+
+  entity_state:
+    entities: []
+    active_entity_count: 0
+    total_entity_appearances: 0
+
+  escalation_state:
+    escalation_tier: 1
+    escalation_events: []
+    contamination_level: 0
+    point_of_no_return_reached: false
+    can_still_escape_cleanly: true
+
+  narrative_state:
+    current_chunk: 0
+    total_words_generated: 0
+    target_words_remaining: "target_word_count"
+    act_structure:
+      current_act: "setup"
+      act_started_chunk: 1
+      beats_completed: []
+      beats_remaining: []
+    scene_state:
+      current_scene_number: 0
+      current_scene_goal: ""
+      scene_tension_level: "low"
+    timeline:
+      story_start_time: null
+      current_time: null
+      elapsed_in_story: "0"
+
+  continuity:
+    established_facts: []
+    named_elements:
+      character_names: []
+      location_names: []
+      object_names: []
+      entity_names: []
+    promises: []

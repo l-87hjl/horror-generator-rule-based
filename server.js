@@ -13,6 +13,10 @@ const Orchestrator = require('./src/backend/services/orchestrator');
 const DebugLogger = require('./src/utils/debugLogger');
 const ChunkPersistence = require('./src/generators/chunkPersistence');
 const StageOrchestrator = require('./src/generators/stageOrchestrator');
+const ContractGenerator = require('./src/backend/services/contractGenerator');
+const GateAudit = require('./src/backend/services/gateAudit');
+const StateTracker = require('./src/backend/services/stateTracker');
+const archiver = require('archiver');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -103,6 +107,14 @@ app.get('/', (req, res) => {
  */
 app.get('/generator', (req, res) => {
   res.sendFile(path.join(__dirname, 'src/frontend/index.html'));
+});
+
+/**
+ * GET /staged
+ * Serve staged workflow generator (3-page interface)
+ */
+app.get('/staged', (req, res) => {
+  res.sendFile(path.join(__dirname, 'src/frontend/staged.html'));
 });
 
 /**
@@ -256,14 +268,18 @@ app.post('/api/generate-stream', async (req, res) => {
     const jobId = createJobId();
     const createdAt = new Date().toISOString();
 
+    // Generate session ID BEFORE creating job so it's available during generation
+    const sessionId = orchestrator.generateSessionId();
+
     jobs.set(jobId, {
       status: 'running',
       createdAt,
       updatedAt: createdAt,
-      userInput
+      userInput,
+      sessionId  // Store sessionId immediately so debug logs work during generation
     });
 
-    sendEvent('job_created', { jobId, statusUrl: `/api/status/${jobId}` });
+    sendEvent('job_created', { jobId, sessionId, statusUrl: `/api/status/${jobId}` });
 
     // Create stage orchestrator with progress callback
     const stageOrchestrator = new StageOrchestrator({
@@ -281,9 +297,6 @@ app.post('/api/generate-stream', async (req, res) => {
         sendEvent(event.type, event);
       }
     });
-
-    // Generate session ID
-    const sessionId = orchestrator.generateSessionId();
 
     // Initialize state manager for this session
     orchestrator.stateManager.initializeState(sessionId, userInput);
@@ -400,17 +413,19 @@ app.get('/api/status/:jobId', (req, res) => {
         success: false,
         status: job.status,
         jobId,
+        sessionId: job.sessionId,  // Available for debug logs on failure
         error: job.error,
         createdAt: job.createdAt,
         updatedAt: job.updatedAt
       });
     }
 
-    // running
+    // running - include sessionId so debug logs work during generation
     return res.json({
       success: true,
       status: job.status,
       jobId,
+      sessionId: job.sessionId,  // Available immediately for debug logs
       createdAt: job.createdAt,
       updatedAt: job.updatedAt
     });
@@ -1002,6 +1017,728 @@ ${storyText}`;
     });
   }
 });
+
+// ============================================================
+// STAGED WORKFLOW ENDPOINTS (3-Page Architecture)
+// ============================================================
+
+/**
+ * POST /api/staged/contract
+ * Stage 1: Generate story contract from user input
+ *
+ * This creates the foundational document that locks identity, scope, and rules.
+ * Returns a contract JSON + initial state + ZIP for download.
+ */
+app.post('/api/staged/contract', async (req, res) => {
+  try {
+    const userInput = req.body;
+
+    console.log('\n--- Stage 1: Contract Generation ---');
+    console.log('User Input:', JSON.stringify(userInput, null, 2));
+
+    // Validate basic input
+    if (!userInput.wordCount || userInput.wordCount < 5000 || userInput.wordCount > 50000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Word count must be between 5,000 and 50,000'
+      });
+    }
+
+    // Fill defaults for any null fields
+    const filledInput = await orchestrator.fillDefaults(userInput);
+
+    // Generate contract
+    const contractGenerator = new ContractGenerator(
+      orchestrator.claudeClient,
+      orchestrator.storyGenerator.getTemplateLoader()
+    );
+
+    const contract = await contractGenerator.generateContract(filledInput);
+
+    // Audit the contract
+    const contractAudit = await contractGenerator.auditContract(contract);
+    contract.contract_audit = contractAudit;
+
+    // Initialize state from contract
+    const stateTracker = new StateTracker();
+    const initialState = stateTracker.initializeFromContract(contract);
+
+    // Create session directory
+    const sessionId = contract.session_id;
+    const sessionDir = path.join(__dirname, 'generated', sessionId);
+    await fs.mkdir(sessionDir, { recursive: true });
+
+    // Save contract and state
+    await fs.writeFile(
+      path.join(sessionDir, 'story_contract.json'),
+      JSON.stringify(contract, null, 2),
+      'utf-8'
+    );
+
+    await fs.writeFile(
+      path.join(sessionDir, 'state.json'),
+      JSON.stringify(initialState, null, 2),
+      'utf-8'
+    );
+
+    // Create contract pack ZIP
+    const zipPath = path.join(sessionDir, 'contract_pack.zip');
+    await createZipFromFiles(zipPath, [
+      { name: 'story_contract.json', content: JSON.stringify(contract, null, 2) },
+      { name: 'state.json', content: JSON.stringify(initialState, null, 2) },
+      { name: 'README.txt', content: `Story Contract Pack
+Session: ${sessionId}
+Created: ${new Date().toISOString()}
+
+This is a "resume pack" for Stage 1 (Contract).
+Upload this ZIP to continue to Stage 2 (Planning).
+
+Files included:
+- story_contract.json: The story's foundational constraints and rules
+- state.json: Initial state (to be updated after each chunk)
+` }
+    ]);
+
+    console.log(`✅ Contract pack created: ${sessionId}`);
+
+    res.json({
+      success: true,
+      stage: 'contract',
+      sessionId,
+      contract,
+      state: initialState,
+      downloadUrl: `/api/session/${sessionId}/file/contract_pack.zip`,
+      nextStage: '/api/staged/plan',
+      instructions: 'Download the contract pack ZIP. Upload it to /api/staged/plan to continue.'
+    });
+
+  } catch (error) {
+    console.error('Contract generation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/staged/plan
+ * Stage 2: Generate outline and chunk plan from contract
+ *
+ * Takes a contract and generates:
+ * - Story outline/beats
+ * - Chunk plan (what each chunk should accomplish)
+ * - Updated planning pack ZIP
+ */
+app.post('/api/staged/plan', async (req, res) => {
+  try {
+    const { contract, state } = req.body;
+
+    if (!contract) {
+      return res.status(400).json({
+        success: false,
+        error: 'Contract is required. Upload the contract pack from Stage 1.'
+      });
+    }
+
+    console.log('\n--- Stage 2: Planning ---');
+    console.log(`Session: ${contract.session_id}`);
+
+    const sessionId = contract.session_id;
+    const sessionDir = path.join(__dirname, 'generated', sessionId);
+    await fs.mkdir(sessionDir, { recursive: true });
+
+    // Generate outline using Claude
+    const outline = await generateOutline(contract);
+
+    // Generate chunk plan
+    const chunkPlan = generateChunkPlan(contract, outline);
+
+    // Save planning artifacts
+    await fs.writeFile(
+      path.join(sessionDir, 'outline.json'),
+      JSON.stringify(outline, null, 2),
+      'utf-8'
+    );
+
+    await fs.writeFile(
+      path.join(sessionDir, 'chunk_plan.json'),
+      JSON.stringify(chunkPlan, null, 2),
+      'utf-8'
+    );
+
+    // Create planning pack ZIP (includes contract + state + plan)
+    const zipPath = path.join(sessionDir, 'planning_pack.zip');
+    await createZipFromFiles(zipPath, [
+      { name: 'story_contract.json', content: JSON.stringify(contract, null, 2) },
+      { name: 'state.json', content: JSON.stringify(state || {}, null, 2) },
+      { name: 'outline.json', content: JSON.stringify(outline, null, 2) },
+      { name: 'chunk_plan.json', content: JSON.stringify(chunkPlan, null, 2) },
+      { name: 'README.txt', content: `Story Planning Pack
+Session: ${sessionId}
+Created: ${new Date().toISOString()}
+
+This is a "resume pack" for Stage 2 (Planning).
+Upload this ZIP to continue to Stage 3 (Generate Chunks).
+
+Files included:
+- story_contract.json: The story's foundational constraints
+- state.json: Current state
+- outline.json: Story structure and beats
+- chunk_plan.json: What each chunk should accomplish
+
+Next: POST to /api/staged/generate with this pack to generate chunks.
+` }
+    ]);
+
+    console.log(`✅ Planning pack created: ${sessionId}`);
+
+    res.json({
+      success: true,
+      stage: 'planning',
+      sessionId,
+      outline,
+      chunkPlan,
+      downloadUrl: `/api/session/${sessionId}/file/planning_pack.zip`,
+      nextStage: '/api/staged/generate',
+      instructions: 'Download the planning pack ZIP. Upload it to /api/staged/generate to start generating chunks.'
+    });
+
+  } catch (error) {
+    console.error('Planning error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/staged/generate
+ * Stage 3: Generate story chunks with gate audits
+ *
+ * This endpoint generates chunks one at a time with state updates and gate audits.
+ * Returns updated state + chunk + audit + resume pack after each chunk.
+ */
+app.post('/api/staged/generate', async (req, res) => {
+  try {
+    const { contract, state, chunkPlan, chunkNumber = 1 } = req.body;
+
+    if (!contract || !state) {
+      return res.status(400).json({
+        success: false,
+        error: 'Contract and state are required. Upload the planning/resume pack.'
+      });
+    }
+
+    console.log('\n--- Stage 3: Chunk Generation ---');
+    console.log(`Session: ${contract.session_id}`);
+    console.log(`Generating chunk: ${chunkNumber}`);
+
+    const sessionId = contract.session_id;
+    const sessionDir = path.join(__dirname, 'generated', sessionId);
+    const chunksDir = path.join(sessionDir, 'chunks');
+    await fs.mkdir(chunksDir, { recursive: true });
+
+    // Load or initialize state tracker
+    const stateTracker = new StateTracker();
+    stateTracker.loadState(state);
+
+    // Determine chunk parameters
+    const targetWords = contract.generation_parameters?.target_word_count || 10000;
+    const chunkSize = contract.generation_parameters?.chunk_size || 2000;
+    const totalChunks = Math.ceil(targetWords / chunkSize);
+    const isLastChunk = chunkNumber >= totalChunks;
+
+    // Calculate target for this chunk
+    const wordsGenerated = state.narrative_state?.total_words_generated || 0;
+    const wordsRemaining = targetWords - wordsGenerated;
+    const thisChunkTarget = isLastChunk ? wordsRemaining : Math.min(chunkSize, wordsRemaining);
+
+    console.log(`   Target words: ${thisChunkTarget}`);
+    console.log(`   Total progress: ${wordsGenerated}/${targetWords}`);
+    console.log(`   Is final chunk: ${isLastChunk}`);
+
+    // Generate chunk
+    const chunkPrompt = buildChunkPrompt(contract, stateTracker, chunkNumber, thisChunkTarget, isLastChunk);
+
+    const claudeClient = orchestrator.claudeClient;
+    const maxTokens = Math.ceil(thisChunkTarget * 1.6);
+
+    console.log(`   Calling Claude API (max_tokens: ${maxTokens})...`);
+
+    const response = await claudeClient.client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      temperature: 0.7,
+      messages: [{ role: 'user', content: chunkPrompt }]
+    });
+
+    const chunkText = response.content[0].text;
+    const chunkWordCount = chunkText.split(/\s+/).length;
+
+    console.log(`   Chunk generated: ${chunkWordCount} words`);
+
+    // Save chunk
+    const chunkFilename = `chunk_${String(chunkNumber).padStart(3, '0')}.txt`;
+    await fs.writeFile(
+      path.join(chunksDir, chunkFilename),
+      chunkText,
+      'utf-8'
+    );
+
+    // Extract state updates from chunk
+    const updates = await stateTracker.extractUpdatesFromChunk(
+      claudeClient,
+      chunkText,
+      contract,
+      chunkNumber
+    );
+
+    // Update state
+    const previousState = JSON.parse(JSON.stringify(stateTracker.getState()));
+    const updatedState = stateTracker.updateAfterChunk(updates, chunkNumber, chunkWordCount);
+
+    // Run gate audit
+    const gateAudit = new GateAudit(claudeClient);
+    const auditResult = await gateAudit.auditChunk(
+      contract,
+      previousState,
+      updatedState,
+      chunkText,
+      chunkNumber,
+      isLastChunk
+    );
+
+    // Save state and audit
+    await fs.writeFile(
+      path.join(sessionDir, 'state.json'),
+      JSON.stringify(updatedState, null, 2),
+      'utf-8'
+    );
+
+    await fs.writeFile(
+      path.join(sessionDir, `audit_chunk_${chunkNumber}.json`),
+      JSON.stringify(auditResult, null, 2),
+      'utf-8'
+    );
+
+    const auditReport = gateAudit.generateReport(auditResult);
+    await fs.writeFile(
+      path.join(sessionDir, `audit_chunk_${chunkNumber}.md`),
+      auditReport,
+      'utf-8'
+    );
+
+    // Determine next step based on audit
+    let nextAction = 'continue';
+    let nextInstructions = `Download the resume pack and POST to /api/staged/generate with chunkNumber: ${chunkNumber + 1}`;
+
+    if (auditResult.status === 'FAIL') {
+      nextAction = 'stop';
+      nextInstructions = 'Gate audit FAILED. Review the audit report and fix issues before continuing.';
+    } else if (isLastChunk) {
+      nextAction = 'assemble';
+      nextInstructions = 'All chunks generated. POST to /api/staged/assemble to combine into final story.';
+    }
+
+    // Create resume pack ZIP
+    const resumePackPath = path.join(sessionDir, 'resume_pack.zip');
+    const zipFiles = [
+      { name: 'story_contract.json', content: JSON.stringify(contract, null, 2) },
+      { name: 'state.json', content: JSON.stringify(updatedState, null, 2) },
+      { name: `audit_chunk_${chunkNumber}.md`, content: auditReport }
+    ];
+
+    // Include outline/chunk_plan if they exist
+    if (chunkPlan) {
+      zipFiles.push({ name: 'chunk_plan.json', content: JSON.stringify(chunkPlan, null, 2) });
+    }
+
+    // Include all chunks generated so far
+    const chunkFiles = await fs.readdir(chunksDir);
+    for (const cf of chunkFiles.filter(f => f.startsWith('chunk_'))) {
+      const chunkContent = await fs.readFile(path.join(chunksDir, cf), 'utf-8');
+      zipFiles.push({ name: `chunks/${cf}`, content: chunkContent });
+    }
+
+    zipFiles.push({
+      name: 'README.txt',
+      content: `Story Resume Pack
+Session: ${sessionId}
+Created: ${new Date().toISOString()}
+Chunks completed: ${chunkNumber}/${totalChunks}
+Words generated: ${updatedState.narrative_state?.total_words_generated}/${targetWords}
+
+Next action: ${nextAction}
+${nextInstructions}
+
+Files included:
+- story_contract.json: The story's foundational constraints
+- state.json: Current state (updated after chunk ${chunkNumber})
+- audit_chunk_${chunkNumber}.md: Gate audit report for this chunk
+- chunks/: All generated chunks so far
+`
+    });
+
+    await createZipFromFiles(resumePackPath, zipFiles);
+
+    console.log(`✅ Resume pack created after chunk ${chunkNumber}`);
+
+    res.json({
+      success: true,
+      stage: 'generate',
+      sessionId,
+      chunkNumber,
+      chunkWordCount,
+      totalWordsGenerated: updatedState.narrative_state?.total_words_generated,
+      targetWords,
+      chunksRemaining: totalChunks - chunkNumber,
+      isComplete: isLastChunk,
+      audit: {
+        status: auditResult.status,
+        recommendation: auditResult.recommendation,
+        criticalFailures: auditResult.critical_failures?.length || 0,
+        warnings: auditResult.warnings?.length || 0
+      },
+      state: updatedState,
+      nextAction,
+      downloadUrl: `/api/session/${sessionId}/file/resume_pack.zip`,
+      chunkUrl: `/api/session/${sessionId}/file/chunks/${chunkFilename}`,
+      nextInstructions
+    });
+
+  } catch (error) {
+    console.error('Chunk generation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/staged/assemble
+ * Assemble all chunks into final story
+ */
+app.post('/api/staged/assemble', async (req, res) => {
+  try {
+    const { contract, state } = req.body;
+
+    if (!contract || !state) {
+      return res.status(400).json({
+        success: false,
+        error: 'Contract and state are required.'
+      });
+    }
+
+    console.log('\n--- Stage 4: Assembly ---');
+    const sessionId = contract.session_id;
+    console.log(`Session: ${sessionId}`);
+
+    const sessionDir = path.join(__dirname, 'generated', sessionId);
+    const chunksDir = path.join(sessionDir, 'chunks');
+
+    // Load all chunks
+    const chunkFiles = await fs.readdir(chunksDir);
+    const chunks = [];
+
+    for (const cf of chunkFiles.filter(f => f.startsWith('chunk_')).sort()) {
+      const content = await fs.readFile(path.join(chunksDir, cf), 'utf-8');
+      chunks.push(content);
+    }
+
+    if (chunks.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No chunks found to assemble.'
+      });
+    }
+
+    console.log(`   Assembling ${chunks.length} chunks...`);
+
+    // Simple assembly: join with scene breaks
+    const assembledStory = chunks.join('\n\n---\n\n');
+    const totalWords = assembledStory.split(/\s+/).length;
+
+    // Save assembled story
+    await fs.writeFile(
+      path.join(sessionDir, 'full_story.md'),
+      assembledStory,
+      'utf-8'
+    );
+
+    // Create final pack ZIP
+    const finalPackPath = path.join(sessionDir, 'final_pack.zip');
+    const zipFiles = [
+      { name: 'story_contract.json', content: JSON.stringify(contract, null, 2) },
+      { name: 'state.json', content: JSON.stringify(state, null, 2) },
+      { name: 'full_story.md', content: assembledStory },
+      { name: 'README.txt', content: `Story Final Pack
+Session: ${sessionId}
+Created: ${new Date().toISOString()}
+Total words: ${totalWords}
+Total chunks: ${chunks.length}
+
+Files included:
+- story_contract.json: The story's foundational constraints
+- state.json: Final state
+- full_story.md: The complete assembled story
+
+Optional next steps:
+- POST to /api/refine with sessionId to run structural audit and refinement
+- POST to /api/polish with sessionId to enhance prose quality
+` }
+    ];
+
+    await createZipFromFiles(finalPackPath, zipFiles);
+
+    console.log(`✅ Assembly complete: ${totalWords} words`);
+
+    res.json({
+      success: true,
+      stage: 'assemble',
+      sessionId,
+      totalChunks: chunks.length,
+      totalWords,
+      downloadUrl: `/api/session/${sessionId}/file/final_pack.zip`,
+      storyUrl: `/api/session/${sessionId}/file/full_story.md`,
+      nextSteps: {
+        refine: '/api/refine',
+        polish: '/api/polish'
+      }
+    });
+
+  } catch (error) {
+    console.error('Assembly error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Helper: Create ZIP from file array
+async function createZipFromFiles(zipPath, files) {
+  return new Promise((resolve, reject) => {
+    const output = require('fs').createWriteStream(zipPath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    output.on('close', () => resolve(zipPath));
+    archive.on('error', reject);
+
+    archive.pipe(output);
+
+    for (const file of files) {
+      archive.append(file.content, { name: file.name });
+    }
+
+    archive.finalize();
+  });
+}
+
+// Helper: Generate outline from contract
+async function generateOutline(contract) {
+  const rules = contract.rule_system?.rules || [];
+  const targetWords = contract.generation_parameters?.target_word_count || 10000;
+  const chunkSize = contract.generation_parameters?.chunk_size || 2000;
+  const totalChunks = Math.ceil(targetWords / chunkSize);
+
+  const prompt = `Create a story outline for a rule-based horror story.
+
+CONTRACT SUMMARY:
+- Location: ${contract.identity_anchors?.setting?.location_name}
+- Protagonist: ${contract.identity_anchors?.protagonist?.role}
+- Rules: ${rules.length} total
+- Theme: ${contract.thematic_contract?.primary_theme}
+- Ending type: ${contract.ending_contract?.ending_type}
+- Target: ${targetWords} words in ${totalChunks} chunks
+
+RULES:
+${rules.map(r => `${r.rule_number}. ${r.rule_text}`).join('\n')}
+
+Create an outline with:
+1. Act structure (setup, confrontation, crisis, resolution)
+2. Key beats for each act
+3. Which rules are discovered/violated when
+4. Escalation progression
+
+Return as JSON:
+{
+  "acts": [
+    {
+      "name": "setup",
+      "chunks": [1, 2, 3],
+      "beats": ["arrival", "first hints", "rule discovery"],
+      "escalation_range": [1, 2]
+    }
+  ],
+  "rule_reveals": [
+    {"rule_number": 1, "chunk": 1, "method": "told by character"},
+    {"rule_number": 2, "chunk": 2, "method": "discovered through observation"}
+  ],
+  "key_moments": [
+    {"chunk": 5, "event": "First violation", "consequence": "..."}
+  ]
+}`;
+
+  try {
+    const response = await orchestrator.claudeClient.client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      temperature: 0.3,
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    const content = response.content[0].text;
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+  } catch (error) {
+    console.warn('Outline generation failed, using default:', error.message);
+  }
+
+  // Default outline
+  return {
+    acts: [
+      { name: 'setup', chunks: [1, 2], beats: ['arrival', 'orientation', 'first rule'], escalation_range: [1, 1] },
+      { name: 'confrontation', chunks: [3, 4, 5, 6], beats: ['more rules', 'first test', 'violation', 'consequence'], escalation_range: [2, 3] },
+      { name: 'crisis', chunks: [7, 8], beats: ['point of no return', 'desperate action'], escalation_range: [3, 4] },
+      { name: 'resolution', chunks: [9, 10], beats: ['climax', 'ending'], escalation_range: [4, 5] }
+    ],
+    rule_reveals: rules.map((r, i) => ({
+      rule_number: r.rule_number,
+      chunk: Math.ceil((i + 1) / 2),
+      method: r.is_hidden ? 'discovered through consequence' : 'revealed early'
+    })),
+    key_moments: []
+  };
+}
+
+// Helper: Generate chunk plan from contract and outline
+function generateChunkPlan(contract, outline) {
+  const targetWords = contract.generation_parameters?.target_word_count || 10000;
+  const chunkSize = contract.generation_parameters?.chunk_size || 2000;
+  const totalChunks = Math.ceil(targetWords / chunkSize);
+
+  const chunks = [];
+
+  for (let i = 1; i <= totalChunks; i++) {
+    const isFirst = i === 1;
+    const isLast = i === totalChunks;
+
+    // Find which act this chunk is in
+    const act = outline.acts?.find(a => a.chunks?.includes(i)) || outline.acts?.[0];
+
+    // Find rules to reveal in this chunk
+    const rulesToReveal = outline.rule_reveals
+      ?.filter(r => r.chunk === i)
+      ?.map(r => r.rule_number) || [];
+
+    // Find key moments
+    const keyMoments = outline.key_moments
+      ?.filter(m => m.chunk === i) || [];
+
+    chunks.push({
+      chunk_number: i,
+      target_words: isLast ? (targetWords - (totalChunks - 1) * chunkSize) : chunkSize,
+      is_first: isFirst,
+      is_last: isLast,
+      act: act?.name || 'unknown',
+      beats: act?.beats?.slice(0, 2) || [],
+      rules_to_reveal: rulesToReveal,
+      key_moments: keyMoments,
+      escalation_target: act?.escalation_range?.[1] || 1,
+      goals: isFirst
+        ? ['Establish setting', 'Introduce protagonist', 'Create atmosphere']
+        : isLast
+          ? ['Resolve conflict', 'Deliver ending', 'Ensure permanence']
+          : ['Continue narrative', 'Build tension', 'Progress escalation']
+    });
+  }
+
+  return {
+    total_chunks: totalChunks,
+    target_words: targetWords,
+    chunk_size: chunkSize,
+    chunks
+  };
+}
+
+// Helper: Build chunk prompt
+function buildChunkPrompt(contract, stateTracker, chunkNumber, targetWords, isLastChunk) {
+  const rules = contract.rule_system?.rules || [];
+  const setting = contract.identity_anchors?.setting;
+  const protagonist = contract.identity_anchors?.protagonist;
+  const pov = contract.identity_anchors?.point_of_view;
+  const theme = contract.thematic_contract?.primary_theme;
+  const stateContext = stateTracker.getPromptContext();
+
+  const isFirstChunk = chunkNumber === 1;
+
+  let prompt = `Write a ${targetWords}-word chunk of a rule-based horror story.
+
+# CONTRACT CONSTRAINTS (DO NOT VIOLATE)
+## Setting
+- Location: ${setting?.location_name}
+- Atmosphere: ${setting?.atmosphere_keywords?.join(', ')}
+
+## Protagonist
+- Role: ${protagonist?.role}
+- Starting state: ${protagonist?.starting_state}
+
+## Point of View
+- POV: ${pov?.pov_type}
+- Tense: ${pov?.tense}
+
+## Rules
+${rules.map(r => `${r.rule_number}. ${r.rule_text}${r.is_hidden ? ' [HIDDEN - do not reveal yet unless appropriate]' : ''}`).join('\n')}
+
+## Theme
+${theme}
+
+${stateContext}
+
+# CHUNK REQUIREMENTS
+- Target: **EXACTLY ${targetWords} WORDS** (±10%)
+- This is chunk ${chunkNumber}${isFirstChunk ? ' (FIRST CHUNK - establish everything)' : ''}${isLastChunk ? ' (FINAL CHUNK - conclude the story)' : ''}
+`;
+
+  if (isFirstChunk) {
+    prompt += `
+# FIRST CHUNK INSTRUCTIONS
+- Establish the setting vividly
+- Introduce the protagonist and their reason for being here
+- Create immediate atmosphere of wrongness
+- Begin rule discovery naturally
+- DO NOT conclude the story - more chunks will follow
+`;
+  } else if (isLastChunk) {
+    prompt += `
+# FINAL CHUNK INSTRUCTIONS
+- Bring the narrative to a conclusion
+- Resolve the protagonist's situation (escape/transformation/death)
+- Ensure permanent consequences
+- Match the contracted ending type: ${contract.ending_contract?.ending_type}
+`;
+  } else {
+    prompt += `
+# CONTINUATION INSTRUCTIONS
+- Continue seamlessly from the previous chunk
+- Maintain all established facts
+- Progress the escalation
+- DO NOT conclude the story - more chunks will follow
+- DO NOT reset tension or danger
+`;
+  }
+
+  prompt += `
+
+Write the chunk now. Return ONLY the story text, no commentary.`;
+
+  return prompt;
+}
 
 /**
  * GET /api/health

@@ -1,0 +1,323 @@
+# Story Contract Schema v1.0
+# Defines the immutable constraints for a story generation session
+# Created at Stage 1 (Contract), enforced throughout all subsequent stages
+
+version: "1.0"
+last_updated: "2026-01-29"
+
+description: |
+  The Story Contract is the foundational document that locks identity, scope, and rules
+  before any prose is generated. It serves as the "constitution" for the story -
+  all subsequent stages must respect these constraints.
+
+  Key principle: Expensive-to-fix-later problems are prevented here.
+  Cheap-to-fix-later problems (prose style, minor details) can wait for revision.
+
+contract_sections:
+
+  # ============================================================
+  # SECTION 1: IDENTITY ANCHORS (Immutable)
+  # ============================================================
+  identity_anchors:
+    description: "Core elements that define this story's unique identity"
+    mutability: "immutable"
+    required: true
+
+    fields:
+      setting:
+        description: "Primary location and atmosphere"
+        required: true
+        schema:
+          location_id: "string (from locations.yaml)"
+          location_name: "string"
+          time_period: "string (contemporary, historical, ambiguous)"
+          atmosphere_keywords: "array[string] (3-5 descriptive words)"
+          physical_boundaries: "string (what defines the location's edges)"
+        validation:
+          - "location_id must exist in locations.yaml OR custom_location must be provided"
+          - "atmosphere_keywords must be consistent with location type"
+
+      protagonist:
+        description: "The narrator/main character"
+        required: true
+        schema:
+          name: "string (can be null for unnamed narrator)"
+          role: "string (why they're at the location)"
+          knowledge_level: "enum: naive|informed|expert|local"
+          starting_state: "string (physical/emotional condition at start)"
+          primary_motivation: "string (what drives their actions)"
+        validation:
+          - "role must explain presence at location"
+          - "knowledge_level affects rule discovery method"
+
+      point_of_view:
+        description: "Narrative perspective"
+        required: true
+        schema:
+          pov_type: "enum: first_person|third_person_limited|third_person_close"
+          tense: "enum: past|present"
+          narrator_reliability: "enum: reliable|unreliable|unknown"
+        constraints:
+          - "POV cannot change mid-story"
+          - "Tense must remain consistent"
+
+  # ============================================================
+  # SECTION 2: RULE SYSTEM (Immutable once established)
+  # ============================================================
+  rule_system:
+    description: "The laws that govern this story's horror logic"
+    mutability: "immutable_once_revealed"
+    required: true
+
+    fields:
+      rule_count:
+        description: "Number of explicit rules"
+        type: "integer"
+        range: [3, 12]
+        required: true
+
+      rule_discovery_method:
+        description: "How rules are revealed to protagonist"
+        type: "string (from rule_discovery.yaml)"
+        required: true
+
+      rule_completeness:
+        description: "Whether all rules are knowable"
+        type: "string (from rule_completeness.yaml)"
+        required: true
+
+      rules:
+        description: "The actual rules (generated or provided)"
+        type: "array"
+        item_schema:
+          rule_number: "integer"
+          rule_text: "string (the rule as stated)"
+          rule_type: "enum: prohibition|obligation|conditional|boundary|sequence|timing"
+          trigger_condition: "string (what activates this rule)"
+          consequence_on_violation: "string (what happens if broken)"
+          is_hidden: "boolean (false = revealed early, true = discovered later)"
+          related_rules: "array[integer] (rule numbers that interact with this one)"
+        validation:
+          - "rule_text must be unambiguous"
+          - "consequence_on_violation must be specific and enforceable"
+          - "hidden rules must have discovery mechanism"
+
+      violation_response_type:
+        description: "How the system responds to rule violations"
+        type: "string (from violation_responses.yaml)"
+        required: true
+
+  # ============================================================
+  # SECTION 3: SCOPE CONSTRAINTS (Forbidden expansions)
+  # ============================================================
+  scope_constraints:
+    description: "What this story is NOT allowed to become"
+    mutability: "immutable"
+    required: true
+
+    fields:
+      forbidden_expansions:
+        description: "Types of content that are off-limits"
+        type: "array[string]"
+        defaults:
+          - "new_protagonists (no additional POV characters)"
+          - "new_locations (story stays at primary location)"
+          - "new_mythologies (no inventing lore beyond established rules)"
+          - "genre_shift (maintains horror throughout)"
+          - "timeline_jumps (no flashforwards beyond immediate scene)"
+        custom_allowed: true
+
+      maximum_scope:
+        description: "The story's outer boundaries"
+        schema:
+          max_timespan: "string (e.g., 'one night', '48 hours', 'one week')"
+          max_characters: "integer (including protagonist)"
+          max_subplots: "integer (0 for single-thread stories)"
+        validation:
+          - "timespan must be plausible for location"
+          - "character count must be justified by setting"
+
+      termination_rules:
+        description: "What 'done' means for this story"
+        type: "array[string]"
+        required: true
+        examples:
+          - "Story ends when protagonist exits location"
+          - "Story ends when final rule is violated"
+          - "Story ends when transformation is complete"
+          - "Story ends when countdown reaches zero"
+
+  # ============================================================
+  # SECTION 4: ENDING CONTRACT
+  # ============================================================
+  ending_contract:
+    description: "Constraints on how the story can conclude"
+    mutability: "immutable"
+    required: true
+
+    fields:
+      ending_type:
+        description: "The contracted ending category"
+        type: "string (from exit_conditions.yaml)"
+        required: true
+
+      acceptable_outcomes:
+        description: "What types of resolution are allowed"
+        type: "array[string]"
+        examples:
+          - "survival_with_cost"
+          - "escape_with_contamination"
+          - "compliance_with_transformation"
+          - "entrapment"
+          - "conditional_exit_achieved"
+          - "conditional_exit_failed"
+
+      required_permanence:
+        description: "What must be permanently altered by the ending"
+        type: "array[string]"
+        required: true
+        examples:
+          - "protagonist's physical state"
+          - "protagonist's knowledge/innocence"
+          - "protagonist's relationships"
+          - "the location itself"
+
+  # ============================================================
+  # SECTION 5: THEMATIC CONTRACT
+  # ============================================================
+  thematic_contract:
+    description: "The thematic through-line the story must enact"
+    mutability: "immutable"
+    required: true
+
+    fields:
+      primary_theme:
+        description: "The central thematic concern"
+        type: "string (from thematic_elements.yaml)"
+        required: true
+
+      theme_enactment:
+        description: "How rules embody the theme"
+        type: "string"
+        required: true
+        validation:
+          - "Must explain how following/violating rules creates thematic tension"
+
+      escalation_style:
+        description: "How horror intensifies"
+        type: "enum: psychological|physical|environmental|social|cosmic"
+        required: true
+
+      ambiguity_level:
+        description: "How much is left unexplained"
+        type: "enum: minimal|moderate|high"
+        required: true
+
+  # ============================================================
+  # SECTION 6: GENERATION PARAMETERS
+  # ============================================================
+  generation_parameters:
+    description: "Technical parameters for generation"
+    mutability: "adjustable"
+    required: true
+
+    fields:
+      target_word_count:
+        type: "integer"
+        range: [5000, 50000]
+        required: true
+
+      chunk_size:
+        type: "integer"
+        default: 2000
+        description: "Target words per chunk"
+
+      chunk_count_estimate:
+        type: "integer"
+        computed: "ceil(target_word_count / chunk_size)"
+
+      skip_audit:
+        type: "boolean"
+        default: false
+        description: "Skip structural audit (not recommended)"
+
+      skip_refinement:
+        type: "boolean"
+        default: false
+        description: "Skip refinement pass (acceptable for drafts)"
+
+# ============================================================
+# VALIDATION RULES
+# ============================================================
+contract_validation:
+  required_sections:
+    - "identity_anchors"
+    - "rule_system"
+    - "scope_constraints"
+    - "ending_contract"
+    - "thematic_contract"
+    - "generation_parameters"
+
+  cross_section_checks:
+    - check: "entry_condition_matches_setting"
+      description: "Entry condition must be plausible for the location"
+
+    - check: "rule_count_matches_word_count"
+      description: "More rules require more words to develop properly"
+      formula: "rule_count <= (target_word_count / 1500)"
+
+    - check: "ending_type_matches_violation_response"
+      description: "Ending must be compatible with how violations are handled"
+
+    - check: "theme_can_be_enacted_by_rules"
+      description: "At least one rule must directly embody the theme"
+
+# ============================================================
+# OUTPUT FORMAT (for generated contract files)
+# ============================================================
+output_format:
+  filename: "story_contract.json"
+  structure:
+    version: "1.0"
+    created_at: "ISO timestamp"
+    session_id: "string"
+
+    identity_anchors:
+      setting: {}
+      protagonist: {}
+      point_of_view: {}
+
+    rule_system:
+      rule_count: "integer"
+      rule_discovery_method: "string"
+      rule_completeness: "string"
+      violation_response_type: "string"
+      rules: []
+
+    scope_constraints:
+      forbidden_expansions: []
+      maximum_scope: {}
+      termination_rules: []
+
+    ending_contract:
+      ending_type: "string"
+      acceptable_outcomes: []
+      required_permanence: []
+
+    thematic_contract:
+      primary_theme: "string"
+      theme_enactment: "string"
+      escalation_style: "string"
+      ambiguity_level: "string"
+
+    generation_parameters:
+      target_word_count: "integer"
+      chunk_size: "integer"
+      chunk_count_estimate: "integer"
+      skip_audit: "boolean"
+      skip_refinement: "boolean"
+
+    contract_audit:
+      is_valid: "boolean"
+      validation_errors: []
+      warnings: []
