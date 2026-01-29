@@ -22,34 +22,68 @@ class ContractGenerator {
   async generateContract(userInput) {
     console.log('📜 Generating story contract...');
 
-    // Load location details if specified
-    const locationDetails = userInput.location
-      ? await this.templateLoader.getLocation(userInput.location)
-      : null;
+    // Handle location based on locationMode
+    let locationDetails = null;
+    let locationName = null;
+    const locationMode = userInput.locationMode || 'engine_selects';
+
+    if (locationMode === 'specific' && userInput.location) {
+      // User selected a specific location from the list
+      locationDetails = await this.templateLoader.getLocation(userInput.location);
+      locationName = locationDetails?.name || userInput.location;
+    } else if (locationMode === 'custom' && userInput.customLocation) {
+      // User typed in a custom location
+      locationName = userInput.customLocation;
+    } else if (locationMode === 'novel') {
+      // AI should select an unconventional location (not typically associated with horror)
+      locationName = 'AI_SELECT_NOVEL_LOCATION';
+    } else {
+      // engine_selects: AI can select from list or create new
+      locationName = 'AI_SELECT_LOCATION';
+    }
 
     // Load inflection point details
+    // Note: getInflectionPoint uses short type names: 'entry', 'discovery', 'completeness', 'violation', 'exit'
     const entryCondition = userInput.entryCondition
-      ? await this.templateLoader.getInflectionPoint('entry_conditions', userInput.entryCondition)
+      ? await this.templateLoader.getInflectionPoint('entry', userInput.entryCondition)
       : null;
 
     const discoveryMethod = userInput.discoveryMethod
-      ? await this.templateLoader.getInflectionPoint('discovery_methods', userInput.discoveryMethod)
+      ? await this.templateLoader.getInflectionPoint('discovery', userInput.discoveryMethod)
       : null;
 
     const completenessPattern = userInput.completenessPattern
-      ? await this.templateLoader.getInflectionPoint('completeness_patterns', userInput.completenessPattern)
+      ? await this.templateLoader.getInflectionPoint('completeness', userInput.completenessPattern)
       : null;
 
     const violationResponse = userInput.violationResponse
-      ? await this.templateLoader.getInflectionPoint('violation_responses', userInput.violationResponse)
+      ? await this.templateLoader.getInflectionPoint('violation', userInput.violationResponse)
       : null;
 
     const exitCondition = userInput.endingType
-      ? await this.templateLoader.getInflectionPoint('exit_conditions', userInput.endingType)
+      ? await this.templateLoader.getInflectionPoint('exit', userInput.endingType)
       : null;
 
     // Generate rules using Claude
     const rules = await this.generateRules(userInput, locationDetails);
+
+    // Handle thematic focus based on thematicMode
+    const thematicMode = userInput.thematicMode || 'engine_selects';
+    let primaryTheme = userInput.thematicFocus;
+    if (thematicMode === 'engine_selects' || !primaryTheme) {
+      primaryTheme = 'AI_SELECT_THEME';
+    }
+
+    // Handle escalation style based on escalationMode
+    const escalationMode = userInput.escalationMode || 'mixed';
+    let escalationStyle = userInput.escalationStyle;
+    if (escalationMode === 'mixed') {
+      escalationStyle = 'AI_SELECT_MIXED';
+    } else if (escalationMode === 'single') {
+      escalationStyle = 'AI_SELECT_SINGLE';
+    } else if (!escalationStyle) {
+      escalationStyle = 'psychological';
+    }
 
     // Build the contract
     const contract = {
@@ -60,8 +94,9 @@ class ContractGenerator {
       // Section 1: Identity Anchors
       identity_anchors: {
         setting: {
-          location_id: userInput.location || 'custom',
-          location_name: locationDetails?.name || userInput.customLocation || 'Unknown Location',
+          location_id: userInput.location || locationMode,
+          location_name: locationName || 'Unknown Location',
+          location_mode: locationMode,
           time_period: 'contemporary',
           atmosphere_keywords: locationDetails?.atmosphere || ['isolated', 'oppressive', 'wrong'],
           physical_boundaries: locationDetails?.boundaries || 'The location itself'
@@ -118,9 +153,11 @@ class ContractGenerator {
 
       // Section 5: Thematic Contract
       thematic_contract: {
-        primary_theme: userInput.thematicFocus || 'dread_of_incomprehensible_systems',
-        theme_enactment: this.inferThemeEnactment(userInput.thematicFocus),
-        escalation_style: userInput.escalationStyle || 'psychological',
+        primary_theme: primaryTheme,
+        thematic_mode: thematicMode,
+        theme_enactment: this.inferThemeEnactment(primaryTheme),
+        escalation_style: escalationStyle,
+        escalation_mode: escalationMode,
         ambiguity_level: userInput.ambiguityLevel || 'moderate'
       },
 
@@ -159,11 +196,31 @@ class ContractGenerator {
   async generateRules(userInput, locationDetails) {
     const ruleCount = userInput.ruleCount || 5;
 
+    // Determine location description for rule generation
+    let locationForPrompt = locationDetails?.name || userInput.customLocation || 'An isolated location';
+    let locationDescription = locationDetails?.description || 'A place where strange rules apply';
+
+    const locationMode = userInput.locationMode || 'engine_selects';
+    if (locationMode === 'engine_selects') {
+      locationForPrompt = 'An isolated, liminal location of your choosing (e.g., highway rest stop, night shift workplace, abandoned building)';
+      locationDescription = 'Select an appropriate location that enhances the horror atmosphere';
+    } else if (locationMode === 'novel') {
+      locationForPrompt = 'An unconventional location not typically associated with horror (e.g., a cheerful daycare, a busy shopping mall, a sunny beach resort)';
+      locationDescription = 'Select a location that creates horror through contrast with its normally positive associations';
+    }
+
+    // Determine thematic focus for rule generation
+    let thematicForPrompt = userInput.thematicFocus || 'dread of incomprehensible systems';
+    const thematicMode = userInput.thematicMode || 'engine_selects';
+    if (thematicMode === 'engine_selects' || !userInput.thematicFocus) {
+      thematicForPrompt = 'Select an appropriate thematic focus (dread of incomprehensible systems, complicity, identity erosion, institutional horror, contamination, or cosmic insignificance)';
+    }
+
     const prompt = `Generate exactly ${ruleCount} rules for a rule-based horror story.
 
-Location: ${locationDetails?.name || userInput.customLocation || 'An isolated location'}
-Location description: ${locationDetails?.description || 'A place where strange rules apply'}
-Thematic focus: ${userInput.thematicFocus || 'dread of incomprehensible systems'}
+Location: ${locationForPrompt}
+Location description: ${locationDescription}
+Thematic focus: ${thematicForPrompt}
 Violation response type: ${userInput.violationResponse || 'escalating consequences'}
 
 Rules must:
@@ -406,6 +463,11 @@ Return ONLY the JSON array, no other text.`;
    * Infer theme enactment
    */
   inferThemeEnactment(theme) {
+    // Handle AI selection cases
+    if (theme === 'AI_SELECT_THEME') {
+      return 'AI will select and enact appropriate thematic elements based on the story context';
+    }
+
     const enactmentMap = {
       'dread_of_incomprehensible_systems': 'Rules embody systems that cannot be fully understood, forcing compliance without comprehension',
       'complicity_and_participation': 'Following rules makes the protagonist complicit in the horror',

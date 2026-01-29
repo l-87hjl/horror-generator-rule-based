@@ -88,12 +88,52 @@ async function loadFormOptions() {
 
 /**
  * Populate a select element with options
+ * Special handling for location and thematic focus dropdowns
  */
 function populateSelect(elementId, options, formatter) {
     const select = document.getElementById(elementId);
     if (!select) return;
 
-    // Clear existing options and add Default first
+    // Clear existing options
+    select.innerHTML = '';
+
+    // Special handling for location dropdown
+    if (elementId === 'location') {
+        // Add AI-powered options with distinct formatting (using ⚡ prefix)
+        select.innerHTML = `
+            <option value="_engine_selects" selected>⚡ Engine Selects</option>
+            <option value="_custom">✏️ Custom Location</option>
+            <option value="_novel">🔮 Novel Location</option>
+            <option disabled>──────────────</option>
+        `;
+        // Add all specific locations
+        for (const option of options) {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = formatter(option);
+            select.appendChild(optionElement);
+        }
+        return;
+    }
+
+    // Special handling for thematic focus dropdown
+    if (elementId === 'thematicFocus') {
+        // Add AI-powered option with distinct formatting
+        select.innerHTML = `
+            <option value="_engine_selects" selected>⚡ Engine Selects</option>
+            <option disabled>──────────────</option>
+        `;
+        // Add all specific themes
+        for (const option of options) {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = formatter(option);
+            select.appendChild(optionElement);
+        }
+        return;
+    }
+
+    // Default behavior for other selects
     select.innerHTML = '<option value="_default" selected>Default (Engine selects)</option>';
 
     // Add all specific options
@@ -134,6 +174,23 @@ function setupEventListeners() {
     const viewLogsBtn = document.getElementById('view-logs-btn');
     if (viewLogsBtn) {
         viewLogsBtn.addEventListener('click', handleViewLogs);
+    }
+
+    // Location dropdown - show/hide custom location field
+    const locationSelect = document.getElementById('location');
+    const customLocationGroup = document.getElementById('customLocation')?.closest('.form-group');
+    if (locationSelect && customLocationGroup) {
+        // Initially hide custom location field
+        customLocationGroup.style.display = 'none';
+
+        locationSelect.addEventListener('change', () => {
+            if (locationSelect.value === '_custom') {
+                customLocationGroup.style.display = 'block';
+                document.getElementById('customLocation').focus();
+            } else {
+                customLocationGroup.style.display = 'none';
+            }
+        });
     }
 
     // Debug logs buttons (multiple locations)
@@ -241,24 +298,68 @@ async function handleFormSubmit(event) {
 
     const formData = new FormData(event.target);
 
-    // Helper to get value or null if default
+    // Helper to get value or null if default/engine selects
     const getValue = (name) => {
         const val = formData.get(name);
-        return (val === '_default' || val === '') ? null : val;
+        return (val === '_default' || val === '_engine_selects' || val === '') ? null : val;
     };
+
+    // Special handling for location
+    const locationValue = formData.get('location');
+    let location = null;
+    let customLocation = formData.get('customLocation') || null;
+    let locationMode = 'engine_selects'; // default
+
+    if (locationValue === '_custom') {
+        locationMode = 'custom';
+        // customLocation is already set from the form
+    } else if (locationValue === '_novel') {
+        locationMode = 'novel';
+    } else if (locationValue === '_engine_selects' || locationValue === '') {
+        locationMode = 'engine_selects';
+    } else {
+        // Specific location selected
+        location = locationValue;
+        locationMode = 'specific';
+    }
+
+    // Special handling for thematic focus
+    const thematicValue = formData.get('thematicFocus');
+    let thematicFocus = null;
+    let thematicMode = 'engine_selects';
+    if (thematicValue && thematicValue !== '_engine_selects' && thematicValue !== '') {
+        thematicFocus = thematicValue;
+        thematicMode = 'specific';
+    }
+
+    // Special handling for escalation style
+    const escalationValue = formData.get('escalationStyle');
+    let escalationStyle = null;
+    let escalationMode = 'mixed'; // default
+    if (escalationValue === '_engine_mixed' || escalationValue === 'mixed') {
+        escalationMode = 'mixed';
+    } else if (escalationValue === '_engine_single') {
+        escalationMode = 'single';
+    } else if (escalationValue && escalationValue !== '') {
+        escalationStyle = escalationValue;
+        escalationMode = 'specific';
+    }
 
     const userInput = {
         wordCount: parseInt(formData.get('wordCount')),
         ruleCount: parseInt(formData.get('ruleCount')),
-        location: getValue('location'),
-        customLocation: formData.get('customLocation') || null,
+        location: location,
+        customLocation: customLocation,
+        locationMode: locationMode,
         entryCondition: getValue('entryCondition'),
         discoveryMethod: getValue('discoveryMethod'),
         completenessPattern: getValue('completenessPattern'),
         violationResponse: getValue('violationResponse'),
         endingType: getValue('endingType'),
-        thematicFocus: getValue('thematicFocus'),
-        escalationStyle: getValue('escalationStyle'),
+        thematicFocus: thematicFocus,
+        thematicMode: thematicMode,
+        escalationStyle: escalationStyle,
+        escalationMode: escalationMode,
         ambiguityLevel: getValue('ambiguityLevel'),
         // Generation options
         skipAudit: formData.get('skipAudit') === 'on',

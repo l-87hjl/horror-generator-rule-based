@@ -570,6 +570,12 @@
               <option value="">Loading...</option>
             </select>
           </div>
+
+          <div class="form-group" id="customLocationGroup" style="display: none;">
+            <label for="customLocation">Custom Location Description</label>
+            <input type="text" id="customLocation" name="customLocation" placeholder="Describe your custom setting...">
+            <span class="form-hint">Provide a detailed description for your custom location</span>
+          </div>
         </div>
 
         <!-- Story Structure -->
@@ -619,12 +625,15 @@
           <div class="form-group">
             <label for="escalationStyle">Escalation Style</label>
             <select id="escalationStyle" name="escalationStyle">
-              <option value="mixed">Mixed (AI selects)</option>
+              <option value="_engine_mixed" selected>⚡ Engine Selects (Mixed)</option>
+              <option value="_engine_single">⚡ Engine Selects (Single)</option>
+              <option disabled>──────────────</option>
               <option value="psychological">Psychological</option>
               <option value="physical">Physical</option>
               <option value="environmental">Environmental</option>
               <option value="social">Social</option>
               <option value="cosmic">Cosmic</option>
+              <option value="ontological">Ontological</option>
             </select>
           </div>
 
@@ -874,6 +883,39 @@
       const select = document.getElementById(id);
       if (!select || !options) return;
 
+      // Special handling for location dropdown
+      if (id === 'location') {
+        select.innerHTML = `
+          <option value="_engine_selects" selected>⚡ Engine Selects</option>
+          <option value="_custom">✏️ Custom Location</option>
+          <option value="_novel">🔮 Novel Location</option>
+          <option disabled>──────────────</option>
+        `;
+        options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = formatOption(opt);
+          select.appendChild(option);
+        });
+        return;
+      }
+
+      // Special handling for thematic focus dropdown
+      if (id === 'thematicFocus') {
+        select.innerHTML = `
+          <option value="_engine_selects" selected>⚡ Engine Selects</option>
+          <option disabled>──────────────</option>
+        `;
+        options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = formatOption(opt);
+          select.appendChild(option);
+        });
+        return;
+      }
+
+      // Default behavior for other selects
       select.innerHTML = '<option value="">Default (Engine selects)</option>';
       options.forEach(opt => {
         const option = document.createElement('option');
@@ -904,6 +946,20 @@
       ruleCountSlider.addEventListener('input', () => {
         ruleCountDisplay.textContent = `${ruleCountSlider.value} rules`;
       });
+
+      // Location dropdown - show/hide custom location field
+      const locationSelect = document.getElementById('location');
+      const customLocationGroup = document.getElementById('customLocationGroup');
+      if (locationSelect && customLocationGroup) {
+        locationSelect.addEventListener('change', () => {
+          if (locationSelect.value === '_custom') {
+            customLocationGroup.style.display = 'block';
+            document.getElementById('customLocation').focus();
+          } else {
+            customLocationGroup.style.display = 'none';
+          }
+        });
+      }
 
       // Contract form
       document.getElementById('contract-form').addEventListener('submit', handleContractSubmit);
@@ -982,17 +1038,67 @@
       e.preventDefault();
 
       const formData = new FormData(e.target);
+
+      // Helper to get value or null if default/engine selects
+      const getValue = (name) => {
+        const val = formData.get(name);
+        return (val === '' || val === '_engine_selects') ? null : val;
+      };
+
+      // Special handling for location
+      const locationValue = formData.get('location');
+      let location = null;
+      let customLocation = formData.get('customLocation') || null;
+      let locationMode = 'engine_selects';
+
+      if (locationValue === '_custom') {
+        locationMode = 'custom';
+      } else if (locationValue === '_novel') {
+        locationMode = 'novel';
+      } else if (locationValue === '_engine_selects' || locationValue === '') {
+        locationMode = 'engine_selects';
+      } else {
+        location = locationValue;
+        locationMode = 'specific';
+      }
+
+      // Special handling for thematic focus
+      const thematicValue = formData.get('thematicFocus');
+      let thematicFocus = null;
+      let thematicMode = 'engine_selects';
+      if (thematicValue && thematicValue !== '_engine_selects' && thematicValue !== '') {
+        thematicFocus = thematicValue;
+        thematicMode = 'specific';
+      }
+
+      // Special handling for escalation style
+      const escalationValue = formData.get('escalationStyle');
+      let escalationStyle = null;
+      let escalationMode = 'mixed';
+      if (escalationValue === '_engine_mixed') {
+        escalationMode = 'mixed';
+      } else if (escalationValue === '_engine_single') {
+        escalationMode = 'single';
+      } else if (escalationValue && escalationValue !== '') {
+        escalationStyle = escalationValue;
+        escalationMode = 'specific';
+      }
+
       const userInput = {
         wordCount: parseInt(formData.get('wordCount')),
         ruleCount: parseInt(formData.get('ruleCount')),
-        location: formData.get('location') || null,
-        entryCondition: formData.get('entryCondition') || null,
-        discoveryMethod: formData.get('discoveryMethod') || null,
-        violationResponse: formData.get('violationResponse') || null,
-        endingType: formData.get('endingType') || null,
-        thematicFocus: formData.get('thematicFocus') || null,
-        escalationStyle: formData.get('escalationStyle'),
-        ambiguityLevel: formData.get('ambiguityLevel')
+        location: location,
+        customLocation: customLocation,
+        locationMode: locationMode,
+        entryCondition: getValue('entryCondition'),
+        discoveryMethod: getValue('discoveryMethod'),
+        violationResponse: getValue('violationResponse'),
+        endingType: getValue('endingType'),
+        thematicFocus: thematicFocus,
+        thematicMode: thematicMode,
+        escalationStyle: escalationStyle,
+        escalationMode: escalationMode,
+        ambiguityLevel: getValue('ambiguityLevel')
       };
 
       try {
