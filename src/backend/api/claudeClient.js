@@ -13,7 +13,7 @@ class ClaudeClient {
 
     this.client = new Anthropic({
       apiKey: apiKey,
-      timeout: config.timeout || 600000, // 10 minutes default timeout
+      timeout: config.timeout || 300000, // 5 minutes default timeout (safer for Render)
       maxRetries: config.maxRetries || 2  // Retry failed requests
     });
 
@@ -21,7 +21,7 @@ class ClaudeClient {
       model: config.model || 'claude-sonnet-4-5-20250929',
       maxTokens: config.maxTokens || 16000,
       temperature: config.temperature || 0.7,
-      timeout: config.timeout || 600000
+      timeout: config.timeout || 300000  // 5 minutes
     };
 
     console.log(`✅ Claude client initialized with ${this.config.timeout/1000}s timeout, ${this.config.maxTokens} max tokens`);
@@ -46,12 +46,19 @@ class ClaudeClient {
    */
   async generateStory(systemPrompt, userPrompt, options = {}) {
     const startTime = Date.now();
-    console.log('🤖 Calling Claude API for story generation...');
+    const maxTokens = options.maxTokens || this.config.maxTokens;
+    console.log(`🤖 Calling Claude API for story generation (max_tokens: ${maxTokens})...`);
+
+    // Log progress every 30 seconds during long API calls
+    const progressInterval = setInterval(() => {
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      console.log(`   ⏳ API call in progress... ${elapsed}s elapsed`);
+    }, 30000);
 
     try {
       const apiCall = this.client.messages.create({
         model: options.model || this.config.model,
-        max_tokens: options.maxTokens || this.config.maxTokens,
+        max_tokens: maxTokens,
         temperature: options.temperature !== undefined ? options.temperature : this.config.temperature,
         system: systemPrompt,
         messages: [
@@ -63,6 +70,7 @@ class ClaudeClient {
       });
 
       const response = await this.withTimeout(apiCall, 'Story generation');
+      clearInterval(progressInterval);
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`✅ Claude API response received (${duration}s)`);
@@ -78,6 +86,7 @@ class ClaudeClient {
         stopReason: response.stop_reason
       };
     } catch (error) {
+      clearInterval(progressInterval);
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       console.error(`❌ Claude API error after ${duration}s: ${error.message}`);
 

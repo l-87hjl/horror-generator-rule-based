@@ -1,0 +1,140 @@
+=== Debug Log for Session: session-2026-01-29T00-11-12-b7cc13ff ===
+Started: 2026-01-29T00:11:12.143Z
+============================================================
+
+[2026-01-29 00:11:12.144] START | initialization
+  Message: Stage orchestration started
+  targetWords: 16666
+  chunkSize: 2000
+  stages: ["init","draft_generation","assembly","audit","refinement","packaging","complete"]
+
+[2026-01-29 00:11:12.145] CHUNK_BEGIN | generation | chunk=1
+  Message: Beginning chunk 1
+  targetWords: 2000
+  totalProgress: 0
+[2026-01-29 00:12:37.728] CHUNK_COMPLETE | generation | chunk=1
+  Message: Chunk 1 completed
+  wordCount: 2139
+  totalWords: 2139
+  processingTime: 85.581
+
+[2026-01-29 00:12:37.729] CHUNK_BEGIN | generation | chunk=2
+  Message: Beginning chunk 2
+  targetWords: 2000
+  totalProgress: 2139
+[2026-01-29 00:13:50.016] CHUNK_COMPLETE | generation | chunk=2
+  Message: Chunk 2 completed
+  wordCount: 1694
+  totalWords: 3833
+  processingTime: 72.286
+
+[2026-01-29 00:13:50.022] CHUNK_BEGIN | generation | chunk=3
+  Message: Beginning chunk 3
+  targetWords: 2000
+  totalProgress: 3833
+[2026-01-29 00:15:00.148] CHUNK_COMPLETE | generation | chunk=3
+  Message: Chunk 3 completed
+  wordCount: 1685
+  totalWords: 5518
+  processingTime: 70.125
+
+[2026-01-29 00:15:00.148] CHUNK_BEGIN | generation | chunk=4
+  Message: Beginning chunk 4
+  targetWords: 2000
+  totalProgress: 5518
+[2026-01-29 00:16:00.952] CHUNK_COMPLETE | generation | chunk=4
+  Message: Chunk 4 completed
+  wordCount: 1689
+  totalWords: 7207
+  processingTime: 60.803
+
+[2026-01-29 00:16:01.000] CHUNK_BEGIN | generation | chunk=5
+  Message: Beginning chunk 5
+  targetWords: 2000
+  totalProgress: 7207
+[2026-01-29 00:17:03.333] CHUNK_COMPLETE | generation | chunk=5
+  Message: Chunk 5 completed
+  wordCount: 1648
+  totalWords: 8855
+  processingTime: 62.332
+
+[2026-01-29 00:17:03.334] CHUNK_BEGIN | generation | chunk=6
+  Message: Beginning chunk 6
+  targetWords: 2000
+  totalProgress: 8855
+[2026-01-29 00:18:05.950] CHUNK_COMPLETE | generation | chunk=6
+  Message: Chunk 6 completed
+  wordCount: 1660
+  totalWords: 10515
+  processingTime: 62.615
+
+[2026-01-29 00:18:05.951] CHUNK_BEGIN | generation | chunk=7
+  Message: Beginning chunk 7
+  targetWords: 2000
+  totalProgress: 10515
+[2026-01-29 00:19:12.139] CHUNK_COMPLETE | generation | chunk=7
+  Message: Chunk 7 completed
+  wordCount: 1643
+  totalWords: 12158
+  processingTime: 66.187
+
+[2026-01-29 00:19:12.150] CHUNK_BEGIN | generation | chunk=8
+  Message: Beginning chunk 8
+  targetWords: 2000
+  totalProgress: 12158
+[2026-01-29 00:20:09.879] CHUNK_COMPLETE | generation | chunk=8
+  Message: Chunk 8 completed
+  wordCount: 1591
+  totalWords: 13749
+  processingTime: 57.727
+
+[2026-01-29 00:20:09.889] CHUNK_BEGIN | generation | chunk=9
+  Message: Beginning chunk 9
+  targetWords: 2000
+  totalProgress: 13749
+[2026-01-29 00:21:09.773] CHUNK_COMPLETE | generation | chunk=9
+  Message: Chunk 9 completed
+  wordCount: 1600
+  totalWords: 15349
+  processingTime: 59.845
+
+[2026-01-29 00:21:09.827] CHUNK_BEGIN | generation | chunk=10
+  Message: Beginning chunk 10
+  targetWords: 1317
+  totalProgress: 15349
+[2026-01-29 00:21:54.554] CHUNK_COMPLETE | generation | chunk=10
+  Message: Chunk 10 completed
+  wordCount: 1148
+  totalWords: 16497
+  processingTime: 44.688
+
+[2026-01-29 00:21:54.589] CHUNK_BEGIN | generation | chunk=11
+  Message: Beginning chunk 11
+  targetWords: 169
+  totalProgress: 16497
+[2026-01-29 00:22:01.925] CHUNK_COMPLETE | generation | chunk=11
+  Message: Chunk 11 completed
+  wordCount: 155
+  totalWords: 16652
+  processingTime: 7.336
+
+[2026-01-29 00:22:01.926] CHUNK_BEGIN | generation | chunk=12
+  Message: Beginning chunk 12
+  targetWords: 14
+  totalProgress: 16652
+[2026-01-29 00:22:04.405] CHUNK_COMPLETE | generation | chunk=12
+  Message: Chunk 12 completed
+  wordCount: 15
+  totalWords: 16667
+  processingTime: 2.478
+
+[2026-01-29 00:22:04.448] COMPLETE | workflow
+  Message: All stages completed successfully
+  totalWords: 16667
+  totalChunks: 12
+  stages: ["draftGeneration","assembly","audit","refinement","packaging"]
+
+============================================================
+Session completed at: 2026-01-29T00:22:04.505Z
+Total elapsed: 10m 52s
+============================================================

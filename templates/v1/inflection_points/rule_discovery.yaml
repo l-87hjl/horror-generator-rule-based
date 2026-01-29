@@ -29,6 +29,52 @@ discovery_methods:
       - "Instructions left by predecessor"
       - "Posted notices and signs"
 
+  explicit_list_unspecified:
+    description: "Rules provided on unspecified material (paper, screen, chalkboard, etc.)"
+    characteristics:
+      - "All rules available from start"
+      - "Material type left to AI/narrative discretion"
+      - "Flexibility in presentation style"
+    narrative_effects:
+      - "Creates procedural horror"
+      - "Allows organic discovery of rule medium"
+      - "Medium can become plot-relevant later"
+    best_used_for:
+      - "Any setting where rules exist"
+      - "When medium doesn't matter to the story"
+      - "When AI should determine atmosphere"
+    implementation_notes:
+      - "AI chooses appropriate medium for setting"
+      - "Medium should match location atmosphere"
+      - "Can be formal or informal presentation"
+    example_framing:
+      - "The rules, wherever and however they appeared"
+      - "Instructions provided upon arrival"
+      - "Guidelines made available"
+
+  explicit_list_laminated:
+    description: "Rules provided on laminated card or sheet"
+    characteristics:
+      - "Physical, durable rule document"
+      - "Suggests repeated use, institutional permanence"
+      - "Tactile, portable reference"
+    narrative_effects:
+      - "Creates procedural corporate horror"
+      - "Lamination implies many before have received same rules"
+      - "Permanence suggests rules don't change for anyone"
+    best_used_for:
+      - "Employment/shift work scenarios"
+      - "Institutional settings (hotels, facilities)"
+      - "Situations with high turnover"
+    implementation_notes:
+      - "Describe the lamination itself (worn edges, fingerprints)"
+      - "Card can be physically carried, referenced"
+      - "Condition of card can indicate age of rule system"
+    example_framing:
+      - "A laminated card with numbered rules"
+      - "Worn plastic edges suggesting many hands before yours"
+      - "The kind of card you'd find in a break room"
+
   environmental_discovery:
     description: "Rules learned through observation of environment"
     characteristics:

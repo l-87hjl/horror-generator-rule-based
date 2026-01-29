@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staged Horror Generator</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Staged workflow specific styles */
+    .stage-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+    }
+
+    .stage-step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .stage-step.active {
+      background: #8b0000;
+      color: #fff;
+    }
+
+    .stage-step.completed {
+      background: #2d5a2d;
+      color: #fff;
+    }
+
+    .stage-step .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .stage-arrow {
+      color: #444;
+      font-size: 1.2rem;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .upload-zone {
+      border: 2px dashed #444;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+
+    .upload-zone:hover {
+      border-color: #8b0000;
+      background: rgba(139, 0, 0, 0.1);
+    }
+
+    .upload-zone.dragover {
+      border-color: #8b0000;
+      background: rgba(139, 0, 0, 0.2);
+    }
+
+    .upload-zone input[type="file"] {
+      display: none;
+    }
+
+    .contract-summary,
+    .state-summary,
+    .audit-summary {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .contract-summary h4,
+    .state-summary h4,
+    .audit-summary h4 {
+      color: #8b0000;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #1a1a1a;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b0000, #cc0000);
+      transition: width 0.3s ease;
+    }
+
+    .chunk-list {
+      max-height: 300px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 0.5rem;
+    }
+
+    .chunk-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem;
+      border-bottom: 1px solid #333;
+    }
+
+    .chunk-item:last-child {
+      border-bottom: none;
+    }
+
+    .chunk-item.current {
+      background: rgba(139, 0, 0, 0.2);
+    }
+
+    .audit-status {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .audit-status.pass {
+      background: #2d5a2d;
+    }
+
+    .audit-status.fail {
+      background: #8b0000;
+    }
+
+    .audit-status.warn {
+      background: #5a5a2d;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .btn-secondary {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+    }
+
+    .btn-secondary:hover {
+      background: #444;
+    }
+
+    .download-link {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #2d5a2d;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+    }
+
+    .download-link:hover {
+      background: #3d7a3d;
+    }
+
+    .rules-preview {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .rule-item {
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+
+    .log-output {
+      background: #0a0a0a;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    /* Refinement Modules Styles */
+    .refinement-modules {
+      margin-top: 2rem;
+      border-top: 1px solid #333;
+      padding-top: 1rem;
+    }
+
+    .module-badge {
+      font-size: 0.75rem;
+      background: #444;
+      color: #aaa;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .module-description {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .module-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid #333;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+
+    .module-card.active {
+      border-color: #8b0000;
+    }
+
+    .module-header {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .module-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .module-toggle {
+      color: #666;
+      margin-right: 0.75rem;
+      font-size: 0.8rem;
+      transition: transform 0.2s;
+    }
+
+    .module-card.expanded .module-toggle {
+      transform: rotate(90deg);
+    }
+
+    .module-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .module-toggle-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+
+    .module-content {
+      padding: 1rem;
+      border-top: 1px solid #333;
+    }
+
+    .module-info {
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background: rgba(139, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .form-hint {
+      display: block;
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
+    .module-placeholder {
+      padding: 1rem;
+      text-align: center;
+      color: #555;
+      font-size: 0.85rem;
+      border: 1px dashed #333;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Staged Horror Generator</h1>
+      <p class="subtitle">3-Stage Workflow with Gate Audits</p>
+    </header>
+
+    <!-- Stage Indicator -->
+    <div class="stage-indicator">
+      <div class="stage-step" id="stage1-indicator">
+        <span class="step-number">1</span>
+        <span>Contract</span>
+      </div>
+      <span class="stage-arrow">&rarr;</span>
+      <div class="stage-step" id="stage2-indicator">
+        <span class="step-number">2</span>
+        <span>Planning</span>
+      </div>
+      <span class="stage-arrow">&rarr;</span>
+      <div class="stage-step" id="stage3-indicator">
+        <span class="step-number">3</span>
+        <span>Generate</span>
+      </div>
+    </div>
+
+    <!-- Page 1: Contract -->
+    <section id="page-contract" class="page active">
+      <h2>Stage 1: Story Contract</h2>
+      <p>Define the constraints that will lock your story's identity, scope, and rules.</p>
+
+      <!-- Resume Upload -->
+      <div class="form-group">
+        <label>Resume from Previous Session (Optional)</label>
+        <div class="upload-zone" id="resume-upload-zone">
+          <p>Drop a resume pack ZIP here, or click to upload</p>
+          <input type="file" id="resume-file" accept=".zip">
+        </div>
+      </div>
+
+      <form id="contract-form">
+        <!-- Basic Settings -->
+        <div class="form-section">
+          <h3>Basic Settings</h3>
+
+          <div class="form-group">
+            <label for="wordCount">Target Word Count</label>
+            <input type="range" id="wordCount" name="wordCount" min="5000" max="50000" value="16000" step="1000">
+            <span id="wordCount-display">16,000 words (~10 chunks)</span>
+          </div>
+
+          <div class="form-group">
+            <label for="ruleCount">Number of Rules</label>
+            <input type="range" id="ruleCount" name="ruleCount" min="3" max="12" value="5">
+            <span id="ruleCount-display">5 rules</span>
+          </div>
+
+          <div class="form-group">
+            <label for="location">Location</label>
+            <select id="location" name="location">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Story Structure -->
+        <div class="form-section">
+          <h3>Story Structure</h3>
+
+          <div class="form-group">
+            <label for="entryCondition">Entry Condition</label>
+            <select id="entryCondition" name="entryCondition">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="discoveryMethod">Rule Discovery</label>
+            <select id="discoveryMethod" name="discoveryMethod">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="violationResponse">Violation Response</label>
+            <select id="violationResponse" name="violationResponse">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="endingType">Ending Type</label>
+            <select id="endingType" name="endingType">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Theme & Style -->
+        <div class="form-section">
+          <h3>Theme & Style</h3>
+
+          <div class="form-group">
+            <label for="thematicFocus">Thematic Focus</label>
+            <select id="thematicFocus" name="thematicFocus">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="escalationStyle">Escalation Style</label>
+            <select id="escalationStyle" name="escalationStyle">
+              <option value="mixed">Mixed (AI selects)</option>
+              <option value="psychological">Psychological</option>
+              <option value="physical">Physical</option>
+              <option value="environmental">Environmental</option>
+              <option value="social">Social</option>
+              <option value="cosmic">Cosmic</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="ambiguityLevel">Ambiguity Level</label>
+            <select id="ambiguityLevel" name="ambiguityLevel">
+              <option value="minimal">Minimal (most explained)</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="high">High (much left mysterious)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Refinement Modules (Expandable) -->
+        <div class="form-section refinement-modules">
+          <h3>Refinement Modules <span class="module-badge">Optional</span></h3>
+          <p class="module-description">Post-generation passes to enhance the story. Each module runs after chunk generation.</p>
+
+          <!-- Sensory Detail Module -->
+          <div class="module-card" id="sensory-module">
+            <div class="module-header" onclick="toggleModule('sensory-module')">
+              <span class="module-toggle">▶</span>
+              <label class="module-toggle-label">
+                <input type="checkbox" id="enableSensoryDetail" name="enableSensoryDetail">
+                Sensory Detail Enhancement
+              </label>
+            </div>
+            <div class="module-content" style="display: none;">
+              <p class="module-info">Adds descriptive/sensory flavor with chance rolls for specificity level.</p>
+
+              <div class="form-group">
+                <label for="sensorySpecificityBias">Specificity Bias</label>
+                <select id="sensorySpecificityBias" name="sensorySpecificityBias">
+                  <option value="generic">Generic (chips, a bag)</option>
+                  <option value="moderate" selected>Moderate (bag of chips)</option>
+                  <option value="specific">Specific (Doritos)</option>
+                  <option value="vivid">Vivid (red shine of a new bag of Doritos)</option>
+                  <option value="random">Random (AI rolls per instance)</option>
+                </select>
+                <span class="form-hint">Controls the default level; random mode rolls dice per detail.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="sensoryFocus">Sensory Focus</label>
+                <div class="checkbox-group">
+                  <label><input type="checkbox" name="sensoryFocus" value="visual" checked> Visual</label>
+                  <label><input type="checkbox" name="sensoryFocus" value="auditory" checked> Auditory</label>
+                  <label><input type="checkbox" name="sensoryFocus" value="tactile"> Tactile</label>
+                  <label><input type="checkbox" name="sensoryFocus" value="olfactory"> Olfactory</label>
+                  <label><input type="checkbox" name="sensoryFocus" value="taste"> Taste</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="sensoryDensity">Sensory Density</label>
+                <input type="range" id="sensoryDensity" name="sensoryDensity" min="1" max="5" value="3">
+                <span id="sensoryDensity-display">Medium</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Placeholder for future modules -->
+          <div class="module-placeholder">
+            <span>+ More modules coming soon (Dialogue Polish, Tension Curve, etc.)</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Generate Contract</button>
+      </form>
+
+      <div id="contract-result" style="display: none;">
+        <h3>Contract Generated</h3>
+        <div class="contract-summary" id="contract-summary"></div>
+        <div class="btn-group">
+          <a class="download-link" id="contract-download">Download Contract Pack</a>
+          <button class="btn btn-primary" id="goto-planning">Continue to Planning &rarr;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page 2: Planning -->
+    <section id="page-planning" class="page">
+      <h2>Stage 2: Story Planning</h2>
+      <p>Review the contract and generate the story outline.</p>
+
+      <div class="upload-zone" id="planning-upload-zone">
+        <p>Drop a contract/resume pack ZIP here, or click to upload</p>
+        <input type="file" id="planning-file" accept=".zip">
+      </div>
+
+      <div id="planning-contract-preview" style="display: none;">
+        <div class="contract-summary">
+          <h4>Contract Loaded</h4>
+          <div id="planning-contract-summary"></div>
+        </div>
+
+        <div class="rules-preview">
+          <h4>Rules</h4>
+          <div id="planning-rules-list"></div>
+        </div>
+
+        <button class="btn btn-primary" id="generate-plan">Generate Story Plan</button>
+      </div>
+
+      <div id="planning-result" style="display: none;">
+        <h3>Planning Complete</h3>
+        <div class="contract-summary">
+          <h4>Outline</h4>
+          <div id="outline-summary"></div>
+        </div>
+        <div class="btn-group">
+          <a class="download-link" id="planning-download">Download Planning Pack</a>
+          <button class="btn btn-primary" id="goto-generate">Start Generating &rarr;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page 3: Generate -->
+    <section id="page-generate" class="page">
+      <h2>Stage 3: Generate Chunks</h2>
+      <p>Generate story chunks one at a time with gate audits.</p>
+
+      <div class="upload-zone" id="generate-upload-zone">
+        <p>Drop a planning/resume pack ZIP here, or click to upload</p>
+        <input type="file" id="generate-file" accept=".zip">
+      </div>
+
+      <div id="generate-controls" style="display: none;">
+        <div class="state-summary">
+          <h4>Current State</h4>
+          <div id="state-summary">
+            <p><strong>Words:</strong> <span id="state-words">0</span> / <span id="state-target">0</span></p>
+            <p><strong>Chunks:</strong> <span id="state-chunks">0</span> / <span id="state-total-chunks">0</span></p>
+            <p><strong>Escalation:</strong> Tier <span id="state-escalation">1</span></p>
+          </div>
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+
+        <button class="btn btn-primary" id="generate-next-chunk">Generate Next Chunk</button>
+
+        <div class="chunk-list" id="chunk-list">
+          <!-- Chunks will be listed here -->
+        </div>
+      </div>
+
+      <div id="generate-result" style="display: none;">
+        <h3>Chunk Generated</h3>
+        <div class="audit-summary">
+          <h4>Gate Audit: <span id="audit-status" class="audit-status">PASS</span></h4>
+          <div id="audit-details"></div>
+        </div>
+
+        <div class="log-output" id="chunk-preview">
+          <!-- Chunk preview -->
+        </div>
+
+        <div class="btn-group">
+          <a class="download-link" id="chunk-download">Download Resume Pack</a>
+          <button class="btn btn-primary" id="continue-generating" style="display: none;">Generate Next Chunk</button>
+          <button class="btn btn-primary" id="goto-assemble" style="display: none;">Assemble Final Story &rarr;</button>
+        </div>
+      </div>
+
+      <div id="assembly-result" style="display: none;">
+        <h3>Story Complete!</h3>
+        <div class="contract-summary">
+          <h4>Final Statistics</h4>
+          <p><strong>Total Words:</strong> <span id="final-words">0</span></p>
+          <p><strong>Total Chunks:</strong> <span id="final-chunks">0</span></p>
+        </div>
+        <div class="btn-group">
+          <a class="download-link" id="final-download">Download Final Story Pack</a>
+          <a class="download-link" id="story-download" style="background: #8b0000;">Download Story Only</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p><a href="/">Home</a> | <a href="/generator">Quick Generator</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // State
+    let currentStage = 1;
+    let contract = null;
+    let state = null;
+    let chunkPlan = null;
+    let outline = null;
+    let nextChunkNumber = 1;
+
+    // API Base
+    const API_BASE = '';
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadOptions();
+      setupEventListeners();
+      updateStageIndicator();
+    });
+
+    // Load dropdown options
+    async function loadOptions() {
+      try {
+        const response = await fetch(`${API_BASE}/api/options`);
+        const data = await response.json();
+
+        if (data.success && data.options) {
+          populateSelect('location', data.options.locations);
+          populateSelect('entryCondition', data.options.entryConditions);
+          populateSelect('discoveryMethod', data.options.discoveryMethods);
+          populateSelect('violationResponse', data.options.violationResponses);
+          populateSelect('endingType', data.options.exitConditions);
+          populateSelect('thematicFocus', data.options.themes);
+        }
+      } catch (error) {
+        console.error('Failed to load options:', error);
+      }
+    }
+
+    function populateSelect(id, options) {
+      const select = document.getElementById(id);
+      if (!select || !options) return;
+
+      select.innerHTML = '<option value="">Default (Engine selects)</option>';
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = formatOption(opt);
+        select.appendChild(option);
+      });
+    }
+
+    function formatOption(str) {
+      return str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    // Event listeners
+    function setupEventListeners() {
+      // Word count slider
+      const wordCountSlider = document.getElementById('wordCount');
+      const wordCountDisplay = document.getElementById('wordCount-display');
+      wordCountSlider.addEventListener('input', () => {
+        const words = parseInt(wordCountSlider.value);
+        const chunks = Math.ceil(words / 2000);
+        wordCountDisplay.textContent = `${words.toLocaleString()} words (~${chunks} chunks)`;
+      });
+
+      // Rule count slider
+      const ruleCountSlider = document.getElementById('ruleCount');
+      const ruleCountDisplay = document.getElementById('ruleCount-display');
+      ruleCountSlider.addEventListener('input', () => {
+        ruleCountDisplay.textContent = `${ruleCountSlider.value} rules`;
+      });
+
+      // Contract form
+      document.getElementById('contract-form').addEventListener('submit', handleContractSubmit);
+
+      // Planning
+      document.getElementById('generate-plan').addEventListener('click', handlePlanGenerate);
+      document.getElementById('goto-planning').addEventListener('click', () => switchToStage(2));
+      document.getElementById('goto-generate').addEventListener('click', () => switchToStage(3));
+
+      // Generate
+      document.getElementById('generate-next-chunk').addEventListener('click', handleGenerateChunk);
+      document.getElementById('continue-generating').addEventListener('click', handleGenerateChunk);
+      document.getElementById('goto-assemble').addEventListener('click', handleAssemble);
+
+      // File uploads
+      setupFileUpload('resume-upload-zone', 'resume-file', handleResumeUpload);
+      setupFileUpload('planning-upload-zone', 'planning-file', handlePlanningUpload);
+      setupFileUpload('generate-upload-zone', 'generate-file', handleGenerateUpload);
+    }
+
+    function setupFileUpload(zoneId, inputId, handler) {
+      const zone = document.getElementById(zoneId);
+      const input = document.getElementById(inputId);
+
+      zone.addEventListener('click', () => input.click());
+      zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('dragover');
+      });
+      zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+          handler(e.dataTransfer.files[0]);
+        }
+      });
+      input.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+          handler(e.target.files[0]);
+        }
+      });
+    }
+
+    // Stage navigation
+    function switchToStage(stage) {
+      currentStage = stage;
+      updateStageIndicator();
+
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      if (stage === 1) document.getElementById('page-contract').classList.add('active');
+      if (stage === 2) document.getElementById('page-planning').classList.add('active');
+      if (stage === 3) document.getElementById('page-generate').classList.add('active');
+    }
+
+    function updateStageIndicator() {
+      for (let i = 1; i <= 3; i++) {
+        const indicator = document.getElementById(`stage${i}-indicator`);
+        indicator.classList.remove('active', 'completed');
+        if (i < currentStage) indicator.classList.add('completed');
+        if (i === currentStage) indicator.classList.add('active');
+      }
+    }
+
+    // Contract generation
+    async function handleContractSubmit(e) {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const userInput = {
+        wordCount: parseInt(formData.get('wordCount')),
+        ruleCount: parseInt(formData.get('ruleCount')),
+        location: formData.get('location') || null,
+        entryCondition: formData.get('entryCondition') || null,
+        discoveryMethod: formData.get('discoveryMethod') || null,
+        violationResponse: formData.get('violationResponse') || null,
+        endingType: formData.get('endingType') || null,
+        thematicFocus: formData.get('thematicFocus') || null,
+        escalationStyle: formData.get('escalationStyle'),
+        ambiguityLevel: formData.get('ambiguityLevel')
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/api/staged/contract`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userInput)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          contract = data.contract;
+          state = data.state;
+
+          // Display summary
+          document.getElementById('contract-summary').innerHTML = `
+            <p><strong>Session:</strong> ${contract.session_id}</p>
+            <p><strong>Location:</strong> ${contract.identity_anchors?.setting?.location_name}</p>
+            <p><strong>Rules:</strong> ${contract.rule_system?.rules?.length}</p>
+            <p><strong>Target:</strong> ${contract.generation_parameters?.target_word_count?.toLocaleString()} words</p>
+            <p><strong>Theme:</strong> ${formatOption(contract.thematic_contract?.primary_theme || 'unknown')}</p>
+          `;
+
+          document.getElementById('contract-download').href = data.downloadUrl;
+          document.getElementById('contract-result').style.display = 'block';
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Error generating contract: ' + error.message);
+      }
+    }
+
+    // Resume upload
+    async function handleResumeUpload(file) {
+      // TODO: Extract and load contract/state from ZIP
+      alert('Resume upload not yet implemented. Please use the form to start a new contract.');
+    }
+
+    // Planning upload
+    async function handlePlanningUpload(file) {
+      // For now, just show the preview if contract is loaded
+      if (contract) {
+        showPlanningPreview();
+      }
+    }
+
+    function showPlanningPreview() {
+      document.getElementById('planning-contract-summary').innerHTML = `
+        <p><strong>Session:</strong> ${contract.session_id}</p>
+        <p><strong>Target:</strong> ${contract.generation_parameters?.target_word_count?.toLocaleString()} words</p>
+      `;
+
+      const rulesList = document.getElementById('planning-rules-list');
+      rulesList.innerHTML = contract.rule_system?.rules?.map(r => `
+        <div class="rule-item">
+          <strong>Rule ${r.rule_number}:</strong> ${r.rule_text}
+        </div>
+      `).join('') || '';
+
+      document.getElementById('planning-contract-preview').style.display = 'block';
+    }
+
+    // Plan generation
+    async function handlePlanGenerate() {
+      if (!contract) {
+        alert('No contract loaded. Please generate or upload a contract first.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/api/staged/plan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contract, state })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          outline = data.outline;
+          chunkPlan = data.chunkPlan;
+
+          document.getElementById('outline-summary').innerHTML = `
+            <p><strong>Total Chunks:</strong> ${chunkPlan?.total_chunks}</p>
+            <p><strong>Acts:</strong> ${outline?.acts?.map(a => a.name).join(' &rarr; ')}</p>
+          `;
+
+          document.getElementById('planning-download').href = data.downloadUrl;
+          document.getElementById('planning-result').style.display = 'block';
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Error generating plan: ' + error.message);
+      }
+    }
+
+    // Generate upload
+    async function handleGenerateUpload(file) {
+      if (contract && state) {
+        showGenerateControls();
+      }
+    }
+
+    function showGenerateControls() {
+      const targetWords = contract.generation_parameters?.target_word_count || 10000;
+      const totalChunks = Math.ceil(targetWords / 2000);
+
+      document.getElementById('state-target').textContent = targetWords.toLocaleString();
+      document.getElementById('state-total-chunks').textContent = totalChunks;
+      document.getElementById('state-words').textContent = state.narrative_state?.total_words_generated || 0;
+      document.getElementById('state-chunks').textContent = state.narrative_state?.current_chunk || 0;
+      document.getElementById('state-escalation').textContent = state.escalation_state?.escalation_tier || 1;
+
+      updateProgress();
+      document.getElementById('generate-controls').style.display = 'block';
+    }
+
+    function updateProgress() {
+      const words = state.narrative_state?.total_words_generated || 0;
+      const target = contract.generation_parameters?.target_word_count || 10000;
+      const percent = Math.min((words / target) * 100, 100);
+      document.getElementById('progress-fill').style.width = `${percent}%`;
+    }
+
+    // Chunk generation
+    async function handleGenerateChunk() {
+      if (!contract || !state) {
+        alert('No contract/state loaded.');
+        return;
+      }
+
+      const btn = document.getElementById('generate-next-chunk');
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+
+      try {
+        const response = await fetch(`${API_BASE}/api/staged/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contract,
+            state,
+            chunkPlan,
+            chunkNumber: nextChunkNumber
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          state = data.state;
+          nextChunkNumber = data.chunkNumber + 1;
+
+          // Update state display
+          document.getElementById('state-words').textContent = data.totalWordsGenerated?.toLocaleString() || '0';
+          document.getElementById('state-chunks').textContent = data.chunkNumber;
+          document.getElementById('state-escalation').textContent = state.escalation_state?.escalation_tier || 1;
+          updateProgress();
+
+          // Add to chunk list
+          const chunkList = document.getElementById('chunk-list');
+          const chunkItem = document.createElement('div');
+          chunkItem.className = 'chunk-item';
+          chunkItem.innerHTML = `
+            <span>Chunk ${data.chunkNumber}</span>
+            <span>${data.chunkWordCount} words</span>
+            <span class="audit-status ${data.audit.status.toLowerCase()}">${data.audit.status}</span>
+          `;
+          chunkList.appendChild(chunkItem);
+
+          // Show result
+          document.getElementById('audit-status').textContent = data.audit.status;
+          document.getElementById('audit-status').className = `audit-status ${data.audit.status.toLowerCase()}`;
+          document.getElementById('audit-details').innerHTML = `
+            <p>Recommendation: ${data.audit.recommendation}</p>
+            ${data.audit.criticalFailures > 0 ? `<p style="color: #cc0000;">Critical failures: ${data.audit.criticalFailures}</p>` : ''}
+            ${data.audit.warnings > 0 ? `<p style="color: #cccc00;">Warnings: ${data.audit.warnings}</p>` : ''}
+          `;
+
+          document.getElementById('chunk-download').href = data.downloadUrl;
+          document.getElementById('generate-result').style.display = 'block';
+
+          // Show appropriate next button
+          if (data.isComplete) {
+            document.getElementById('continue-generating').style.display = 'none';
+            document.getElementById('goto-assemble').style.display = 'inline-block';
+          } else if (data.audit.status !== 'FAIL') {
+            document.getElementById('continue-generating').style.display = 'inline-block';
+            document.getElementById('goto-assemble').style.display = 'none';
+          } else {
+            document.getElementById('continue-generating').style.display = 'none';
+            document.getElementById('goto-assemble').style.display = 'none';
+          }
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Error generating chunk: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Next Chunk';
+      }
+    }
+
+    // Assembly
+    async function handleAssemble() {
+      try {
+        const response = await fetch(`${API_BASE}/api/staged/assemble`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contract, state })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          document.getElementById('final-words').textContent = data.totalWords?.toLocaleString();
+          document.getElementById('final-chunks').textContent = data.totalChunks;
+          document.getElementById('final-download').href = data.downloadUrl;
+          document.getElementById('story-download').href = data.storyUrl;
+
+          document.getElementById('generate-result').style.display = 'none';
+          document.getElementById('generate-controls').style.display = 'none';
+          document.getElementById('assembly-result').style.display = 'block';
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Error assembling story: ' + error.message);
+      }
+    }
+
+    // Initialize planning preview if contract exists
+    setTimeout(() => {
+      if (contract) showPlanningPreview();
+      if (contract && state) showGenerateControls();
+    }, 100);
+
+    // Module toggle functionality
+    function toggleModule(moduleId) {
+      const module = document.getElementById(moduleId);
+      const content = module.querySelector('.module-content');
+      const isExpanded = module.classList.contains('expanded');
+
+      if (isExpanded) {
+        module.classList.remove('expanded');
+        content.style.display = 'none';
+      } else {
+        module.classList.add('expanded');
+        content.style.display = 'block';
+      }
+    }
+
+    // Sensory density slider
+    const sensoryDensitySlider = document.getElementById('sensoryDensity');
+    const sensoryDensityDisplay = document.getElementById('sensoryDensity-display');
+    if (sensoryDensitySlider) {
+      const densityLabels = ['Sparse', 'Light', 'Medium', 'Rich', 'Dense'];
+      sensoryDensitySlider.addEventListener('input', () => {
+        sensoryDensityDisplay.textContent = densityLabels[parseInt(sensoryDensitySlider.value) - 1];
+      });
+    }
+
+    // Module checkbox activation styling
+    document.querySelectorAll('.module-card input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const card = e.target.closest('.module-card');
+        if (e.target.checked) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

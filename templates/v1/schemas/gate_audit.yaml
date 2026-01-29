@@ -1,0 +1,374 @@
+# Gate Audit Schema v1.0
+# Lightweight checks performed after each chunk
+# Fast pass/fail to catch expensive-to-fix-later problems early
+
+version: "1.0"
+last_updated: "2026-01-29"
+
+description: |
+  Gate Audits are lightweight, fast checks that run after EVERY chunk.
+  They catch B-type (expensive-to-fix-later) problems before more prose is generated.
+
+  Gate Audit is NOT:
+  - A full quality assessment
+  - A style check
+  - A revision pass
+
+  Gate Audit IS:
+  - A consistency check
+  - A scope check
+  - A contract compliance check
+
+  If gate audit fails, generation STOPS until the issue is resolved.
+  This prevents compounding errors that require expensive rewrites.
+
+audit_philosophy:
+  goal: "Catch errors that will be expensive to fix later"
+  speed: "Must complete in <5 seconds"
+  scope: "Only checks that can be automated or quickly AI-verified"
+  output: "Binary pass/fail with specific failure reason"
+
+# ============================================================
+# GATE AUDIT CHECKS
+# ============================================================
+gate_checks:
+
+  # ------------------------------------------------------------
+  # CHECK 1: IDENTITY PRESERVATION
+  # ------------------------------------------------------------
+  identity_preservation:
+    description: "Verify the story hasn't drifted from its identity anchors"
+    priority: "critical"
+    check_type: "automated + ai_quick"
+
+    checks:
+      protagonist_identity:
+        question: "Is the protagonist still the same character?"
+        pass_if:
+          - "Same name (or still unnamed if started unnamed)"
+          - "Same role/occupation"
+          - "Same POV"
+        fail_if:
+          - "New protagonist introduced"
+          - "POV switched to different character"
+          - "Protagonist's core identity changed without consequence"
+        severity: "critical"
+
+      setting_identity:
+        question: "Is the story still in the contracted location?"
+        pass_if:
+          - "Action takes place at contracted location"
+          - "If character moved, movement was within location bounds"
+        fail_if:
+          - "New location introduced beyond scope"
+          - "Character teleported to different setting"
+          - "Location changed without explanation"
+        severity: "critical"
+
+      pov_consistency:
+        question: "Is POV and tense consistent with contract?"
+        pass_if:
+          - "Same POV type throughout chunk"
+          - "Same tense throughout chunk"
+        fail_if:
+          - "POV switched mid-chunk"
+          - "Tense changed without reason"
+        severity: "major"
+
+  # ------------------------------------------------------------
+  # CHECK 2: RULE CONSISTENCY
+  # ------------------------------------------------------------
+  rule_consistency:
+    description: "Verify rules function as laws, not suggestions"
+    priority: "critical"
+    check_type: "ai_quick"
+
+    checks:
+      no_rule_contradiction:
+        question: "Do all rules still work the same way they were established?"
+        pass_if:
+          - "Rules behave consistently with earlier chunks"
+          - "No retcon of rule mechanics"
+          - "Consequences match established patterns"
+        fail_if:
+          - "Rule worked differently than before"
+          - "Rule consequence changed arbitrarily"
+          - "Previously iron-clad rule is now flexible"
+        severity: "critical"
+
+      no_unauthorized_rules:
+        question: "Were any new rules introduced that aren't in the contract?"
+        pass_if:
+          - "No new rules beyond contract count"
+          - "If hidden rule revealed, it was in contract"
+        fail_if:
+          - "New rule appeared not in contract"
+          - "Rule count exceeded contract"
+          - "Arbitrary restriction introduced"
+        severity: "major"
+
+      violation_consequence:
+        question: "If a rule was violated, was the consequence appropriate?"
+        pass_if:
+          - "Violation led to contracted consequence type"
+          - "Consequence was permanent (no reset)"
+          - "Escalation tier increased appropriately"
+        fail_if:
+          - "Violation had no consequence"
+          - "Consequence was undone"
+          - "Escalation decreased or reset"
+        severity: "critical"
+
+  # ------------------------------------------------------------
+  # CHECK 3: SCOPE ENFORCEMENT
+  # ------------------------------------------------------------
+  scope_enforcement:
+    description: "Verify story stayed within contracted boundaries"
+    priority: "critical"
+    check_type: "automated + ai_quick"
+
+    checks:
+      no_forbidden_expansion:
+        question: "Did the chunk avoid all forbidden expansions?"
+        pass_if:
+          - "No new protagonists (unless explicitly allowed)"
+          - "No new locations beyond setting"
+          - "No new mythologies/lore beyond rules"
+          - "No genre shift"
+        fail_if:
+          - "New POV character introduced"
+          - "Story moved to new location"
+          - "New cosmology/mythology invented"
+          - "Shifted to different genre"
+        severity: "critical"
+
+      word_count_on_track:
+        question: "Is word count progressing appropriately?"
+        pass_if:
+          - "Chunk within 80-120% of target chunk size"
+          - "Total progress on track for target word count"
+        fail_if:
+          - "Chunk severely under target (<50%)"
+          - "Chunk severely over target (>150%)"
+          - "Total progress significantly off track"
+        severity: "major"
+
+      termination_not_premature:
+        question: "Did the story avoid ending prematurely?"
+        pass_if:
+          - "Story continues if not final chunk"
+          - "No 'THE END' type markers if more chunks expected"
+          - "Narrative threads remain open"
+        fail_if:
+          - "Story concluded before final chunk"
+          - "All threads resolved prematurely"
+          - "Ending markers appeared too early"
+        severity: "critical"
+
+  # ------------------------------------------------------------
+  # CHECK 4: ESCALATION INTEGRITY
+  # ------------------------------------------------------------
+  escalation_integrity:
+    description: "Verify escalation only increases, never decreases"
+    priority: "critical"
+    check_type: "automated"
+
+    checks:
+      escalation_monotonic:
+        question: "Did escalation tier stay same or increase?"
+        pass_if:
+          - "escalation_tier >= previous chunk's tier"
+          - "contamination_level >= previous chunk's level"
+        fail_if:
+          - "Escalation tier decreased"
+          - "Contamination level decreased"
+          - "Tension reset without cost"
+        severity: "critical"
+
+      no_reset:
+        question: "Were there any forbidden resets?"
+        pass_if:
+          - "No 'back to normal' sequences"
+          - "No arbitrary danger removal"
+          - "No cost-free restoration"
+        fail_if:
+          - "Danger undone without cost"
+          - "Character returned to pre-danger state"
+          - "Consequences erased"
+        severity: "critical"
+
+  # ------------------------------------------------------------
+  # CHECK 5: STATE VALIDITY
+  # ------------------------------------------------------------
+  state_validity:
+    description: "Verify state update is logically consistent"
+    priority: "high"
+    check_type: "automated"
+
+    checks:
+      state_matches_prose:
+        question: "Does the state update reflect what actually happened in the chunk?"
+        pass_if:
+          - "Rules marked discovered were actually revealed in prose"
+          - "Rules marked violated were actually broken in prose"
+          - "Injuries in state match injuries described"
+          - "Location in state matches prose"
+        fail_if:
+          - "State says rule discovered but prose doesn't show it"
+          - "State says no violation but prose shows violation"
+          - "State and prose contradict"
+        severity: "major"
+
+      no_dead_character_action:
+        question: "Did dead/incapacitated characters stay dead/incapacitated?"
+        pass_if:
+          - "Dead characters don't act"
+          - "Destroyed objects aren't used"
+          - "Incapacitated characters behave appropriately"
+        fail_if:
+          - "Dead character speaks or acts"
+          - "Destroyed item reappears"
+          - "Incapacitated character acts normally"
+        severity: "critical"
+
+      continuity_maintained:
+        question: "Are established facts still true?"
+        pass_if:
+          - "All facts in continuity.established_facts respected"
+          - "Names consistent with continuity.named_elements"
+        fail_if:
+          - "Established fact contradicted"
+          - "Name changed without explanation"
+          - "Canon violated"
+        severity: "major"
+
+# ============================================================
+# AUDIT EXECUTION
+# ============================================================
+execution:
+  process:
+    1: "Load contract and previous state"
+    2: "Load new chunk text"
+    3: "Load proposed state update"
+    4: "Run automated checks (instant)"
+    5: "Run AI-quick checks if automated checks pass"
+    6: "Return pass/fail with reasons"
+
+  timeout: "5 seconds maximum"
+
+  on_pass:
+    action: "Proceed to next chunk"
+    output: "audit_chunk_{N}.md with PASS status"
+
+  on_fail:
+    action: "STOP generation"
+    output: "audit_chunk_{N}.md with FAIL status and specific issues"
+    recovery: "User must resolve issues before continuing"
+
+# ============================================================
+# OUTPUT FORMAT
+# ============================================================
+output_format:
+  filename: "audit_chunk_{N}.md"
+
+  structure: |
+    # Gate Audit: Chunk {N}
+    **Status:** PASS / FAIL
+    **Timestamp:** {ISO timestamp}
+    **Duration:** {ms}
+
+    ## Checks Performed
+    | Check | Result | Notes |
+    |-------|--------|-------|
+    | protagonist_identity | PASS/FAIL | {notes} |
+    | setting_identity | PASS/FAIL | {notes} |
+    | ... | ... | ... |
+
+    ## Critical Failures
+    {If any, list with specific evidence}
+
+    ## Warnings
+    {Non-critical issues to watch}
+
+    ## State Delta Verified
+    {Summary of state changes this chunk}
+
+    ## Recommendation
+    PROCEED / STOP / REVIEW
+
+# ============================================================
+# QUICK AI PROMPTS (for AI-assisted checks)
+# ============================================================
+ai_prompts:
+  identity_check: |
+    Given this story contract and chunk, verify:
+    1. Is the protagonist the same as contracted? (name, role, POV)
+    2. Is the setting the same as contracted?
+    3. Has POV/tense remained consistent?
+
+    Contract: {contract_json}
+    Chunk: {chunk_text}
+
+    Respond with JSON:
+    {
+      "protagonist_match": true/false,
+      "setting_match": true/false,
+      "pov_consistent": true/false,
+      "issues": ["list of specific issues if any"]
+    }
+
+  rule_check: |
+    Given these established rules and this chunk, verify:
+    1. Do all rules still work the same way?
+    2. Were any unauthorized new rules introduced?
+    3. If violations occurred, were consequences appropriate?
+
+    Rules: {rules_json}
+    Previous state: {state_json}
+    Chunk: {chunk_text}
+
+    Respond with JSON:
+    {
+      "rules_consistent": true/false,
+      "no_unauthorized_rules": true/false,
+      "consequences_appropriate": true/false,
+      "issues": ["list of specific issues if any"]
+    }
+
+  scope_check: |
+    Given these scope constraints and this chunk, verify:
+    1. Were any forbidden expansions made?
+    2. Did the story stay at the contracted location?
+    3. Did the story avoid concluding prematurely?
+
+    Constraints: {constraints_json}
+    Is final chunk: {is_final}
+    Chunk: {chunk_text}
+
+    Respond with JSON:
+    {
+      "no_forbidden_expansion": true/false,
+      "setting_maintained": true/false,
+      "not_premature_end": true/false,
+      "issues": ["list of specific issues if any"]
+    }
+
+# ============================================================
+# DEEP AUDIT (for act breaks, not every chunk)
+# ============================================================
+deep_audit:
+  description: "More thorough audit at act breaks (~every 3 chunks)"
+  when_to_run:
+    - "End of act (setup → confrontation → crisis → resolution)"
+    - "Every 3 chunks"
+    - "After major escalation event"
+    - "Before final chunk"
+
+  additional_checks:
+    - "Full continuity scan across all chunks"
+    - "Promise/payoff tracking (setups that need resolution)"
+    - "Thematic consistency"
+    - "Pacing assessment"
+    - "Rule interaction verification"
+
+  output: "checkpoint_audit_act_{N}.md"

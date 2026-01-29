@@ -24,6 +24,15 @@ class Orchestrator {
     this.storyRefiner = new StoryRefiner(this.storyGenerator.getClaudeClient());
     this.outputPackager = new OutputPackager(config.outputDir);
 
+    // Expose Claude client for external use (e.g., StageOrchestrator)
+    this.claudeClient = this.storyGenerator.getClaudeClient();
+
+    // State manager placeholder (created per-workflow, but exposed for SSE streaming)
+    this.stateManager = new StateManager();
+
+    // Constraint enforcer placeholder
+    this.constraintEnforcer = null;
+
     this.config = {
       autoRefine: config.autoRefine !== false,
       maxRevisionRounds: config.maxRevisionRounds || 3,
@@ -40,6 +49,11 @@ class Orchestrator {
     console.log(`\n=== Starting Story Generation Workflow ===`);
     console.log(`Session ID: ${sessionId}`);
     console.log(`Target Word Count: ${userInput.wordCount}`);
+
+    // Fill in random defaults for any null fields
+    console.log('🎲 Filling defaults for unspecified options...');
+    userInput = await this.fillDefaults(userInput);
+
     console.log(`Location: ${userInput.location}`);
     console.log(`Theme: ${userInput.thematicFocus}\n`);
 
@@ -162,6 +176,67 @@ class Orchestrator {
         };
       }
 
+      // CRITICAL: Save and package files IMMEDIATELY after generation
+      // This ensures files are downloadable even if audit/refinement fails
+      sessionData.currentStage = 'immediate_packaging';
+      console.log('📦 Step 1.75: Creating IMMEDIATE output package (before audit)...');
+
+      // Save state file first
+      const stateFilePath = path.join(
+        this.outputPackager.getOutputDir(),
+        sessionId,
+        'session_state.json'
+      );
+      await sessionData.stateManager.saveState(stateFilePath);
+      sessionData.stateFilePath = stateFilePath;
+
+      // Create initial package (generation-only, no audit/refinement)
+      const immediatePackageData = {
+        ...sessionData,
+        status: 'generation_complete',
+        auditReport: null,
+        revisedStory: null,
+        changeLog: []
+      };
+      const immediatePackage = await this.outputPackager.createPackage(immediatePackageData);
+      console.log(`✅ Immediate package created: ${immediatePackage.zipPath}`);
+      console.log(`   Download available at: /api/download/${sessionId}\n`);
+
+      // Store immediate package info for potential early return
+      sessionData.immediatePackage = immediatePackage;
+
+      // Check if user wants to skip audit/refinement (for faster delivery)
+      const skipAudit = userInput.skipAudit === true;
+      const skipRefinement = userInput.skipRefinement === true || skipAudit;
+
+      if (skipAudit) {
+        console.log('⏭️  Skipping audit and refinement (user requested)...\n');
+        sessionData.status = 'completed';
+        sessionData.currentStage = 'complete';
+        sessionData.metadata.endTime = new Date().toISOString();
+        sessionData.metadata.duration = this.calculateDuration(
+          sessionData.metadata.startTime,
+          sessionData.metadata.endTime
+        );
+
+        return {
+          success: true,
+          sessionId,
+          outputPackage: immediatePackage,
+          downloadUrl: `/api/download/${sessionId}`,
+          summary: {
+            wordCount: sessionData.initialStory.split(/\s+/).length,
+            qualityScore: null,
+            grade: 'not_audited',
+            revisionsApplied: 0,
+            duration: sessionData.metadata.duration
+          },
+          files: immediatePackage.files,
+          stage: 'generation_complete',
+          nextStage: '/api/refine' // Inform client about next optional stage
+        };
+      }
+
       // Step 2: Perform revision audit
       sessionData.currentStage = 'revision_audit';
       console.log('🔍 Step 2: Performing revision audit...');
@@ -182,8 +257,8 @@ class Orchestrator {
       console.log(`   Critical Failures: ${auditResult.scores.criticalFailures}`);
       console.log(`   Major Failures: ${auditResult.scores.majorFailures}\n`);
 
-      // Step 3: Refine if needed
-      if (this.config.autoRefine && this.revisionAuditor.needsRefinement(auditResult.scores)) {
+      // Step 3: Refine if needed (and not skipped)
+      if (!skipRefinement && this.config.autoRefine && this.revisionAuditor.needsRefinement(auditResult.scores)) {
         sessionData.currentStage = 'refinement';
         console.log('🔧 Step 3: Refinement needed - applying fixes...');
 
@@ -214,21 +289,15 @@ class Orchestrator {
         sessionData.changeLog = [];
       }
 
-      // Step 4: Save state file
+      // Step 4: Save updated state file
       sessionData.currentStage = 'state_saving';
-      console.log('💾 Step 4: Saving state file...');
-      const stateFilePath = path.join(
-        this.outputPackager.getOutputDir(),
-        sessionId,
-        'session_state.json'
-      );
+      console.log('💾 Step 4: Saving updated state file...');
       await sessionData.stateManager.saveState(stateFilePath);
-      sessionData.stateFilePath = stateFilePath;
       console.log(`✅ State saved\n`);
 
-      // Step 5: Package output
+      // Step 5: Package final output (with audit/refinement)
       sessionData.currentStage = 'packaging';
-      console.log('📦 Step 5: Creating output package...');
+      console.log('📦 Step 5: Creating final output package...');
       const packageResult = await this.outputPackager.createPackage(sessionData);
 
       sessionData.status = 'completed';
@@ -382,6 +451,7 @@ class Orchestrator {
 
   /**
    * Validate user input before workflow
+   * Only wordCount is required - other fields can be null (engine picks defaults)
    */
   validateInput(userInput) {
     const errors = [];
@@ -391,38 +461,79 @@ class Orchestrator {
       errors.push('Word count must be between 5,000 and 50,000');
     }
 
-    if (!userInput.location) {
-      errors.push('Location is required');
-    }
-
-    if (!userInput.entryCondition) {
-      errors.push('Entry condition is required');
-    }
-
-    if (!userInput.discoveryMethod) {
-      errors.push('Discovery method is required');
-    }
-
-    if (!userInput.completenessPattern) {
-      errors.push('Completeness pattern is required');
-    }
-
-    if (!userInput.violationResponse) {
-      errors.push('Violation response is required');
-    }
-
-    if (!userInput.endingType) {
-      errors.push('Ending type is required');
-    }
-
-    if (!userInput.thematicFocus) {
-      errors.push('Thematic focus is required');
-    }
+    // All other fields are optional - engine will pick random defaults if null
 
     return {
       valid: errors.length === 0,
       errors
     };
+  }
+
+  /**
+   * Fill in random defaults for any null/undefined fields
+   * Called after validation, before workflow execution
+   */
+  async fillDefaults(userInput) {
+    const options = await this.getAvailableOptions();
+    const filled = { ...userInput };
+
+    // Helper to pick random element from array
+    const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    // Fill each null field with a random option
+    if (!filled.location && options.locations?.length) {
+      filled.location = pickRandom(options.locations);
+      console.log(`   🎲 Random location: ${filled.location}`);
+    }
+
+    if (!filled.entryCondition && options.entryConditions?.length) {
+      filled.entryCondition = pickRandom(options.entryConditions);
+      console.log(`   🎲 Random entry condition: ${filled.entryCondition}`);
+    }
+
+    if (!filled.discoveryMethod && options.discoveryMethods?.length) {
+      filled.discoveryMethod = pickRandom(options.discoveryMethods);
+      console.log(`   🎲 Random discovery method: ${filled.discoveryMethod}`);
+    }
+
+    if (!filled.completenessPattern && options.completenessPatterns?.length) {
+      filled.completenessPattern = pickRandom(options.completenessPatterns);
+      console.log(`   🎲 Random completeness pattern: ${filled.completenessPattern}`);
+    }
+
+    if (!filled.violationResponse && options.violationResponses?.length) {
+      filled.violationResponse = pickRandom(options.violationResponses);
+      console.log(`   🎲 Random violation response: ${filled.violationResponse}`);
+    }
+
+    if (!filled.endingType && options.exitConditions?.length) {
+      filled.endingType = pickRandom(options.exitConditions);
+      console.log(`   🎲 Random ending type: ${filled.endingType}`);
+    }
+
+    if (!filled.thematicFocus && options.themes?.length) {
+      filled.thematicFocus = pickRandom(options.themes);
+      console.log(`   🎲 Random thematic focus: ${filled.thematicFocus}`);
+    }
+
+    // Default escalation and ambiguity if not set
+    if (!filled.escalationStyle) {
+      filled.escalationStyle = pickRandom(['gradual', 'sudden', 'oscillating', 'relentless']);
+      console.log(`   🎲 Random escalation style: ${filled.escalationStyle}`);
+    }
+
+    if (!filled.ambiguityLevel) {
+      filled.ambiguityLevel = pickRandom(['low', 'medium', 'high', 'very-high']);
+      console.log(`   🎲 Random ambiguity level: ${filled.ambiguityLevel}`);
+    }
+
+    // Default rule count if not set
+    if (!filled.ruleCount || filled.ruleCount < 1) {
+      filled.ruleCount = Math.floor(Math.random() * 5) + 3; // 3-7 rules
+      console.log(`   🎲 Random rule count: ${filled.ruleCount}`);
+    }
+
+    return filled;
   }
 }
 
