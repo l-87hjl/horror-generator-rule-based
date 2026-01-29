@@ -209,6 +209,121 @@
       max-height: 200px;
       overflow-y: auto;
     }
+
+    /* Refinement Modules Styles */
+    .refinement-modules {
+      margin-top: 2rem;
+      border-top: 1px solid #333;
+      padding-top: 1rem;
+    }
+
+    .module-badge {
+      font-size: 0.75rem;
+      background: #444;
+      color: #aaa;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .module-description {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .module-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid #333;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+
+    .module-card.active {
+      border-color: #8b0000;
+    }
+
+    .module-header {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .module-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .module-toggle {
+      color: #666;
+      margin-right: 0.75rem;
+      font-size: 0.8rem;
+      transition: transform 0.2s;
+    }
+
+    .module-card.expanded .module-toggle {
+      transform: rotate(90deg);
+    }
+
+    .module-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .module-toggle-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+
+    .module-content {
+      padding: 1rem;
+      border-top: 1px solid #333;
+    }
+
+    .module-info {
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background: rgba(139, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .form-hint {
+      display: block;
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
+    .module-placeholder {
+      padding: 1rem;
+      text-align: center;
+      color: #555;
+      font-size: 0.85rem;
+      border: 1px dashed #333;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -322,6 +437,7 @@
           <div class="form-group">
             <label for="escalationStyle">Escalation Style</label>
             <select id="escalationStyle" name="escalationStyle">
+              <option value="mixed">Mixed (AI selects)</option>
               <option value="psychological">Psychological</option>
               <option value="physical">Physical</option>
               <option value="environmental">Environmental</option>
@@ -337,6 +453,60 @@
               <option value="moderate" selected>Moderate</option>
               <option value="high">High (much left mysterious)</option>
             </select>
+          </div>
+        </div>
+
+        <!-- Refinement Modules (Expandable) -->
+        <div class="form-section refinement-modules">
+          <h3>Refinement Modules <span class="module-badge">Optional</span></h3>
+          <p class="module-description">Post-generation passes to enhance the story. Each module runs after chunk generation.</p>
+
+          <!-- Sensory Detail Module -->
+          <div class="module-card" id="sensory-module">
+            <div class="module-header" onclick="toggleModule('sensory-module')">
+              <span class="module-toggle">▶</span>
+              <label class="module-toggle-label">
+                <input type="checkbox" id="enableSensoryDetail" name="enableSensoryDetail">
+                Sensory Detail Enhancement
+              </label>
+            </div>
+            <div class="module-content" style="display: none;">
+              <p class="module-info">Adds descriptive/sensory flavor with chance rolls for specificity level.</p>
+
+              <div class="form-group">
+                <label for="sensorySpecificityBias">Specificity Bias</label>
+                <select id="sensorySpecificityBias" name="sensorySpecificityBias">
+                  <option value="generic">Generic (chips, a bag)</option>
+                  <option value="moderate" selected>Moderate (bag of chips)</option>
+                  <option value="specific">Specific (Doritos)</option>
+                  <option value="vivid">Vivid (red shine of a new bag of Doritos)</option>
+                  <option value="random">Random (AI rolls per instance)</option>
+                </select>
+                <span class="form-hint">Controls the default level; random mode rolls dice per detail.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="sensoryFocus">Sensory Focus</label>
+                <div class="checkbox-group">
+                  <label><input type="checkbox" name="sensoryFocus" value="visual" checked> Visual</label>
+                  <label><input type="checkbox" name="sensoryFocus" value="auditory" checked> Auditory</label>
+                  <label><input type="checkbox" name="sensoryFocus" value="tactile"> Tactile</label>
+                  <label><input type="checkbox" name="sensoryFocus" value="olfactory"> Olfactory</label>
+                  <label><input type="checkbox" name="sensoryFocus" value="taste"> Taste</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="sensoryDensity">Sensory Density</label>
+                <input type="range" id="sensoryDensity" name="sensoryDensity" min="1" max="5" value="3">
+                <span id="sensoryDensity-display">Medium</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Placeholder for future modules -->
+          <div class="module-placeholder">
+            <span>+ More modules coming soon (Dialogue Polish, Tension Curve, etc.)</span>
           </div>
         </div>
 
@@ -850,6 +1020,43 @@
       if (contract) showPlanningPreview();
       if (contract && state) showGenerateControls();
     }, 100);
+
+    // Module toggle functionality
+    function toggleModule(moduleId) {
+      const module = document.getElementById(moduleId);
+      const content = module.querySelector('.module-content');
+      const isExpanded = module.classList.contains('expanded');
+
+      if (isExpanded) {
+        module.classList.remove('expanded');
+        content.style.display = 'none';
+      } else {
+        module.classList.add('expanded');
+        content.style.display = 'block';
+      }
+    }
+
+    // Sensory density slider
+    const sensoryDensitySlider = document.getElementById('sensoryDensity');
+    const sensoryDensityDisplay = document.getElementById('sensoryDensity-display');
+    if (sensoryDensitySlider) {
+      const densityLabels = ['Sparse', 'Light', 'Medium', 'Rich', 'Dense'];
+      sensoryDensitySlider.addEventListener('input', () => {
+        sensoryDensityDisplay.textContent = densityLabels[parseInt(sensoryDensitySlider.value) - 1];
+      });
+    }
+
+    // Module checkbox activation styling
+    document.querySelectorAll('.module-card input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const card = e.target.closest('.module-card');
+        if (e.target.checked) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    });
   </script>
 </body>
 </html>

@@ -24,7 +24,7 @@ class ContractGenerator {
 
     // Load location details if specified
     const locationDetails = userInput.location
-      ? await this.templateLoader.getLocationDetails(userInput.location)
+      ? await this.templateLoader.getLocation(userInput.location)
       : null;
 
     // Load inflection point details
@@ -314,7 +314,10 @@ Return ONLY the JSON array, no other text.`;
       'oral_tradition': 'naive',
       'written_documentation': 'informed',
       'experiential_learning': 'naive',
-      'inherited_knowledge': 'informed'
+      'inherited_knowledge': 'informed',
+      'explicit_list': 'informed',
+      'explicit_list_unspecified': 'informed',
+      'explicit_list_laminated': 'informed'
     };
 
     return knowledgeMap[discoveryMethod?.id] || 'naive';
