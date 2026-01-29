@@ -1,0 +1,129 @@
+=== Debug Log for Session: session-2026-01-28T21-44-12-ead32d52 ===
+Started: 2026-01-28T21:44:12.591Z
+============================================================
+
+[2026-01-28 21:44:12.593] START | initialization
+  Message: Stage orchestration started
+  targetWords: 16666
+  chunkSize: 2000
+  stages: ["init","draft_generation","assembly","audit","refinement","packaging","complete"]
+
+[2026-01-28 21:44:12.593] CHUNK_BEGIN | generation | chunk=1
+  Message: Beginning chunk 1
+  targetWords: 2000
+  totalProgress: 0
+[2026-01-28 21:45:27.975] CHUNK_COMPLETE | generation | chunk=1
+  Message: Chunk 1 completed
+  wordCount: 1892
+  totalWords: 1892
+  processingTime: 75.381
+
+[2026-01-28 21:45:27.976] CHUNK_BEGIN | generation | chunk=2
+  Message: Beginning chunk 2
+  targetWords: 2000
+  totalProgress: 1892
+[2026-01-28 21:46:31.122] CHUNK_COMPLETE | generation | chunk=2
+  Message: Chunk 2 completed
+  wordCount: 1538
+  totalWords: 3430
+  processingTime: 63.145
+
+[2026-01-28 21:46:31.123] CHUNK_BEGIN | generation | chunk=3
+  Message: Beginning chunk 3
+  targetWords: 2000
+  totalProgress: 3430
+[2026-01-28 21:47:36.048] CHUNK_COMPLETE | generation | chunk=3
+  Message: Chunk 3 completed
+  wordCount: 1653
+  totalWords: 5083
+  processingTime: 64.924
+
+[2026-01-28 21:47:36.049] CHUNK_BEGIN | generation | chunk=4
+  Message: Beginning chunk 4
+  targetWords: 2000
+  totalProgress: 5083
+[2026-01-28 21:48:49.718] CHUNK_COMPLETE | generation | chunk=4
+  Message: Chunk 4 completed
+  wordCount: 1822
+  totalWords: 6905
+  processingTime: 73.668
+
+[2026-01-28 21:48:49.719] CHUNK_BEGIN | generation | chunk=5
+  Message: Beginning chunk 5
+  targetWords: 2000
+  totalProgress: 6905
+[2026-01-28 21:49:59.147] CHUNK_COMPLETE | generation | chunk=5
+  Message: Chunk 5 completed
+  wordCount: 1752
+  totalWords: 8657
+  processingTime: 69.427
+
+[2026-01-28 21:49:59.147] CHUNK_BEGIN | generation | chunk=6
+  Message: Beginning chunk 6
+  targetWords: 2000
+  totalProgress: 8657
+[2026-01-28 21:51:13.604] CHUNK_COMPLETE | generation | chunk=6
+  Message: Chunk 6 completed
+  wordCount: 1828
+  totalWords: 10485
+  processingTime: 74.456
+
+[2026-01-28 21:51:13.605] CHUNK_BEGIN | generation | chunk=7
+  Message: Beginning chunk 7
+  targetWords: 2000
+  totalProgress: 10485
+[2026-01-28 21:52:12.739] CHUNK_COMPLETE | generation | chunk=7
+  Message: Chunk 7 completed
+  wordCount: 1596
+  totalWords: 12081
+  processingTime: 59.133
+
+[2026-01-28 21:52:12.739] CHUNK_BEGIN | generation | chunk=8
+  Message: Beginning chunk 8
+  targetWords: 2000
+  totalProgress: 12081
+[2026-01-28 21:53:14.274] CHUNK_COMPLETE | generation | chunk=8
+  Message: Chunk 8 completed
+  wordCount: 1587
+  totalWords: 13668
+  processingTime: 61.533
+
+[2026-01-28 21:53:14.275] CHUNK_BEGIN | generation | chunk=9
+  Message: Beginning chunk 9
+  targetWords: 2000
+  totalProgress: 13668
+[2026-01-28 21:54:29.316] CHUNK_COMPLETE | generation | chunk=9
+  Message: Chunk 9 completed
+  wordCount: 1822
+  totalWords: 15490
+  processingTime: 75.04
+
+[2026-01-28 21:54:29.317] CHUNK_BEGIN | generation | chunk=10
+  Message: Beginning chunk 10
+  targetWords: 1176
+  totalProgress: 15490
+[2026-01-28 21:55:14.631] CHUNK_COMPLETE | generation | chunk=10
+  Message: Chunk 10 completed
+  wordCount: 1128
+  totalWords: 16618
+  processingTime: 45.312
+
+[2026-01-28 21:55:14.631] CHUNK_BEGIN | generation | chunk=11
+  Message: Beginning chunk 11
+  targetWords: 48
+  totalProgress: 16618
+[2026-01-28 21:55:18.775] CHUNK_COMPLETE | generation | chunk=11
+  Message: Chunk 11 completed
+  wordCount: 48
+  totalWords: 16666
+  processingTime: 4.142
+[2026-01-28 21:57:19.589] COMPLETE | workflow
+  Message: All stages completed successfully
+  totalWords: 16666
+  totalChunks: 11
+  stages: ["draftGeneration","assembly","audit","refinement","packaging"]
+
+============================================================
+Session completed at: 2026-01-28T21:57:19.589Z
+Total elapsed: 13m 7s
+============================================================

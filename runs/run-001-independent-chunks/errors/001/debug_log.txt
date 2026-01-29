@@ -1,0 +1,49 @@
+=== Debug Log for Session: session-2026-01-28T18-44-12-5cf9a8a1 ===
+Started: 2026-01-28T18:44:12.623Z
+============================================================
+
+[2026-01-28 18:44:12.624] START | initialization
+  Message: Stage orchestration started
+  targetWords: 10000
+  chunkSize: 2000
+  stages: ["init","draft_generation","assembly","audit","refinement","packaging","complete"]
+
+[2026-01-28 18:44:12.625] CHUNK_BEGIN | generation | chunk=1
+  Message: Beginning chunk 1
+  targetWords: 2000
+  totalProgress: 0
+[2026-01-28 18:49:44.770] CHUNK_COMPLETE | generation | chunk=1
+  Message: Chunk 1 completed
+  wordCount: 9541
+  totalWords: 9541
+  processingTime: 332.143
+
+[2026-01-28 18:49:44.771] CHUNK_BEGIN | generation | chunk=2
+  Message: Beginning chunk 2
+  targetWords: 459
+  totalProgress: 9541
+[2026-01-28 18:50:04.079] CHUNK_COMPLETE | generation | chunk=2
+  Message: Chunk 2 completed
+  wordCount: 405
+  totalWords: 9946
+  processingTime: 19.307
+
+[2026-01-28 18:50:04.090] CHUNK_BEGIN | generation | chunk=3
+  Message: Beginning chunk 3
+  targetWords: 54
+  totalProgress: 9946
+[2026-01-28 18:50:08.500] CHUNK_COMPLETE | generation | chunk=3
+  Message: Chunk 3 completed
+  wordCount: 49
+  totalWords: 9995
+  processingTime: 4.41
+
+[2026-01-28 18:50:08.517] CHUNK_BEGIN | generation | chunk=4
+  Message: Beginning chunk 4
+  targetWords: 5
+  totalProgress: 9995
+[2026-01-28 18:50:10.517] CHUNK_COMPLETE | generation | chunk=4
+  Message: Chunk 4 completed
+  wordCount: 6
+  totalWords: 10001
+  processingTime: 1.999
