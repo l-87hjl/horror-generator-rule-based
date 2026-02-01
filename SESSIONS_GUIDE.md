@@ -137,10 +137,10 @@
 ## Important File Locations
 
 ### URLs (for user reference)
-- **Repository**: https://github.com/l-87hjl/rule-based-horror
+- **Repository**: https://github.com/l-87hjl/horror-generator-rule-based
 - **Production App**: https://rule-based-horror.onrender.com/generator/
-- **GitHub Pages**: https://l-87hjl.github.io/rule-based-horror/ (if enabled)
-- **Raw file format**: https://raw.githubusercontent.com/l-87hjl/rule-based-horror/main/PATH/TO/FILE
+- **GitHub Pages**: https://l-87hjl.github.io/horror-generator-rule-based/ (if enabled)
+- **Raw file format**: https://raw.githubusercontent.com/l-87hjl/horror-generator-rule-based/main/PATH/TO/FILE
 - **Render Dashboard**: https://dashboard.render.com
 
 ### Key Files to Check
@@ -163,7 +163,7 @@ Search for these prefixes to find relevant logs:
 
 ## Git Workflow
 
-**Branch**: `claude/horror-story-generator-DTAVx`
+**Default Branch**: `main`
 
 **Commit format**: Use clear, descriptive messages with tags:
 - `FIX:` - Bug fixes

@@ -28,20 +28,13 @@ A web-based procedural horror story generator that creates, refines, and validat
 ## 🔗 Important Links
 
 ### Repository
-- **GitHub**: https://github.com/l-87hjl/rule-based-horror
-- **Default Branch**: `claude/horror-story-generator-DTAVx`
-- **Raw files**: `https://raw.githubusercontent.com/l-87hjl/rule-based-horror/main/PATH/TO/FILE`
+- **GitHub**: https://github.com/l-87hjl/horror-generator-rule-based
+- **Default Branch**: `main`
+- **Raw files**: `https://raw.githubusercontent.com/l-87hjl/horror-generator-rule-based/main/PATH/TO/FILE`
 
-### Branch Structure (Important!)
+### Branch Structure
 
-> **Note on Default Branch:** This repository has an unusual branch structure. The default branch is `claude/horror-story-generator-DTAVx`, which was the first Claude Code-created branch. Normally a `main` branch would be created first, but in this case the Claude branch became the default before a main branch existed.
->
-> **What this means:**
-> - **`claude/horror-story-generator-DTAVx`** - Default branch, actively maintained
-> - **`main`** - Created later to centralize changes, may be used for merges
-> - **Other `claude/*` branches** - Feature/fix branches, may not be up-to-date
->
-> **For contributors:** Changes should target the default branch or `main`. The DTAVx branch and any currently active Claude branches are the only ones kept up-to-date. Changing the default branch could disrupt the repository, so it remains as-is.
+> **For contributors:** Changes should target the `main` branch. Feature branches use the `claude/*` naming convention.
 
 ### Production
 - **App URL**: https://rule-based-horror.onrender.com/generator/

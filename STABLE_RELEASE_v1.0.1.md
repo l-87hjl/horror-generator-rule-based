@@ -319,8 +319,8 @@ Health Check: /api/health
 
 - **Application:** https://l-horror.onrender.com
 - **Health Check:** https://l-horror.onrender.com/api/health
-- **Repository:** github.com/l-87hjl/rule-based-horror
-- **Branch:** claude/horror-story-generator-DTAVx
+- **Repository:** github.com/l-87hjl/horror-generator-rule-based
+- **Branch:** main
 
 ### Monitoring
 
@@ -362,8 +362,8 @@ Expected response:
 **Local Development:**
 ```bash
 # Clone repository
-git clone https://github.com/l-87hjl/rule-based-horror.git
-cd rule-based-horror
+git clone https://github.com/l-87hjl/horror-generator-rule-based.git
+cd horror-generator-rule-based
 
 # Install dependencies
 npm install
