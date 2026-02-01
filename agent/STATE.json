@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/l-87hjl/agent-boot/main/schemas/state.schema.json",
+  "version": "1.0.0",
+  "projectType": "horror-story-generator",
+  "status": "initialized",
+  "lastUpdated": "2026-02-01T00:00:00Z",
+  "currentPhase": "setup",
+  "metrics": {
+    "storiesGenerated": 0,
+    "storiesAudited": 0,
+    "totalRuns": 0
+  },
+  "configuration": {
+    "bootRepo": "l-87hjl/agent-boot",
+    "bootRef": "main",
+    "bootVersion": "1.0.0",
+    "contractRepo": "l-87hjl/ai-agent-contract",
+    "contractVersion": "1.0.0"
+  }
+}

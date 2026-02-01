@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/l-87hjl/agent-boot/main/schemas/todo.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-01T00:00:00Z",
+  "queue": [],
+  "completed": [],
+  "blocked": []
+}
