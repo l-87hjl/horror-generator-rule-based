@@ -1,23 +1,5 @@
 {
-  "story_target": {
-    "word_count": 8000,
-    "genre": "rule-based horror",
-    "escalation_style": "psychological"
-  },
-  "chunking_strategy": {
-    "total_chunks": 4,
-    "target_words_per_chunk": 2000,
-    "overlap_words": 150
-  },
-  "execution_constraints": {
-    "model": "claude-sonnet-4-5-20250929",
-    "max_tokens_per_call": 16000,
-    "estimated_tokens_per_chunk": 3000,
-    "refinement_safe": true
-  },
-  "risk_assessment": {
-    "timeout_risk": "low",
-    "refinement_risk": "medium",
-    "notes": "Chunk sizes chosen to allow full context retention during escalation and final resolution."
-  }
+  "story_target": { "word_count": 8000 },
+  "chunking_strategy": { "total_chunks": 4, "target_words_per_chunk": 2000 },
+  "execution_constraints": { "model": "claude-sonnet-4-5-20250929" }
 }
