@@ -173,6 +173,8 @@ coverage/
 tmp/
 temp/
 *.tmp
+scratch/
+**/scratch/
 
 # Build files (if compilation added later)
 dist/
