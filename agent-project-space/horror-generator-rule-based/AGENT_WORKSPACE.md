@@ -1,10 +1,10 @@
 # AGENT WORKSPACE CONTRACT
 
-This directory defines the agent-project-space contract for the
-horror-generator-rule-based repository.
+This directory defines the agent-project-space contract for the horror-generator-rule-based repository.
 
-It exists to stage, validate, and prepare artifacts that would otherwise
-require UI waiting, repeated downloads/uploads, or long-running backend work.
+It exists to stage, validate, and prepare artifacts that would otherwise require UI waiting, repeated downloads/uploads, or long-running backend work.
+
+> **Note:** This workspace is intentionally *not* named after the repository to avoid namespace collisions.
 
 ---
 
@@ -19,12 +19,13 @@ require UI waiting, repeated downloads/uploads, or long-running backend work.
 
 ## Structure
 
-agent-project-space/horror-generator-rule-based/
-├── AGENT_WORKSPACE.md
-├── prompts/
-├── plans/
-├── audits/
-└── docs/
+agent-project-space/
+└── hgrb-workspace/
+    ├── AGENT_WORKSPACE.md
+    ├── prompts/
+    ├── plans/
+    ├── audits/
+    └── docs/
 
 ---
 
